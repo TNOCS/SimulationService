@@ -102,6 +102,7 @@
         "./ServerComponents/rules/RuleEngine.d.ts",
         "./ServerComponents/rules/WorldState.d.ts",
         "./SimulationService/api/SimServiceManager.ts",
+        "./SimulationService/state/typestate.ts",
         "./server.ts"
     ]
 }

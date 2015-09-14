@@ -4,14 +4,18 @@ import ApiManager = require('../../ServerComponents/api/ApiManager');
 import Utils = require('../../ServerComponents/helpers/Utils');
 
 export enum SimCommand {
-    Start, Pause, Stop
+    Start,
+    Pause,
+    Stop,
+    Run,
+    Finish
 }
 
 
 /** Simulation state */
 export enum SimulationState {
     Idle,
-    Start,
+    Ready,
     Pause,
     Busy
 }
@@ -43,13 +47,13 @@ export class SimServiceManager extends ApiManager.ApiManager {
 
         this.fsm = new TypeState.FiniteStateMachine<SimulationState>(SimulationState.Idle);
         // Define transitions
-        this.fsm.from(SimulationState.Idle).to(SimulationState.Start);
-        this.fsm.from(SimulationState.Start).to(SimulationState.Idle);
-        this.fsm.from(SimulationState.Start).to(SimulationState.Busy);
-        this.fsm.from(SimulationState.Start).to(SimulationState.Pause);
-        this.fsm.from(SimulationState.Pause).to(SimulationState.Start);
-        this.fsm.from(SimulationState.Pause).to(SimulationState.Idle);
-        this.fsm.from(SimulationState.Busy).to(SimulationState.Start);
+        this.fsm.from(SimulationState.Idle).to(SimulationState.Ready).on(SimCommand.Start);
+        this.fsm.from(SimulationState.Ready).to(SimulationState.Idle).on(SimCommand.Stop);
+        this.fsm.from(SimulationState.Ready).to(SimulationState.Busy).on(SimCommand.Run);
+        this.fsm.from(SimulationState.Ready).to(SimulationState.Pause).on(SimCommand.Pause);
+        this.fsm.from(SimulationState.Pause).to(SimulationState.Ready).on(SimCommand.Start);
+        this.fsm.from(SimulationState.Pause).to(SimulationState.Idle).on(SimCommand.Stop);
+        this.fsm.from(SimulationState.Busy).to(SimulationState.Ready).on(SimCommand.Finish);
 
         // Listen to state changes
         this.fsm.onTransition = (fromState: SimulationState, toState: SimulationState) => {
@@ -105,18 +109,24 @@ export class SimServiceManager extends ApiManager.ApiManager {
         }
         if (simState.hasOwnProperty('simCmd')) {
             this.simCmd = SimCommand[simState.simCmd];
-            Winston.info(`sim: new command ${SimCommand[this.simCmd]}`);
-            switch (this.simCmd) {
-                case SimCommand.Start:
-                    if (this.fsm.canGo(SimulationState.Start)) this.fsm.go(SimulationState.Start);
-                    break;
-                case SimCommand.Pause:
-                    if (this.fsm.canGo(SimulationState.Pause)) this.fsm.go(SimulationState.Pause);
-                    break;
-                case SimCommand.Stop:
-                    if (this.fsm.canGo(SimulationState.Idle)) this.fsm.go(SimulationState.Idle);
-                    break;
+            if (typeof this.simCmd === 'undefined') {
+                Winston.warn('Received unknown sim command ' + simState.simCmd);
+                return;
             }
+            Winston.info(`sim: new command ${SimCommand[this.simCmd]}`);
+            this.fsm.trigger(this.simCmd);
+
+            // switch (this.simCmd) {
+            //     case SimCommand.Start:
+            //         if (this.fsm.canGo(SimulationState.Ready)) this.fsm.go(SimulationState.Ready);
+            //         break;
+            //     case SimCommand.Pause:
+            //         if (this.fsm.canGo(SimulationState.Pause)) this.fsm.go(SimulationState.Pause);
+            //         break;
+            //     case SimCommand.Stop:
+            //         if (this.fsm.canGo(SimulationState.Idle)) this.fsm.go(SimulationState.Idle);
+            //         break;
+            // }
         }
         this.emit('simTimeChanged', {
             time: this.simTime,

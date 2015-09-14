@@ -8,15 +8,14 @@ export class Transitions<T> {
     public fromStates: T[];
     public toStates: T[];
 
-
     /**
-  * Specify the end state(s) of a transition function
-  * @method to
-  * @param ...states {T[]}
-  */
+     * Specify the end state(s) of a transition function
+     * @method to
+     * @param ...states {T[]}
+     */
     public to(...states: T[]) {
         this.toStates = states;
-        this.fsm.addTransitions(this);
+        return this.fsm.addTransitions(this);
     }
 
     public toAny(states: any) {
@@ -37,7 +36,30 @@ export class Transitions<T> {
  * @class TransitionFunction<T>
  */
 export class TransitionFunction<T> {
+    // public events: {
+    //     [trigger: number]: {
+    //         callback: Function,
+    //         args: any[]
+    //     }
+    // }[];
+
     constructor(public fsm: FiniteStateMachine<T>, public from: T, public to: T) { }
+
+    // public addEvent(trigger: number, callback?: Function, ...args: any[]) {
+    //     if (!this.events) this.events = [];
+    //     this.events[trigger] = { callback: callback, args: args };
+    // }
+}
+
+export class TransitionFunctions<T> extends Array<TransitionFunction<T>> {
+    constructor(private fsm: FiniteStateMachine<T>) { super(); }
+
+    public on(trigger: number, callback?: (from: T, to: T) => any) {
+        this.forEach(t => {
+            if (callback) this.fsm.on(t.to, callback);
+            this.fsm.addEvent(trigger, t.from, t.to);
+        });
+    }
 }
 
 /***
@@ -52,35 +74,52 @@ export class FiniteStateMachine<T> {
     private _onCallbacks: { [key: string]: { (from: T): void; }[] } = {};
     private _exitCallbacks: { [key: string]: { (to: T): boolean; }[] } = {};
     private _enterCallbacks: { [key: string]: { (from: T): boolean; }[] } = {};
-
+    private _triggers: { [from: string]: { [ trigger: string ]: T }} = {};
 
     /**
-  * @constructor
-  * @param startState {T} Intial starting state
-  */
+     * @constructor
+     * @param startState {T} Intial starting state
+     */
     constructor(startState: T) {
         this.currentState = startState;
         this._startState = startState;
     }
 
     public addTransitions(fcn: Transitions<T>) {
+        var newTransitions = new TransitionFunctions<T>(this);
         fcn.fromStates.forEach(from => {
             fcn.toStates.forEach(to => {
                 // self transitions are invalid and don't add duplicates
                 if (from !== to && !this._validTransition(from, to)) {
-                    this._transitionFunctions.push(new TransitionFunction<T>(this, from, to));
+                    newTransitions.push(new TransitionFunction<T>(this, from, to));
                 }
             });
         });
+        newTransitions.forEach(t => this._transitionFunctions.push(t));
+        return newTransitions;
+    }
+
+    public addEvent(trigger: number, fromState: T, toState: T) {
+        var fr = fromState.toString();
+        if (!this._triggers[fr]) this._triggers[fr] = {};
+        this._triggers[fr][trigger.toString()] = toState;
+    }
+
+    public trigger(trigger: number) {
+        if (typeof trigger === 'undefined') return;
+        var t = trigger.toString();
+        var current = this.currentState.toString();
+        if (!this._triggers.hasOwnProperty(current) || !this._triggers[current].hasOwnProperty(t)) return;
+        this.go(this._triggers[current][t]);
     }
 
     /**
-  * Listen for the transition to this state and fire the associated callback
-  * @method on
-  * @param state {T} State to listen to
-  * @param callback {fcn} Callback to fire
-  */
-    public on(state: T, callback: (from?: T) => any): FiniteStateMachine<T> {
+     * Listen for the transition to this state and fire the associated callback
+     * @method on
+     * @param state {T} State to listen to
+     * @param callback {fcn} Callback to fire
+     */
+    public on(state: T, callback: (from?: T, to?: T) => any): FiniteStateMachine<T> {
         var key = state.toString();
         if (!this._onCallbacks[key]) {
             this._onCallbacks[key] = [];
@@ -184,9 +223,10 @@ export class FiniteStateMachine<T> {
     }
 
     /**
-  * Reset the finite state machine back to the start state, DO NOT USE THIS AS A SHORTCUT for a transition. This is for starting the fsm from the beginning.
-  * @method reset
-  */
+     * Reset the finite state machine back to the start state, DO NOT USE THIS AS A SHORTCUT for a transition.
+     * This is for starting the fsm from the beginning.
+     * @method reset
+     */
     public reset(): void {
         this.currentState = this._startState;
     }
@@ -204,7 +244,6 @@ export class FiniteStateMachine<T> {
             this._onCallbacks[state.toString()] = [];
         }
 
-
         var canExit = this._exitCallbacks[this.currentState.toString()].reduce<boolean>((accum: boolean, next: () => boolean) => {
             return accum && (<boolean>next.call(this, state));
         }, true);
@@ -217,7 +256,7 @@ export class FiniteStateMachine<T> {
             var old = this.currentState;
             this.currentState = state;
             this._onCallbacks[this.currentState.toString()].forEach(fcn => {
-                fcn.call(this, old);
+                fcn.call(this, old, state);
             });
             this.onTransition(old, state);
         }

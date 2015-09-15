@@ -36,13 +36,13 @@ export class SimServiceManager extends ApiManager.ApiManager {
     public simTime: Date;
     public simSpeed: number;
     public simCmd: SimCommand;
+    public name: string;
 
-    constructor(public isClient = false) {
+    constructor(name: string, public isClient = false) {
         super(isClient);
+        this.name = name;
         this.simTime = new Date();
-    }
 
-    init() {
         Winston.info(`sim: Init layer manager (isClient=${this.isClient})`);
 
         this.fsm = new TypeState.FiniteStateMachine<SimulationState>(SimulationState.Idle);
@@ -60,20 +60,12 @@ export class SimServiceManager extends ApiManager.ApiManager {
             this.publishState(fromState, toState)
         }
 
-        // this.fsm.on(SimulationState.Idle, (from: SimulationState) => {
-        //     this.publishState();
-        // });
-
-        // this.keys['hello'] = {
-        //     id: 'test',
-        //     title: 'world',
-        //     storage: 'file'
-        // };
     }
 
     public publishState(fromState: SimulationState, toState: SimulationState) {
         Winston.info(`sim: transitioning from ${SimulationState[fromState]} to ${SimulationState[toState]}.`);
         var state = {
+            name: this.name,
             time: this.simTime,
             fromState: SimulationState[fromState],
             toState: SimulationState[toState]

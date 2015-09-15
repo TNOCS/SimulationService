@@ -74,7 +74,7 @@ export class FiniteStateMachine<T> {
     private _onCallbacks: { [key: string]: { (from: T): void; }[] } = {};
     private _exitCallbacks: { [key: string]: { (to: T): boolean; }[] } = {};
     private _enterCallbacks: { [key: string]: { (from: T): boolean; }[] } = {};
-    private _triggers: { [from: string]: { [ trigger: string ]: T }} = {};
+    private _triggers: { [from: string]: { [trigger: string]: T } } = {};
 
     /**
      * @constructor

@@ -1,0 +1,54 @@
+var express = require('express');
+var path = require('path');
+var cc = require("./ServerComponents/dynamic/ClientConnection");
+var ProjectRepositoryService = require('./ServerComponents/creator/ProjectRepositoryService');
+var DataSource = require("./ServerComponents/dynamic/DataSource");
+var MessageBus = require('./ServerComponents/bus/MessageBus');
+var ConfigurationService = require('./ServerComponents/configuration/ConfigurationService');
+var LayerDirectory = require("./ServerComponents/dynamic/LayerDirectory");
+var store = require('./ServerComponents/import/Store');
+var ApiServiceManager = require('./ServerComponents/api/ApiServiceManager');
+var RestAPI = require('./ServerComponents/api/RestAPI');
+var MqttAPI = require('./ServerComponents/api/MqttAPI');
+var SocketIOAPI = require('./ServerComponents/api/SocketIOAPI');
+var FileStorage = require('./ServerComponents/api/FileStorage');
+var Winston = require('winston');
+var SimulationService = require('./SimulationService/api/SimServiceManager');
+Winston.remove(Winston.transports.Console);
+Winston.add(Winston.transports.Console, {
+    colorize: true,
+    prettyPrint: true
+});
+var favicon = require('serve-favicon');
+var bodyParser = require('body-parser');
+var server = express();
+var httpServer = require('http').Server(server);
+var cm = new cc.ConnectionManager(httpServer);
+var messageBus = new MessageBus.MessageBusService();
+var config = new ConfigurationService('./configuration.json');
+var port = "3333";
+server.set('port', port);
+server.use(favicon(__dirname + '/public/favicon.ico'));
+server.use(bodyParser.json({ limit: '25mb' }));
+server.use(bodyParser.urlencoded({ limit: '25mb', extended: true }));
+config.add("server", "http://localhost:" + port);
+var ld = new LayerDirectory.LayerDirectory(server, cm);
+ld.Start();
+var ds = new DataSource.DataSourceService(cm, "DataSource");
+ds.start();
+server.get("/datasource", ds.getDataSource);
+server.use(express.static(path.join(__dirname, 'swagger')));
+var apiServiceMgr = new ApiServiceManager(server, config);
+var resourceTypeStore = new ProjectRepositoryService(new store.FolderStore({ storageFolder: "public/data/resourceTypes" }));
+apiServiceMgr.addService(resourceTypeStore);
+server.use(express.static(path.join(__dirname, 'public')));
+var api = new SimulationService.SimServiceManager('SimServiceManager');
+api.init();
+api.initResources(path.join(path.resolve(__dirname), "public/data/resourceTypes/"));
+api.addConnector("rest", new RestAPI.RestAPI(server, config['basePath']), {});
+api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
+api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
+api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/layers/")), {});
+httpServer.listen(server.get('port'), function () {
+    Winston.info('Express server listening on port ' + server.get('port'));
+});

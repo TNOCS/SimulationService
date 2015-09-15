@@ -101,6 +101,8 @@
         "./ServerComponents/rules/Rule.d.ts",
         "./ServerComponents/rules/RuleEngine.d.ts",
         "./ServerComponents/rules/WorldState.d.ts",
+        "./SimulationManager/server.ts",
+        "./SimulationManager/src/SimulationManager.ts",
         "./SimulationService/api/SimServiceManager.ts",
         "./SimulationService/state/typestate.ts",
         "./server.ts"

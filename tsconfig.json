@@ -15,6 +15,8 @@
         "!./Classes/*.d.ts"
     ],
     "files": [
+        "./FloodSim/server.ts",
+        "./FloodSim/src/FloodSim.ts",
         "./Scripts/typings/JSONStream/JSONStream.d.ts",
         "./Scripts/typings/async/async.d.ts",
         "./Scripts/typings/body-parser/body-parser.d.ts",
@@ -73,6 +75,7 @@
         "./ServerComponents/helpers/Rss.d.ts",
         "./ServerComponents/helpers/RssGeoJSON.d.ts",
         "./ServerComponents/helpers/Utils.d.ts",
+        "./ServerComponents/helpers/conrec.d.ts",
         "./ServerComponents/import/AggregateOpportunitiesToGeoJsonTransformer.d.ts",
         "./ServerComponents/import/AggregateOpportunitiesToOrganisationTransformer.d.ts",
         "./ServerComponents/import/BagDetailsTransformer.d.ts",
@@ -93,6 +96,7 @@
         "./ServerComponents/import/ITransform.d.ts",
         "./ServerComponents/import/Importer.d.ts",
         "./ServerComponents/import/ImporterRepositoryService.d.ts",
+        "./ServerComponents/import/IsoLines.d.ts",
         "./ServerComponents/import/KvKToJsonTransformer.d.ts",
         "./ServerComponents/import/MergeGeoJsonTransformer.d.ts",
         "./ServerComponents/import/RepeatEnum.d.ts",
@@ -103,7 +107,9 @@
         "./ServerComponents/rules/WorldState.d.ts",
         "./SimulationManager/server.ts",
         "./SimulationManager/src/SimulationManager.ts",
+        "./SimulationService/api/SimServiceManager.d.ts",
         "./SimulationService/api/SimServiceManager.ts",
+        "./SimulationService/state/typestate.d.ts",
         "./SimulationService/state/typestate.ts",
         "./server.ts"
     ]

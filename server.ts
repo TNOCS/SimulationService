@@ -72,7 +72,6 @@ apiServiceMgr.addService(resourceTypeStore);
 server.use(express.static(path.join(__dirname, 'public')));
 
 var api = new SimulationService.SimServiceManager('SimServiceManager');
-api.init();
 api.initResources(path.join(path.resolve(__dirname), "public/data/resourceTypes/"));
 
 api.addConnector("rest", new RestAPI.RestAPI(server, config['basePath']), {});

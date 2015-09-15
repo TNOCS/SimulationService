@@ -54,3 +54,9 @@ example/public/data/projects/DynamicExample/
 SimulationService/**/*.js
 ServerComponents/
 .vscode/
+FloodSim/.settings/
+FloodSim/server.js
+FloodSim/src/
+FloodSim/public/data/layers.json
+FloodSim/public/data/layers/
+server.js

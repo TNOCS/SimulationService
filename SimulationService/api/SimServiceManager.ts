@@ -15,8 +15,8 @@ export enum SimCommand {
 /** Simulation state */
 export enum SimulationState {
     Idle,
-    Ready,
     Pause,
+    Ready,
     Busy
 }
 

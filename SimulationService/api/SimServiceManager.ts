@@ -48,6 +48,7 @@ export class SimServiceManager extends ApiManager.ApiManager {
         this.fsm = new TypeState.FiniteStateMachine<SimulationState>(SimulationState.Idle);
         // Define transitions
         this.fsm.from(SimulationState.Idle).to(SimulationState.Ready).on(SimCommand.Start);
+        this.fsm.from(SimulationState.Idle).to(SimulationState.Busy).on(SimCommand.Run);
         this.fsm.from(SimulationState.Ready).to(SimulationState.Idle).on(SimCommand.Stop);
         this.fsm.from(SimulationState.Ready).to(SimulationState.Busy).on(SimCommand.Run);
         this.fsm.from(SimulationState.Ready).to(SimulationState.Pause).on(SimCommand.Pause);

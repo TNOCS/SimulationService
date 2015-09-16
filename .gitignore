@@ -56,7 +56,7 @@ ServerComponents/
 .vscode/
 FloodSim/.settings/
 FloodSim/server.js
-FloodSim/src/
+FloodSim/src/**/*.js
 FloodSim/public/data/layers.json
 FloodSim/public/data/layers/
 server.js

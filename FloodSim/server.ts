@@ -80,7 +80,7 @@ api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     //api.addConnector("imb", new ImbAPI.ImbAPI("localhost", 4000), {});
     // api.addConnector("mongo", new MongoDB.MongoDBStorage("127.0.0.1", 27017), {});
 
-    api.setConfiguration();
+    api.loadConfiguration();
 });
 
 // api.initResources(path.join(path.resolve(__dirname), "public/data/resourceTypes/"));

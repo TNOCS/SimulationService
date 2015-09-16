@@ -51,36 +51,39 @@ export class FloodSim extends SimulationService.SimServiceManager {
     }
 
     loadConfiguration() {
-        this.scenarioFolder =path.join(this.rootPath, this.relativeScenarioFolder);
+        this.scenarioFolder = path.join(this.rootPath, this.relativeScenarioFolder);
         if (!fs.existsSync(this.scenarioFolder)) return;
         var scenarios = Utils.getDirectories(this.scenarioFolder);
-        scenarios.forEach(s => {
-            var scenario = path.basename(s);
-            fs.readdir(s, (err: Error, files: string[]) => {
-                files.forEach(f => this.readFloodingFile(f, scenario));
+        scenarios.forEach(scenario => {
+            fs.readdir(path.join(this.scenarioFolder, scenario), (err: Error, files: string[]) => {
+                if (err || typeof files === 'undefined') return;
+                files.forEach(f => this.readFloodingFile(path.join(this.scenarioFolder, scenario, f), scenario));
             });
         });
 
-        fs.readFile(path.join(this.rootPath, 'flooding', 'Gorinchem_AW389_TP+1D.asc'), 'utf8', (err: Error, data: Buffer) => {
-            if (err) throw new Error('Cannot load flooding data: ' + err.message);
-            var params: IsoLines.IGridDataSourceParameters = <IsoLines.IGridDataSourceParameters>{
-                propertyName: 'h',
-                gridType: 'esri',
-                projection: 'RD',
-                noDataValue: -9999,
-                useContour: true,
-                minThreshold: 0,
-                contourLevels: [1, 2, 3, 4, 5, 6]
-            }
-            this.floodLayer = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
-            var layer = new ApiManager.Layer();
-            layer.id = this.floodLayer.id;
-            layer.title = 'Flooding simulation';
-            layer.description = 'A simple flooding simulation.';
-            layer.features = this.floodLayer.features;
-            layer.storage = 'file';
-            this.addLayer(layer, <ApiManager.ApiMeta>{}, () => { });
-        });
+        // fs.readFile(path.join(this.rootPath, 'Gorinchem_AW389_TP+1D.asc'), 'utf8', (err: Error, data: Buffer) => {
+        //     if (err) {
+        //         Winston.error('Cannot load flooding data: ' + err.message);
+        //         return;
+        //     }
+        //     var params: IsoLines.IGridDataSourceParameters = <IsoLines.IGridDataSourceParameters>{
+        //         propertyName: 'h',
+        //         gridType: 'esri',
+        //         projection: 'RD',
+        //         noDataValue: -9999,
+        //         useContour: true,
+        //         minThreshold: 0,
+        //         contourLevels: [1, 2, 3, 4, 5, 6]
+        //     }
+        //     this.floodLayer = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
+        //     var layer = new ApiManager.Layer();
+        //     layer.id = this.floodLayer.id;
+        //     layer.title = 'Flooding simulation';
+        //     layer.description = 'A simple flooding simulation.';
+        //     layer.features = this.floodLayer.features;
+        //     layer.storage = 'file';
+        //     this.addLayer(layer, <ApiManager.ApiMeta>{}, () => { });
+        // });
 
         this.fsm.onEnter(SimulationService.SimulationState.Ready, (from) => {
             if (from === SimulationService.SimulationState.Idle) this.simStartTime = this.simTime;
@@ -120,7 +123,7 @@ export class FloodSim extends SimulationService.SimServiceManager {
                 }
                 var floodSim = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
                 var layer = new ApiManager.Layer();
-                layer.features = this.floodLayer.features;
+                layer.features = floodSim.features;
                 layer.storage = 'file';
 
                 if (!this.floodSims.hasOwnProperty(scenario)) this.floodSims[scenario] = [];

@@ -1,6 +1,7 @@
 import fs = require('fs');
 import path = require('path');
 import Winston = require('winston');
+
 import GeoJSON = require('../../ServerComponents/helpers/GeoJSON')
 import Utils = require('../../ServerComponents/helpers/Utils')
 import IsoLines = require('../../ServerComponents/import/IsoLines')
@@ -32,7 +33,7 @@ export class FloodSim extends SimulationService.SimServiceManager {
     private floodingHasStarted: boolean = false;
     /** A list of available flood simulations, i.e. floodSims[scenarioName] = { timeStamp, layer } */
     private floodSims: {
-        [scenarioName: string] : {
+        [scenarioName: string]: {
             /** The time in minutes since the start of the simulation */
             timeStamp: number,
             /** The flooding data */
@@ -46,11 +47,12 @@ export class FloodSim extends SimulationService.SimServiceManager {
     /** Time that the flooding started */
     private floodingStartTime: Date;
 
-    constructor(name: string, public isClient = false) {
-        super(name, isClient);
+    constructor(name: string, public isClient = false, public options: ApiManager.ApiManagerOptions = <ApiManager.ApiManagerOptions>{}) {
+        super(name, isClient, options);
     }
 
     loadConfiguration() {
+
         this.scenarioFolder = path.join(this.rootPath, this.relativeScenarioFolder);
         if (!fs.existsSync(this.scenarioFolder)) return;
         var scenarios = Utils.getDirectories(this.scenarioFolder);
@@ -61,7 +63,8 @@ export class FloodSim extends SimulationService.SimServiceManager {
             });
         });
 
-        // fs.readFile(path.join(this.rootPath, 'Gorinchem_AW389_TP+1D.asc'), 'utf8', (err: Error, data: Buffer) => {
+
+        // fs.readFile(path.join(this.rootPath, 'scenarios/Gorinchem/100.asc'), 'utf8', (err: Error, data: Buffer) => {
         //     if (err) {
         //         Winston.error('Cannot load flooding data: ' + err.message);
         //         return;
@@ -77,7 +80,7 @@ export class FloodSim extends SimulationService.SimServiceManager {
         //     }
         //     this.floodLayer = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
         //     var layer = new ApiManager.Layer();
-        //     layer.id = this.floodLayer.id;
+        //     layer.id = "FloodSimLayer";
         //     layer.title = 'Flooding simulation';
         //     layer.description = 'A simple flooding simulation.';
         //     layer.features = this.floodLayer.features;

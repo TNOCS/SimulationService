@@ -47,7 +47,7 @@ export class FloodSim extends SimulationService.SimServiceManager {
     /** Time that the flooding started */
     private floodingStartTime: Date;
 
-    constructor(name: string, public isClient = false, public options: ApiManager.ApiManagerOptions = <ApiManager.ApiManagerOptions>{}) {
+    constructor(name: string, public isClient = false, public options: ApiManager.IApiManagerOptions = <ApiManager.IApiManagerOptions>{}) {
         super(name, isClient, options);
     }
 

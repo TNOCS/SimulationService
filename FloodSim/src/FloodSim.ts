@@ -56,8 +56,8 @@ export class FloodSim extends SimSvc.SimServiceManager {
     /** Time that the flooding started */
     private floodingStartTime: Date;
 
-    constructor(name: string, public isClient = false) {
-        super(name, isClient);
+    constructor(name: string, public isClient = false, public options: ApiManager.IApiManagerOptions = <ApiManager.IApiManagerOptions>{}) {
+        super(name, isClient, options);
     }
 
     start() {

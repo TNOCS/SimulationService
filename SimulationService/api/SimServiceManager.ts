@@ -45,8 +45,8 @@ export class SimServiceManager extends Api.ApiManager {
     public simSpeed: number;
     public simCmd: SimCommand;
 
-    constructor(name: string, public isClient = false) {
-        super(isClient);
+    constructor(name: string, public isClient = false, public options: ApiManager.IApiManagerOptions = <ApiManager.IApiManagerOptions>{}) {
+        super(isClient, options);
         this.name = name;
         this.simTime = new Date();
 

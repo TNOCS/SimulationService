@@ -1,6 +1,6 @@
 import Winston = require('winston');
 import TypeState = require('../state/typestate');
-import ApiManager = require('../../ServerComponents/api/ApiManager');
+import Api = require('../../ServerComponents/api/ApiManager');
 import Utils = require('../../ServerComponents/helpers/Utils');
 
 export enum SimCommand {
@@ -30,13 +30,20 @@ export interface ISimTimeState {
     simCmd?: string;
 }
 
-export class SimServiceManager extends ApiManager.ApiManager {
+export enum Event {
+    TimeChanged
+}
+
+export class SimServiceManager extends Api.ApiManager {
     private id: string = Utils.newGuid();
+    /** Name of the simulation service. */
+    public name: string;
+    /** Optional message to transmit with the state object */
+    public message: string;
     public fsm: TypeState.FiniteStateMachine<SimulationState>;
     public simTime: Date;
     public simSpeed: number;
     public simCmd: SimCommand;
-    public name: string;
 
     constructor(name: string, public isClient = false) {
         super(isClient);
@@ -58,33 +65,49 @@ export class SimServiceManager extends ApiManager.ApiManager {
 
         // Listen to state changes
         this.fsm.onTransition = (fromState: SimulationState, toState: SimulationState) => {
-            this.publishState(fromState, toState)
+            this.publishStateChanged(fromState, toState)
         }
 
-    }
-
-    public publishState(fromState: SimulationState, toState: SimulationState) {
-        Winston.info(`sim: transitioning from ${SimulationState[fromState]} to ${SimulationState[toState]}.`);
-        var state = {
-            name: this.name,
-            time: this.simTime,
-            fromState: SimulationState[fromState],
-            toState: SimulationState[toState]
-        }
-        this.updateKey(this.id, state, <ApiManager.ApiMeta>{}, () => { });
-    }
-
-    public updateKey(keyId: string, value: Object, meta: ApiManager.ApiMeta, callback: Function) {
-        if (value.hasOwnProperty('type')) {
-            switch (value['type']) {
+        // Listen to relevant KeyEvents (simTime, jobs)
+        this.on(Api.Event[Api.Event.KeyChanged], (key: Api.IChangeEvent) => {
+            if (!key.value.hasOwnProperty('type')) return;
+            switch (key.value['type']) {
                 case 'simTime':
-                    this.updateSimulationState(value);
+                    this.updateSimulationState(key.value);
                     break;
                 case 'job':
                     break;
             }
-        }
-        super.updateKey(keyId, value, meta, callback);
+        });
+    }
+
+    /**
+     * Override the start method to specify your own startup behaviour.
+     * Although you could use the init method, at that time the connectors haven't been configured yet.
+     */
+    public start(options?: Object) { }
+
+    /**
+     * Send a message, acknowledging the fact that we have received a time step and are, depending on the state,
+     * ready to move on.
+     */
+    private sendAck() {
+        var state = {
+            name: this.name,
+            time: this.simTime,
+            state: SimulationState[this.fsm.currentState]
+        };
+        if (this.message) state['msg'] = this.message;
+        this.updateKey(`simState/${this.name}.${this.id}`, state, <Api.ApiMeta>{}, () => { });
+    }
+
+    /**
+     * Publish a message when the state has changed, so when the sim was busy (and the simulation stopped) and moves
+     * to the Ready state, we can continue running the simulation.
+     */
+    private publishStateChanged(fromState: SimulationState, toState: SimulationState) {
+        Winston.info(`sim: transitioning from ${SimulationState[fromState]} to ${SimulationState[toState]}.`);
+        this.sendAck();
     }
 
     /**
@@ -108,23 +131,13 @@ export class SimServiceManager extends ApiManager.ApiManager {
             }
             Winston.info(`sim: new command ${SimCommand[this.simCmd]}`);
             this.fsm.trigger(this.simCmd);
-
-            // switch (this.simCmd) {
-            //     case SimCommand.Start:
-            //         if (this.fsm.canGo(SimulationState.Ready)) this.fsm.go(SimulationState.Ready);
-            //         break;
-            //     case SimCommand.Pause:
-            //         if (this.fsm.canGo(SimulationState.Pause)) this.fsm.go(SimulationState.Pause);
-            //         break;
-            //     case SimCommand.Stop:
-            //         if (this.fsm.canGo(SimulationState.Idle)) this.fsm.go(SimulationState.Idle);
-            //         break;
-            // }
         }
-        this.emit('simTimeChanged', {
+
+        this.emit(Event[Event.TimeChanged], {
             time: this.simTime,
             speed: this.simSpeed,
             cmd: this.simCmd
         });
+        this.sendAck();
     }
 }

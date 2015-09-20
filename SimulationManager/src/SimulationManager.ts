@@ -1,34 +1,150 @@
 import Winston = require('winston');
 import TypeState = require('../../SimulationService/state/typestate');
-import ApiManager = require('../../ServerComponents/api/ApiManager');
-import SimulationService = require('../../SimulationService/api/SimServiceManager');
+import Api = require('../../ServerComponents/api/ApiManager');
+import SimSvc = require('../../SimulationService/api/SimServiceManager');
 import HyperTimer = require('hypertimer');
 
-export class SimulationManager extends SimulationService.SimServiceManager {
+export class SimulationManager extends SimSvc.SimServiceManager {
+    /** The topic/key that is used for publishing simulation time messages */
+    private simTimeKey: string;
+    /**
+     * Timer to send the time messages to all sims.
+     * @type {HyperTimer}
+     */
     private timer: HyperTimer;
+    /**
+     * Dictionary of active sims.
+     * @type {SimSvc.ISimState[]}
+     */
+    private sims: { [id: string]: SimSvc.ISimState } = {};
+    /**
+     * Contains the id of all sims that are not ready, so they cannot receive time events.
+     * @type {number}
+     */
+    private simsNotReady: string[] = [];
 
-    constructor(name: string, public isClient = false) {
-        super(name, isClient);
+    constructor(name: string, public isClient = false, options = <Api.IApiManagerOptions>{}) {
+        super(name, isClient, options);
 
-        this.fsm.onEnter(SimulationService.SimulationState.Ready, () => {
-            this.timer = new HyperTimer( {
-                time: this.simTime,
-                rate: this.simSpeed,
-            });
-            this.timer.setInterval(() => {
-                this.simTime = this.timer.getTime();
-                this.publishTime();
-            }, 5000); // 5s
+        // Listen to state changes and do not send any message (which is the default behaviour).
+        this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }
+
+        this.simTimeKey = `${SimSvc.Keys[SimSvc.Keys.SimTime]}/${this.name}.${this.id}`;
+
+        //this.collectSimState();
+
+        // When ready, start sending messages.
+        this.fsm.onEnter(SimSvc.SimState.Ready, () => {
+            this.startTimer();
             return true;
         });
-
-        this.fsm.onExit(SimulationService.SimulationState.Ready, () => {
+        // When moving to pause or idle, pause the timer.
+        this.fsm.onExit(SimSvc.SimState.Ready, () => {
             this.timer.pause();
             return true;
         });
     }
 
+    /**
+     * Override the start method to specify your own startup behaviour.
+     * Although you could use the init method, at that time the connectors haven't been configured yet.
+     */
+    public start(options?: Object) {
+        super.start(options);
+        
+        // Listen to SimState keys
+        this.subscribeKey(`${SimSvc.SimServiceManager.namespace}/${SimSvc.Keys[SimSvc.Keys.SimState]}/#:sender`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+            try {
+                var simState = <SimSvc.ISimState>JSON.parse(message);
+                Winston.error("Received sim state: ", simState);
+                if (!simState) return;
+                var state = SimSvc.SimState[simState.state];
+                var index = this.simsNotReady.indexOf(simState.id);
+                if (state !== SimSvc.SimState.Ready) {
+                    if (index < 0) this.simsNotReady.push(simState.id);
+                } else {
+                    if (index >= 0) this.simsNotReady.splice(index, 1);
+                }
+                this.sims[simState.id] = simState;
+                // Listen to sims that move to Exit (when they have exited, we always try to emit a final Exit message).
+                if (state === SimSvc.SimState.Exit) {
+                    delete this.sims[simState.id];
+                }
+            } catch (e) {}
+        });
+    }
+
+
+    /**
+     * Listen to simulation state messages and collect their state, so we know whether we should pause the simulation.
+     * @method collectSimState
+     * @return {void}
+     */
+    private collectSimState() {
+        this.on(Api.Event[Api.Event.KeyChanged], (key: Api.IChangeEvent) => {
+            Winston.info(`SimMngr: Received ${key}`);
+            // Listen to sims that reply (so they are online and we may have to wait for them).
+            // In that case, add them to the sims list.
+            var simState = <SimSvc.ISimState>key.value;
+            if (!simState) return;
+            var state = SimSvc.SimState[simState.state];
+            var index = this.simsNotReady.indexOf(simState.id);
+            if (state !== SimSvc.SimState.Ready) {
+                if (index < 0) this.simsNotReady.push(simState.id);
+            } else {
+                if (index >= 0) this.simsNotReady.splice(index, 1);
+            }
+            this.sims[simState.id] = simState;
+            // Listen to sims that move to Exit (when they have exited, we always try to emit a final Exit message).
+            if (state === SimSvc.SimState.Exit) {
+                delete this.sims[simState.id];
+            }
+        });
+    }
+
+    /**
+     * Create a new timer and start it.
+     * As the start time may have changed, the speed or interval (time step), create a new timer.
+     * @method startTimer
+     * @return {void}
+     */
+    private startTimer() {
+        this.timer = new HyperTimer({
+            time: this.simTime,
+            rate: this.simSpeed || 1,
+            paced: true
+        });
+        this.timer.setInterval(() => {
+            this.simTime = this.timer.getTime();
+            if (this.continue()) this.publishTime();
+        }, this.simTimeStep || 5000); // Default every 5 seconds
+    }
+
+    /**
+     * Check whether we should continue or pause the simulation based on the current conditions.
+     * @method continue
+     * @return {boolean}        [Returns true if we can continue, false otherwise]
+     */
+    private continue() {
+        if (this.simsNotReady.length === 0) {
+            // All sims are ready, so if we are not running, and should be running, continue.
+            if (!this.timer.running && this.fsm.currentState === SimSvc.SimState.Ready) {
+                this.publishTime(); // Inform others
+                this.timer.continue();
+            }
+            return true;
+        }
+        // Some sims are not ready, so if we are running, pause.
+        if (this.timer.running) this.timer.pause();
+        return false;
+    }
+
+    /**
+     * Publish a time message.
+     * @method publishTime
+     * @return {void}
+     */
     private publishTime() {
-        this.updateKey('SimTime', this.timer.getTime(), <ApiManager.ApiMeta>{}, () => { });
+        this.updateKey(this.simTimeKey, this.timer.getTime(), <Api.ApiMeta>{}, () => { });
     }
 }

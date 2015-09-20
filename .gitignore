@@ -60,3 +60,4 @@ FloodSim/src/**/*.js
 FloodSim/public/data/layers.json
 FloodSim/public/data/layers/
 server.js
+SimulationManager/

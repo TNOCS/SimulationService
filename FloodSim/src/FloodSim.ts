@@ -56,7 +56,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     /** Time that the flooding started */
     private floodingStartTime: Date;
 
-    constructor(name: string, public isClient = false, public options: ApiManager.IApiManagerOptions = <ApiManager.IApiManagerOptions>{}) {
+    constructor(name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(name, isClient, options);
     }
 
@@ -74,8 +74,8 @@ export class FloodSim extends SimSvc.SimServiceManager {
      */
     private initFSM() {
         // Specify the behaviour of the sim.
-        this.fsm.onEnter(SimSvc.SimulationState.Ready, (from) => {
-            if (from === SimSvc.SimulationState.Idle || from === SimSvc.SimulationState.Busy)
+        this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
+            if (from === SimSvc.SimState.Idle || from === SimSvc.SimState.Busy)
                 this.simStartTime = this.simTime;
             return true;
         });

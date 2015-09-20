@@ -12,16 +12,17 @@ import DynamicProject = require("./../ServerComponents/dynamic/DynamicProject");
 import LayerDirectory = require("./../ServerComponents/dynamic/LayerDirectory");
 import store = require('./../ServerComponents/import/Store');
 import ApiServiceManager = require('./../ServerComponents/api/ApiServiceManager');
-import ApiManager = require('./../ServerComponents/api/ApiManager');
+import Api = require('./../ServerComponents/api/ApiManager');
 import RestAPI = require('./../ServerComponents/api/RestAPI');
 import MqttAPI = require('./../ServerComponents/api/MqttAPI');
 import SocketIOAPI = require('./../ServerComponents/api/SocketIOAPI');
-import MongoDB = require('./../ServerComponents/api/MongoDB');
 import FileStorage = require('./../ServerComponents/api/FileStorage');
-import ImbAPI = require('./../ServerComponents/api/ImbAPI');
 import Winston = require('winston');
+import SimSvc = require('../SimulationService/api/SimServiceManager');
+import SimMngr = require('./src/SimulationManager');
+//import ImbAPI = require('./../ServerComponents/api/ImbAPI');
+//import MongoDB = require('./../ServerComponents/api/MongoDB');
 
-import SimulationManager = require('./src/SimulationManager');
 
 Winston.remove(Winston.transports.Console);
 Winston.add(Winston.transports.Console, {
@@ -71,24 +72,20 @@ apiServiceMgr.addService(resourceTypeStore);
 
 server.use(express.static(path.join(__dirname, 'public')));
 
-var api = new SimulationManager.SimulationManager('SimulationManager');
+var prefix = SimSvc.SimServiceManager.namespace;
+
+var api = new SimMngr.SimulationManager('SimulationManager', false, {
+    mqttSubscriptions: [ '#' ]
+});
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});
     api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
     api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
-    //api.addConnector("imb", new ImbAPI.ImbAPI("localhost", 4000), {});
+    // api.addConnector("imb", new ImbAPI.ImbAPI("localhost", 4000), {});
     // api.addConnector("mongo", new MongoDB.MongoDBStorage("127.0.0.1", 27017), {});
     // api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/")), {});
+    api.start();
 });
-
-// api.initResources(path.join(path.resolve(__dirname), "public/data/resourceTypes/"));
-// api.addConnector("rest", new RestAPI.RestAPI(server, config['basePath']), {});
-// api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
-// api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
-// api.addConnector("imb", new ImbAPI.ImbAPI("localhost", 4000), {});
-// api.addConnector("mongo", new MongoDB.MongoDBStorage("127.0.0.1", 27017), {});
-// api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/layers/")), {});
-
 
 httpServer.listen(server.get('port'), () => {
     Winston.info('Express server listening on port ' + server.get('port'));

@@ -12,7 +12,6 @@ export enum SimCommand {
     Exit
 }
 
-
 /** Simulation state */
 export enum SimState {
     Idle,
@@ -97,16 +96,16 @@ export class SimServiceManager extends Api.ApiManager {
             this.publishStateChanged(fromState, toState)
         }
 
-        // this.on(Api.Event[Api.Event.KeyChanged], (key: Api.IChangeEvent) => {
-        //     if (!key.value.hasOwnProperty('type')) return;
-        //     switch (key.value['type']) {
-        //         case 'simTime':
-        //             this.updateSimulationState(key.value);
-        //             break;
-        //         case 'job':
-        //             break;
-        //     }
-        // });
+        this.on(Api.Event[Api.Event.KeyChanged], (key: Api.IChangeEvent) => {
+            if (!key.value.hasOwnProperty('type')) return;
+            switch (key.value['type']) {
+                case 'simTime':
+                    this.updateSimulationState(key.value);
+                    break;
+                case 'job':
+                    break;
+            }
+        });
 
         this.cleanup(() => this.terminateProcess());
     }

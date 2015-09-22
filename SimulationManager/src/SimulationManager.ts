@@ -51,8 +51,8 @@ export class SimulationManager extends SimSvc.SimServiceManager {
      */
     public start(options?: Object) {
         super.start(options);
-        
-        // Listen to SimState keys
+
+        // Listen to Sim/SimState/ keys
         this.subscribeKey(`${SimSvc.SimServiceManager.namespace}/${SimSvc.Keys[SimSvc.Keys.SimState]}/#:sender`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             try {
                 var simState = <SimSvc.ISimState>JSON.parse(message);

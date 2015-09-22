@@ -35,9 +35,7 @@ example/public/app/*.js
 example/Scripts/typings/cs/csComp.d.ts
 example/services/**/*.js
 example/dist/
-
 test/Scripts/
-
 coverage/
 test/csComp/**/*.js
 test/csComp/spec/classes/datasource.spec.js
@@ -60,4 +58,4 @@ FloodSim/src/**/*.js
 FloodSim/public/data/layers.json
 FloodSim/public/data/layers/
 server.js
-SimulationManager/
+SimulationManager/**/*.js

@@ -16,8 +16,8 @@
         "!./node_modules/**/*.ts"
     ],
     "files": [
-        "./api/SimServiceManager.ts",
-        "./state/typestate.ts",
+        "./server.ts",
+        "./src/SimulationManager.ts",
         "../Scripts/typings/JSONStream/JSONStream.d.ts",
         "../Scripts/typings/async/async.d.ts",
         "../Scripts/typings/body-parser/body-parser.d.ts",

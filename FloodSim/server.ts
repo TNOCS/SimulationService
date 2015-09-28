@@ -42,7 +42,7 @@ var config = new ConfigurationService('./configuration.json');
 //require('http').setMaxHeaderLength(26214400);
 
 // all environments
-var port = "3333";
+var port = "3334";
 server.set('port', port);
 server.use(favicon(__dirname + '/public/favicon.ico'));
 //increased limit size, see: http://stackoverflow.com/questions/19917401/node-js-express-request-entity-too-large

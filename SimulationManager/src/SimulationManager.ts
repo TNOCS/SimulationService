@@ -4,6 +4,12 @@ import Api = require('../../ServerComponents/api/ApiManager');
 import SimSvc = require('../../SimulationService/api/SimServiceManager');
 import HyperTimer = require('hypertimer');
 
+/**
+ * The simulation manager is responsible for:
+ * - managing the simulation time, speed and state.
+ * - viewing the state of the simulation (who is online, what is their simulation status).
+ * - storing the world state.
+ */
 export class SimulationManager extends SimSvc.SimServiceManager {
     /** The topic/key that is used for publishing simulation time messages */
     private simTimeKey: string;
@@ -23,8 +29,8 @@ export class SimulationManager extends SimSvc.SimServiceManager {
      */
     private simsNotReady: string[] = [];
 
-    constructor(name: string, public isClient = false, options = <Api.IApiManagerOptions>{}) {
-        super(name, isClient, options);
+    constructor(namespace: string, name: string, public isClient = false, options = <Api.IApiManagerOptions>{}) {
+        super(namespace, name, isClient, options);
 
         // Listen to state changes and do not send any message (which is the default behaviour).
         this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }

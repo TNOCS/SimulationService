@@ -62,8 +62,6 @@ export class SimServiceManager extends Api.ApiManager {
     /** Namespace for the simulation keys, e.g. /Sim/KEYS */
     static namespace: string = 'Sim';
     id: string = Utils.newGuid();
-    /** Name of the simulation service. */
-    public name: string;
     /** Optional message to transmit with the state object */
     public message: string;
     public fsm: TypeState.FiniteStateMachine<SimState>;
@@ -72,9 +70,8 @@ export class SimServiceManager extends Api.ApiManager {
     public simTimeStep: number;
     public simCmd: SimCommand;
 
-    constructor(name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
-        super(isClient, options);
-        this.name = name;
+    constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
+        super(namespace, name, isClient, options);
         this.simTime = new Date();
 
         Winston.info(`sim: Init layer manager (isClient=${this.isClient})`);

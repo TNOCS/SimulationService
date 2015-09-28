@@ -74,7 +74,7 @@ server.use(express.static(path.join(__dirname, 'public')));
 
 var prefix = SimSvc.SimServiceManager.namespace;
 
-var api = new SimMngr.SimulationManager('SimulationManager', false, {
+var api = new SimMngr.SimulationManager('cs', 'SimulationManager', false, {
     mqttSubscriptions: [ '#' ]
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {

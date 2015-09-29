@@ -86,7 +86,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
      */
     private publishFloodLayer() {
         var layer = new Api.Layer();
-        layer.id = 'FloodSim.' + Utils.newGuid();
+        layer.id = 'FloodSim.FloodSim'; // + Utils.newGuid();
         layer.title = 'Flooding';
         layer.description = 'Current flooding status.';
         layer.storage = 'file';

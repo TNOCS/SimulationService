@@ -123,15 +123,15 @@ export class SimServiceManager extends Api.ApiManager {
      */
     public start(options?: Object) {
         // Listen to SimTime keys
-        this.subscribeKey(`${SimServiceManager.namespace}/${Keys[Keys.SimTime]}/#:sender`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+        this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.SimTime]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta? : Api.ApiMeta) => {
             try {
-                var msg = JSON.parse(message);
-                //Winston.error("Received sim time: ", msg);
-                this.updateSimulationState(msg);
+                var simTime = message.simTime;
+                Winston.error("Received sim time: ", simTime);
+                this.updateSimulationState(message);
             } catch (e) {}
         });
         // Listen to JOBS
-        this.subscribeKey('Sim/Jobs/#:sender', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+        this.subscribeKey('Sim.Jobs', <Api.ApiMeta>{}, (topic: string, message: any, meta?:Api.ApiMeta) => {
             Winston.error("Received job: ", message);
         });
     }

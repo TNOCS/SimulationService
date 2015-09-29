@@ -59,3 +59,7 @@ FloodSim/public/data/layers.json
 FloodSim/public/data/layers/
 server.js
 SimulationManager/**/*.js
+SimulationManager/public/**/*.js
+FloodSim/**/*.js
+SimulationManager/public/bower_components/
+SimulationManager/public/cs/

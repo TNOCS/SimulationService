@@ -1,0 +1,112 @@
+{
+  "id": "Simulation",
+  "title": "Simulation",
+  "description": "Example of the Simulation Manager in action.",
+  "logo": "images/CommonSenseRound.png",
+  "url": "https://github.com/TNOCS/csMap",
+  "connected": true,
+  "timeLine": {
+    "start": 1375315200000,
+    "end": 1425168000000,
+    "range": 49852800000,
+    "zoomLevelName": "weeks",
+    "isLive": false,
+    "focus": 1418313240000,
+    "zoomLevel": 604800000
+  },
+  "datasources": null,
+  "dashboards": [
+    {
+      "id": "home",
+      "name": "Home",
+      "editMode": false,
+      "showMap": true,
+      "showTimeline": true,
+      "showLeftmenu": true,
+      "showLegend": true,
+      "showRightmenu": false,
+      "showBackgroundImage": false,
+      "visiblelayers": [],
+      "widgets": [
+        {
+          "id": "f38c1b7d-40b7-4e03-1349-7d0c0876091b",
+          "directive": "simtimecontroller",
+          "elementId": "widget-f38c1b7d-40b7-4e03-1349-7d0c0876091b",
+          "enabled": true,
+          "style": "default",
+          "left": "20px",
+          "right": "",
+          "top": "25px",
+          "width": "321px",
+          "height": "142px",
+          "data": {}
+        }
+      ],
+      "visibleLeftMenuItems": [
+        "!lm-layers"
+      ]
+    },
+    {
+      "id": "datatable",
+      "name": "Table",
+      "editMode": false,
+      "showMap": false,
+      "showTimeline": false,
+      "showLeftmenu": false,
+      "showLegend": false,
+      "showRightmenu": false,
+      "showBackgroundImage": false,
+      "widgets": [
+        {
+          "id": "a098ba13-5258-4a50-4315-be6b266ecba7",
+          "directive": "datatable",
+          "elementId": "widget-a098ba13-5258-4a50-4315-be6b266ecba7",
+          "enabled": true,
+          "width": "100%",
+          "height": "100%"
+        }
+      ],
+      "visibleLeftMenuItems": []
+    },
+    {
+      "id": "nomap",
+      "name": "No Map",
+      "editMode": false,
+      "showMap": false,
+      "showTimeline": false,
+      "showLeftmenu": true,
+      "showLegend": false,
+      "showRightmenu": false,
+      "showBackgroundImage": true,
+      "backgroundimage": "images/amsterdam.jpg",
+      "widgets": [
+        {
+          "id": "3654881f-0644-46ea-5133-f45c3dde8c9e",
+          "directive": "markdownwidget",
+          "title": "Test",
+          "elementId": "widget-3654881f-0644-46ea-5133-f45c3dde8c9e",
+          "enabled": true,
+          "left": "10px",
+          "top": "10px",
+          "width": "650px",
+          "height": "350px",
+          "data": {
+            "content": "# Hello World #\n | a | b | c | d | \n |---|---|---|---| \n | 1 | 2 | 3 | 4 |"
+          }
+        }
+      ]
+    }
+  ],
+  "userPrivileges": {
+    "mca": {
+      "expertMode": true
+    },
+    "heatmap": {
+      "expertMode": true
+    }
+  },
+  "expertMode": 3,
+  "baselayers": {},
+  "propertyTypeData": {},
+  "groups": null
+}

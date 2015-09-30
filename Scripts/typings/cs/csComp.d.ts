@@ -1760,6 +1760,48 @@ declare module csComp.Services {
 }
 
 declare module csComp.Services {
+    class ConnectionService {
+        private $messageBusService;
+        private $layerService;
+        static $inject: string[];
+        constructor($messageBusService: Services.MessageBusService, $layerService: Services.LayerService);
+    }
+}
+
+declare module csComp.Services {
+    class Coordinates {
+        accuracy: number;
+        latitude: number;
+        longitude: number;
+    }
+    class Geoposition {
+        coords: Coordinates;
+        timestamp: number;
+    }
+    class GeoService {
+        bus: Services.MessageBusService;
+        $rootScope: ng.IRootScopeService;
+        $window: ng.IWindowService;
+        $q: ng.IQService;
+        position: Geoposition;
+        geolocation_msgs: {
+            'errors.location.unsupportedBrowser': string;
+            'errors.location.permissionDenied': string;
+            'errors.location.positionUnavailable': string;
+            'errors.location.timeout': string;
+        };
+        static $inject: string[];
+        constructor(bus: Services.MessageBusService, $rootScope: ng.IRootScopeService, $window: ng.IWindowService, $q: ng.IQService);
+        getLocation(): any;
+        start(opts?: any): void;
+    }
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module csComp.Services {
     /** Contains properties needed to describe right panel */
     class RightPanelTab {
         title: string;
@@ -1806,48 +1848,6 @@ declare module csComp.Services {
       * Module
       */
     var myModule: any;
-}
-
-declare module csComp.Services {
-    class Coordinates {
-        accuracy: number;
-        latitude: number;
-        longitude: number;
-    }
-    class Geoposition {
-        coords: Coordinates;
-        timestamp: number;
-    }
-    class GeoService {
-        bus: Services.MessageBusService;
-        $rootScope: ng.IRootScopeService;
-        $window: ng.IWindowService;
-        $q: ng.IQService;
-        position: Geoposition;
-        geolocation_msgs: {
-            'errors.location.unsupportedBrowser': string;
-            'errors.location.permissionDenied': string;
-            'errors.location.positionUnavailable': string;
-            'errors.location.timeout': string;
-        };
-        static $inject: string[];
-        constructor(bus: Services.MessageBusService, $rootScope: ng.IRootScopeService, $window: ng.IWindowService, $q: ng.IQService);
-        getLocation(): any;
-        start(opts?: any): void;
-    }
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module csComp.Services {
-    class ConnectionService {
-        private $messageBusService;
-        private $layerService;
-        static $inject: string[];
-        constructor($messageBusService: Services.MessageBusService, $layerService: Services.LayerService);
-    }
 }
 
 declare module csComp.Services {
@@ -2261,6 +2261,20 @@ declare module csComp.Services {
     var myModule: any;
 }
 
+declare module csComp.Search {
+    interface ISearchFormScope extends ng.IScope {
+        vm: SearchFormCtrl;
+        location: L.LatLng;
+    }
+    class SearchFormCtrl {
+        private $scope;
+        private $mapService;
+        static $inject: string[];
+        constructor($scope: ISearchFormScope, $mapService: csComp.Services.MapService);
+        doSearch(): void;
+    }
+}
+
 declare module Accessibility {
     /**
       * Module
@@ -2321,17 +2335,26 @@ declare module Accessibility {
     }
 }
 
-declare module csComp.Search {
-    interface ISearchFormScope extends ng.IScope {
-        vm: SearchFormCtrl;
-        location: L.LatLng;
+declare module BaseMapList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module BaseMapList {
+    interface IBaseMapScope extends ng.IScope {
+        vm: BaseMapListCtrl;
     }
-    class SearchFormCtrl {
+    class BaseMapListCtrl {
         private $scope;
+        private $layerService;
         private $mapService;
+        private $messageBusService;
+        private scope;
         static $inject: string[];
-        constructor($scope: ISearchFormScope, $mapService: csComp.Services.MapService);
-        doSearch(): void;
+        constructor($scope: IBaseMapScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
+        selectBaseLayer(key: any): void;
     }
 }
 
@@ -2452,36 +2475,6 @@ declare module Charts {
     }
 }
 
-declare module BaseMapList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module BaseMapList {
-    interface IBaseMapScope extends ng.IScope {
-        vm: BaseMapListCtrl;
-    }
-    class BaseMapListCtrl {
-        private $scope;
-        private $layerService;
-        private $mapService;
-        private $messageBusService;
-        private scope;
-        static $inject: string[];
-        constructor($scope: IBaseMapScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
-        selectBaseLayer(key: any): void;
-    }
-}
-
-declare module Directives.Clock {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
 declare module Helpers.ContextMenu {
     /**
       * Module
@@ -2489,38 +2482,11 @@ declare module Helpers.ContextMenu {
     var myModule: any;
 }
 
-declare module ExpertMode {
+declare module Directives.Clock {
     /**
       * Module
       */
     var myModule: any;
-}
-
-declare module ExpertMode {
-    import Expertise = csComp.Services.Expertise;
-    interface IExpertModeScope extends ng.IScope {
-        vm: ExpertModeCtrl;
-        expertMode: Expertise;
-    }
-    class ExpertModeCtrl {
-        private $scope;
-        private $localStorageService;
-        private $layerService;
-        private $mapService;
-        private $messageBus;
-        static $inject: string[];
-        constructor($scope: IExpertModeScope, $localStorageService: ng.localStorage.ILocalStorageService, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBus: csComp.Services.MessageBusService);
-        /**
-        * Get the CSS class to render the mode.
-        */
-        getCssClass(): string;
-        /**
-        * Set the expert mode: although we assume that each directive is responsible for managing it by listening
-        * to the expertMode.newExpertise message, we already set some common options here.
-        * This is to reduce the dependency on this directive.
-        */
-        private setExpertMode(expertMode);
-    }
 }
 
 declare module DataTable {
@@ -2606,6 +2572,62 @@ declare module DataTable {
          * Convert to trusted html string.
          */
         toTrusted(html: string): any;
+    }
+}
+
+declare module ExpertMode {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module ExpertMode {
+    import Expertise = csComp.Services.Expertise;
+    interface IExpertModeScope extends ng.IScope {
+        vm: ExpertModeCtrl;
+        expertMode: Expertise;
+    }
+    class ExpertModeCtrl {
+        private $scope;
+        private $localStorageService;
+        private $layerService;
+        private $mapService;
+        private $messageBus;
+        static $inject: string[];
+        constructor($scope: IExpertModeScope, $localStorageService: ng.localStorage.ILocalStorageService, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBus: csComp.Services.MessageBusService);
+        /**
+        * Get the CSS class to render the mode.
+        */
+        getCssClass(): string;
+        /**
+        * Set the expert mode: although we assume that each directive is responsible for managing it by listening
+        * to the expertMode.newExpertise message, we already set some common options here.
+        * This is to reduce the dependency on this directive.
+        */
+        private setExpertMode(expertMode);
+    }
+}
+
+declare module FeatureList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module FeatureList {
+    interface IFeatureListScope extends ng.IScope {
+        vm: FeatureListCtrl;
+        numberOfItems: number;
+    }
+    class FeatureListCtrl {
+        private $scope;
+        private $layerService;
+        private $mapService;
+        private scope;
+        static $inject: string[];
+        constructor($scope: IFeatureListScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService);
     }
 }
 
@@ -2779,52 +2801,6 @@ declare module FeatureProps {
     }
 }
 
-declare module FilterList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module FilterList {
-    interface IFilterListScope extends ng.IScope {
-        vm: FilterListCtrl;
-    }
-    class FilterListCtrl {
-        private $scope;
-        private $layerService;
-        private $messageBus;
-        private scope;
-        noFilters: boolean;
-        locationFilterActive: boolean;
-        static $inject: string[];
-        constructor($scope: IFilterListScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
-        private setLocationFilter(group);
-    }
-}
-
-declare module FeatureList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module FeatureList {
-    interface IFeatureListScope extends ng.IScope {
-        vm: FeatureListCtrl;
-        numberOfItems: number;
-    }
-    class FeatureListCtrl {
-        private $scope;
-        private $layerService;
-        private $mapService;
-        private scope;
-        static $inject: string[];
-        constructor($scope: IFeatureListScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService);
-    }
-}
-
 declare module FeatureRelations {
     /**
       * Module
@@ -2882,6 +2858,30 @@ declare module FeatureRelations {
                  */
         private sidebarMessageReceived;
         private featureMessageReceived;
+    }
+}
+
+declare module FilterList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module FilterList {
+    interface IFilterListScope extends ng.IScope {
+        vm: FilterListCtrl;
+    }
+    class FilterListCtrl {
+        private $scope;
+        private $layerService;
+        private $messageBus;
+        private scope;
+        noFilters: boolean;
+        locationFilterActive: boolean;
+        static $inject: string[];
+        constructor($scope: IFilterListScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
+        private setLocationFilter(group);
     }
 }
 
@@ -3201,36 +3201,6 @@ declare module Heatmap {
     }
 }
 
-declare module LanguageSwitch {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module LanguageSwitch {
-    interface ILanguageSwitchScope extends ng.IScope {
-        vm: LanguageSwitchCtrl;
-    }
-    interface ILanguage {
-        key: string;
-        img: string;
-        name: string;
-    }
-    class LanguageSwitchCtrl {
-        private $scope;
-        private $translate;
-        private $languages;
-        private $layerService;
-        private $messageBus;
-        private scope;
-        language: ILanguage;
-        static $inject: string[];
-        constructor($scope: ILanguageSwitchScope, $translate: ng.translate.ITranslateService, $languages: ILanguage[], $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
-        switchLanguage(language: ILanguage): void;
-    }
-}
-
 declare module KanbanBoard {
     /**
       * Module
@@ -3447,6 +3417,36 @@ declare module LayersDirective {
     }
 }
 
+declare module LanguageSwitch {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module LanguageSwitch {
+    interface ILanguageSwitchScope extends ng.IScope {
+        vm: LanguageSwitchCtrl;
+    }
+    interface ILanguage {
+        key: string;
+        img: string;
+        name: string;
+    }
+    class LanguageSwitchCtrl {
+        private $scope;
+        private $translate;
+        private $languages;
+        private $layerService;
+        private $messageBus;
+        private scope;
+        language: ILanguage;
+        static $inject: string[];
+        constructor($scope: ILanguageSwitchScope, $translate: ng.translate.ITranslateService, $languages: ILanguage[], $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
+        switchLanguage(language: ILanguage): void;
+    }
+}
+
 declare module Legend {
     /**
       * Module
@@ -3487,33 +3487,6 @@ declare module Legend {
     }
 }
 
-declare module MapElement {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module MapElement {
-    interface IMapElementScope extends ng.IScope {
-        vm: MapElementCtrl;
-        mapid: string;
-        initMap: Function;
-    }
-    class MapElementCtrl {
-        private $scope;
-        private $layerService;
-        private mapService;
-        private $messageBusService;
-        private scope;
-        private locale;
-        options: string[];
-        static $inject: string[];
-        constructor($scope: IMapElementScope, $layerService: csComp.Services.LayerService, mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
-        initMap(): void;
-    }
-}
-
 declare module LegendList {
     /**
       * Module
@@ -3545,6 +3518,33 @@ declare module LegendList {
         private updateLegendItemsUsingFeatures();
         private getName(key, ft);
         toTrusted(html: string): string;
+    }
+}
+
+declare module MapElement {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module MapElement {
+    interface IMapElementScope extends ng.IScope {
+        vm: MapElementCtrl;
+        mapid: string;
+        initMap: Function;
+    }
+    class MapElementCtrl {
+        private $scope;
+        private $layerService;
+        private mapService;
+        private $messageBusService;
+        private scope;
+        private locale;
+        options: string[];
+        static $inject: string[];
+        constructor($scope: IMapElementScope, $layerService: csComp.Services.LayerService, mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
+        initMap(): void;
     }
 }
 
@@ -3924,37 +3924,6 @@ declare module OfflineSearch {
     }
 }
 
-declare module ProjectSettings {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module ProjectSettings {
-    interface IProjectSettingsScope extends ng.IScope {
-        vm: ProjectSettingsCtrl;
-    }
-    class ProjectSettingsCtrl {
-        private $scope;
-        private $timeout;
-        private $layerService;
-        private scope;
-        static $inject: string[];
-        constructor($scope: IProjectSettingsScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService);
-        saveSettings(): void;
-        updateProject(): void;
-        private updateProjectReady(data);
-    }
-}
-
-declare module Helpers.Resize {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
 declare module ProjectHeaderSelection {
     /**
       * Module
@@ -3979,7 +3948,38 @@ declare module ProjectHeaderSelection {
     }
 }
 
+declare module ProjectSettings {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module ProjectSettings {
+    interface IProjectSettingsScope extends ng.IScope {
+        vm: ProjectSettingsCtrl;
+    }
+    class ProjectSettingsCtrl {
+        private $scope;
+        private $timeout;
+        private $layerService;
+        private scope;
+        static $inject: string[];
+        constructor($scope: IProjectSettingsScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService);
+        saveSettings(): void;
+        updateProject(): void;
+        private updateProjectReady(data);
+    }
+}
+
 declare module ShowModal {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module Helpers.Resize {
     /**
       * Module
       */
@@ -4009,57 +4009,6 @@ declare module StyleList {
             'top': string;
             'background': string;
         };
-    }
-}
-
-declare module TripPlanner {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module TripPlanner {
-    interface ITripPlannerScope extends ng.IScope {
-        vm: TripPlannerCtrl;
-    }
-    interface IOtpUrlParameters {
-        [key: string]: any;
-    }
-    interface IOtpTab {
-        icon: string;
-        title: string;
-    }
-    interface IOtpItinerary {
-        duration: number;
-        legs: csComp.Services.IOtpLeg[];
-    }
-    class TripPlannerCtrl {
-        private $scope;
-        private $mapService;
-        private $layerService;
-        private $messageBusService;
-        private $dashboardService;
-        private scope;
-        layer: csComp.Services.ProjectLayer;
-        private urlAddress;
-        private urlParameters;
-        private transportModes;
-        private transportMode;
-        private walkSpeedKm;
-        private bikeSpeedKm;
-        private time;
-        private fromLoc;
-        private toLoc;
-        private tabs;
-        private activeTab;
-        private itineraries;
-        urlKeys: string[];
-        static $inject: string[];
-        constructor($scope: ITripPlannerScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-        planRoute(): void;
-        parseUrl(): void;
-        private featureTabActivated(title);
     }
 }
 
@@ -4133,6 +4082,57 @@ declare module Timeline {
         * @seealso: http://almende.github.io/chap-links-library/downloads.html
         */
         loadLocales(): void;
+    }
+}
+
+declare module TripPlanner {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module TripPlanner {
+    interface ITripPlannerScope extends ng.IScope {
+        vm: TripPlannerCtrl;
+    }
+    interface IOtpUrlParameters {
+        [key: string]: any;
+    }
+    interface IOtpTab {
+        icon: string;
+        title: string;
+    }
+    interface IOtpItinerary {
+        duration: number;
+        legs: csComp.Services.IOtpLeg[];
+    }
+    class TripPlannerCtrl {
+        private $scope;
+        private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $dashboardService;
+        private scope;
+        layer: csComp.Services.ProjectLayer;
+        private urlAddress;
+        private urlParameters;
+        private transportModes;
+        private transportMode;
+        private walkSpeedKm;
+        private bikeSpeedKm;
+        private time;
+        private fromLoc;
+        private toLoc;
+        private tabs;
+        private activeTab;
+        private itineraries;
+        urlKeys: string[];
+        static $inject: string[];
+        constructor($scope: ITripPlannerScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        planRoute(): void;
+        parseUrl(): void;
+        private featureTabActivated(title);
     }
 }
 
@@ -4781,6 +4781,38 @@ declare module GroupEdit {
     }
 }
 
+declare module LayerEdit {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module LayerEdit {
+    interface ILayerEditScope extends ng.IScope {
+        vm: LayerEditCtrl;
+    }
+    class LayerEditCtrl {
+        private $scope;
+        private $http;
+        private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $dashboardService;
+        private scope;
+        layer: csComp.Services.ProjectLayer;
+        availabeTypes: {
+            (key: string): csComp.Services.IFeatureType;
+        };
+        static $inject: string[];
+        constructor($scope: ILayerEditScope, $http: ng.IHttpService, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        addLayer(): void;
+        removeLayer(): void;
+        addFeatureType(): void;
+        getTypes(): void;
+    }
+}
+
 declare module FeatureTypeEditor {
     /**
       * Module
@@ -4874,38 +4906,6 @@ declare module PropertyTypes {
     }
 }
 
-declare module LayerEdit {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module LayerEdit {
-    interface ILayerEditScope extends ng.IScope {
-        vm: LayerEditCtrl;
-    }
-    class LayerEditCtrl {
-        private $scope;
-        private $http;
-        private $mapService;
-        private $layerService;
-        private $messageBusService;
-        private $dashboardService;
-        private scope;
-        layer: csComp.Services.ProjectLayer;
-        availabeTypes: {
-            (key: string): csComp.Services.IFeatureType;
-        };
-        static $inject: string[];
-        constructor($scope: ILayerEditScope, $http: ng.IHttpService, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-        addLayer(): void;
-        removeLayer(): void;
-        addFeatureType(): void;
-        getTypes(): void;
-    }
-}
-
 declare module ChartsWidget {
     /**
       * Module
@@ -4929,7 +4929,7 @@ declare module ChartsWidget {
         widget: csComp.Services.IWidget;
         editor: any;
         static $inject: string[];
-        constructor($scope: IChartsEditCtrl, $timeout: ng.ITimeoutService, $compile: any, $layerService: csComp.Services.LayerService, $templateCache: any, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
+        constructor($scope: IChartsEditCtrl, $timeout: ng.ITimeoutService, $compile: ng.ICompileService, $layerService: csComp.Services.LayerService, $templateCache: ng.ITemplateCacheService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
         setupEditor(): void;
         loadChart(): void;
         updateChart(): void;
@@ -5204,6 +5204,126 @@ declare module Filters {
     }
 }
 
+declare module Indicators {
+    /**
+      * Module
+      */
+    var myModule: any;
+    interface IVisualInput {
+        type: string;
+        default: Object;
+    }
+    interface IVisualType {
+        id: string;
+        title: string;
+        input: any;
+    }
+    interface IIndicatorsEditCtrl extends ng.IScope {
+        vm: IndicatorsEditCtrl;
+        data: indicatorData;
+    }
+    class IndicatorsEditCtrl {
+        private $scope;
+        private $timeout;
+        private $compile;
+        private $layerService;
+        private $templateCache;
+        private $messageBus;
+        private $mapService;
+        private $dashboardService;
+        private scope;
+        private widget;
+        private selectedIndicatorVisual;
+        indicatorVisuals: {
+            [key: string]: IVisualType;
+        };
+        private featureType;
+        private propertyTypes;
+        private propertyTypeData;
+        static $inject: string[];
+        constructor($scope: IIndicatorsEditCtrl, $timeout: ng.ITimeoutService, $compile: any, $layerService: csComp.Services.LayerService, $templateCache: any, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
+        colorUpdated(c: any, i: any): void;
+        updatePropertyTypes(indic: indicator): void;
+        moveUp(i: indicator): void;
+        deleteIndicator(i: string): void;
+        updateIndicator(i: indicator): void;
+        initIndicator(i: indicator): void;
+        updateVisual(i: indicator): void;
+        addIndicator(): void;
+        sensorChanged(i: indicator): void;
+    }
+}
+
+declare module Indicators {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module Indicators {
+    class indicatorData {
+        title: string;
+        orientation: string;
+        indicators: indicator[];
+    }
+    class indicator {
+        title: string;
+        visual: string;
+        type: string;
+        featureTypeName: string;
+        propertyTypes: string[];
+        propertyTypeTitles: string[];
+        data: string;
+        indicatorWidth: number;
+        property: string;
+        sensor: string;
+        _sensorSet: csComp.Services.SensorSet;
+        layer: string;
+        /** dashboard to select after click */
+        dashboard: string;
+        source: string;
+        isActive: boolean;
+        id: string;
+        color: string;
+        indexValue: number;
+        _focusTime: number;
+        _toggleUpdate: boolean;
+        _value: any;
+        inputs: {
+            [key: string]: any;
+        };
+        _result: {
+            [key: string]: any;
+        };
+        constructor();
+    }
+    interface IIndicatorsScope extends ng.IScope {
+        vm: IndicatorsCtrl;
+        data: indicatorData;
+    }
+    class IndicatorsCtrl implements csComp.Services.IWidgetCtrl {
+        private $scope;
+        private $timeout;
+        private $layerService;
+        private $messageBus;
+        private $mapService;
+        private $dashboardService;
+        private $translate;
+        private scope;
+        private widget;
+        static $inject: string[];
+        constructor($scope: IIndicatorsScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService, $translate: ng.translate.ITranslateService);
+        forceUpdateIndicator(i: indicator, value: any): void;
+        updateIndicator(i: indicator): void;
+        startEdit(): void;
+        private checkLayers();
+        selectIndicator(i: indicator): void;
+        indicatorInit(i: indicator, scope: any): void;
+        private selectFeature(f, i);
+    }
+}
+
 declare module IFrameWidget {
     /**
       * Module
@@ -5402,123 +5522,67 @@ declare module NavigatorWidget {
     }
 }
 
-declare module Indicators {
-    /**
-      * Module
-      */
-    var myModule: any;
-    interface IVisualInput {
-        type: string;
-        default: Object;
-    }
-    interface IVisualType {
-        id: string;
-        title: string;
-        input: any;
-    }
-    interface IIndicatorsEditCtrl extends ng.IScope {
-        vm: IndicatorsEditCtrl;
-        data: indicatorData;
-    }
-    class IndicatorsEditCtrl {
-        private $scope;
-        private $timeout;
-        private $compile;
-        private $layerService;
-        private $templateCache;
-        private $messageBus;
-        private $mapService;
-        private $dashboardService;
-        private scope;
-        private widget;
-        private selectedIndicatorVisual;
-        indicatorVisuals: {
-            [key: string]: IVisualType;
-        };
-        private featureType;
-        private propertyTypes;
-        private propertyTypeData;
-        static $inject: string[];
-        constructor($scope: IIndicatorsEditCtrl, $timeout: ng.ITimeoutService, $compile: any, $layerService: csComp.Services.LayerService, $templateCache: any, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
-        colorUpdated(c: any, i: any): void;
-        updatePropertyTypes(indic: indicator): void;
-        moveUp(i: indicator): void;
-        deleteIndicator(i: string): void;
-        updateIndicator(i: indicator): void;
-        initIndicator(i: indicator): void;
-        updateVisual(i: indicator): void;
-        addIndicator(): void;
-        sensorChanged(i: indicator): void;
-    }
-}
-
-declare module Indicators {
-    /**
-      * Module
-      */
+declare module PostMan {
+    /** Module */
     var myModule: any;
 }
 
-declare module Indicators {
-    class indicatorData {
-        title: string;
-        orientation: string;
-        indicators: indicator[];
+declare module PostMan {
+    /** Module */
+    var myModule: any;
+}
+
+declare module PostMan {
+    interface IPostManScope extends ng.IScope {
+        vm: PostManCtrl;
+        data: PostManEditorData;
+        selectedMessage: IPostManMessage;
     }
-    class indicator {
-        title: string;
-        visual: string;
-        type: string;
-        featureTypeName: string;
-        propertyTypes: string[];
-        propertyTypeTitles: string[];
-        data: string;
-        indicatorWidth: number;
-        property: string;
-        sensor: string;
-        _sensorSet: csComp.Services.SensorSet;
-        layer: string;
-        /** dashboard to select after click */
-        dashboard: string;
-        source: string;
-        isActive: boolean;
-        id: string;
-        color: string;
-        indexValue: number;
-        _focusTime: number;
-        _toggleUpdate: boolean;
-        _value: any;
-        inputs: {
-            [key: string]: any;
+    class PostManCtrl {
+        private $scope;
+        private $http;
+        private messageBusService;
+        private $timeout;
+        private scope;
+        private result;
+        static $inject: string[];
+        constructor($scope: IPostManScope, $http: ng.IHttpService, messageBusService: csComp.Services.MessageBusService, $timeout: ng.ITimeoutService);
+        execute(): void;
+    }
+}
+
+declare module PostMan {
+    interface IPostManMessage {
+        name: string;
+        httpMethod: {
+            name: string;
         };
-        _result: {
-            [key: string]: any;
-        };
-        constructor();
+        url: string;
+        message: string;
+        description: string;
     }
-    interface IIndicatorsScope extends ng.IScope {
-        vm: IndicatorsCtrl;
-        data: indicatorData;
+    interface PostManEditorData {
+        messages: IPostManMessage[];
     }
-    class IndicatorsCtrl implements csComp.Services.IWidgetCtrl {
+    interface IPostManEditScope extends ng.IScope {
+        vm: PostManEditCtrl;
+        selectedMessage: IPostManMessage;
+        data: PostManEditorData;
+        methods: [{
+            name: string;
+        }];
+    }
+    class PostManEditCtrl {
         private $scope;
         private $timeout;
-        private $layerService;
         private $messageBus;
-        private $mapService;
         private $dashboardService;
-        private $translate;
         private scope;
-        private widget;
+        widget: csComp.Services.IWidget;
         static $inject: string[];
-        constructor($scope: IIndicatorsScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService, $translate: ng.translate.ITranslateService);
-        forceUpdateIndicator(i: indicator, value: any): void;
-        updateIndicator(i: indicator): void;
-        startEdit(): void;
-        private checkLayers();
-        selectIndicator(i: indicator): void;
-        indicatorInit(i: indicator, scope: any): void;
-        private selectFeature(f, i);
+        constructor($scope: IPostManEditScope, $timeout: ng.ITimeoutService, $messageBus: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        addMessage(): void;
+        deleteMessage(): void;
     }
 }
 
@@ -5550,6 +5614,12 @@ declare module SimTimeController {
         Finish = 4,
         Exit = 5,
     }
+    interface ISimTimeMessage {
+        simTime: string;
+        simSpeed: string;
+        simCmd: string;
+        type: string;
+    }
     interface ISimTimeControllerScope extends ng.IScope {
         vm: SimTimeControllerCtrl;
     }
@@ -5565,6 +5635,9 @@ declare module SimTimeController {
         private startTime;
         /** Current time */
         private time;
+        private editorData;
+        private isOpen;
+        private timeOptions;
         isPlaying: boolean;
         isPaused: boolean;
         isStopped: boolean;
@@ -5577,12 +5650,36 @@ declare module SimTimeController {
         decreaseSpeed(): void;
         setSpeed(newSpeed: number): void;
         setTime(newTime: number): void;
+        openCalendar(e: Event): void;
         private speedChanged();
         private sendSimTimeMessage(cmd);
     }
 }
 
 declare module SimTimeController {
+    interface SimTimeControllerEditorData {
+        httpMethod: {
+            name: string;
+        };
+        url: string;
+        message: string;
+    }
+    interface ISimTimeControllerEditCtrl extends ng.IScope {
+        vm: SimTimeControllerEditCtrl;
+        data: SimTimeControllerEditorData;
+        methods: [{
+            name: string;
+        }];
+    }
     class SimTimeControllerEditCtrl {
+        private $scope;
+        private $timeout;
+        private $messageBus;
+        private $dashboardService;
+        private scope;
+        widget: csComp.Services.IWidget;
+        editor: any;
+        static $inject: string[];
+        constructor($scope: ISimTimeControllerEditCtrl, $timeout: ng.ITimeoutService, $messageBus: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
     }
 }

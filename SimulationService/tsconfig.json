@@ -16,9 +16,14 @@
         "!./node_modules/**/*.ts"
     ],
     "files": [
+        "./api/SimServiceManager.d.ts",
         "./api/SimServiceManager.ts",
         "./state/typestate.ts",
         "../Scripts/typings/JSONStream/JSONStream.d.ts",
+        "../Scripts/typings/angular-translate/angular-translate.d.ts",
+        "../Scripts/typings/angularjs/angular-cookies.d.ts",
+        "../Scripts/typings/angularjs/angular-mocks.d.ts",
+        "../Scripts/typings/angularjs/angular.d.ts",
         "../Scripts/typings/async/async.d.ts",
         "../Scripts/typings/bcrypt/bcryptjs.d.ts",
         "../Scripts/typings/body-parser/body-parser.d.ts",
@@ -72,6 +77,7 @@
         "../ServerComponents/database/BagDatabase.d.ts",
         "../ServerComponents/database/IBagAddress.d.ts",
         "../ServerComponents/database/IBagOptions.d.ts",
+        "../ServerComponents/database/LocalBag.d.ts",
         "../ServerComponents/database/Location.d.ts",
         "../ServerComponents/dynamic/ClientConnection.d.ts",
         "../ServerComponents/dynamic/DataSource.d.ts",

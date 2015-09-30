@@ -115,6 +115,7 @@ export class SimulationManager extends SimSvc.SimServiceManager {
      * @return {void}
      */
     private startTimer() {
+        if (this.timer) this.timer.clear();
         this.timer = new HyperTimer({
             time: this.simTime,
             rate: this.simSpeed || 1,

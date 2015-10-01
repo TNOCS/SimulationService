@@ -43,7 +43,8 @@ export enum Keys {
     /** For transmitting the simulation state */
     SimState,
     /** For transmitting the simulation time */
-    SimTime
+    SimTime,
+    Job
 }
 
 export interface ISimState {
@@ -126,13 +127,13 @@ export class SimServiceManager extends Api.ApiManager {
         this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.SimTime]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta? : Api.ApiMeta) => {
             try {
                 var simTime = message.simTime;
-                Winston.error("Received sim time: ", simTime);
+                Winston.info("Received sim time: ", simTime);
                 this.updateSimulationState(message);
             } catch (e) {}
         });
         // Listen to JOBS
-        this.subscribeKey('Sim.Jobs', <Api.ApiMeta>{}, (topic: string, message: any, meta?:Api.ApiMeta) => {
-            Winston.error("Received job: ", message);
+        this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.Job]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta?:Api.ApiMeta) => {
+            Winston.info("Received job: ", message);
         });
     }
 
@@ -150,7 +151,7 @@ export class SimServiceManager extends Api.ApiManager {
         if (this.message) state['msg'] = this.message;
 
         this.emit(Event[Event.TimeChanged], state);
-        this.updateKey(`${SimServiceManager.namespace}/${Keys[Keys.SimState]}/${this.name}_${this.id}`, state, <Api.ApiMeta>{}, () => { });
+        this.updateKey(`${SimServiceManager.namespace}.${Keys[Keys.SimState]}.${this.name}_${this.id}`, state, <Api.ApiMeta>{}, () => { });
     }
 
     /**

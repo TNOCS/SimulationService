@@ -6,12 +6,12 @@
   "url": "https://github.com/TNOCS/csMap",
   "connected": true,
   "timeLine": {
-    "start": 1443347725206,
-    "end": 1443952525206,
+    "start": 1443385665918,
+    "end": 1443990465918,
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1443869365206,
+    "focus": 1443907305918,
     "zoomLevel": 3600000
   },
   "datasources": null,
@@ -37,11 +37,13 @@
           "left": "20px",
           "right": "",
           "top": "25px",
-          "width": "321px",
-          "height": "142px",
+          "width": "340px",
+          "height": "140px",
           "data": {
-            "httpMethod": "post",
-            "url": "/Sim/SimTime",
+            "httpMethod": {
+              "name": "POST"
+            },
+            "url": "api/keys/Sim.SimTime",
             "message": "{ hello: \"world\" }"
           }
         },
@@ -54,8 +56,8 @@
           "left": "20px",
           "right": "",
           "top": "190px",
-          "width": "315px",
-          "height": "429px",
+          "width": "340px",
+          "height": "430px",
           "data": {
             "messages": [
               {
@@ -77,6 +79,19 @@
               }
             ]
           }
+        },
+        {
+          "id": "ac5f271b-5f06-4835-0d18-54727896ebaf",
+          "directive": "simstate",
+          "elementId": "widget-ac5f271b-5f06-4835-0d18-54727896ebaf",
+          "enabled": true,
+          "style": "default",
+          "left": "380px",
+          "right": "",
+          "top": "26px",
+          "width": "300px",
+          "height": "594px",
+          "data": {}
         }
       ],
       "visibleLeftMenuItems": [
@@ -114,8 +129,7 @@
       "showLeftmenu": true,
       "showLegend": false,
       "showRightmenu": false,
-      "showBackgroundImage": true,
-      "backgroundimage": "images/amsterdam.jpg",
+      "showBackgroundImage": false,
       "widgets": [
         {
           "id": "3654881f-0644-46ea-5133-f45c3dde8c9e",

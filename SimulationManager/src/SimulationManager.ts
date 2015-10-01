@@ -35,7 +35,7 @@ export class SimulationManager extends SimSvc.SimServiceManager {
         // Listen to state changes and do not send any message (which is the default behaviour).
         this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }
 
-        this.simTimeKey = `${SimSvc.Keys[SimSvc.Keys.SimTime]}/${this.name}.${this.id}`;
+        this.simTimeKey = `${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimTime]}.${this.name}.${this.id}`;
 
         //this.collectSimState();
 
@@ -58,8 +58,8 @@ export class SimulationManager extends SimSvc.SimServiceManager {
     public start(options?: Object) {
         super.start(options);
 
-        // Listen to Sim/SimState/ keys
-        this.subscribeKey(`${SimSvc.SimServiceManager.namespace}/${SimSvc.Keys[SimSvc.Keys.SimState]}/#:sender`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+        // Listen to Sim.SimState keys
+        this.subscribeKey(`${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimState]}`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             try {
                 var simState = <SimSvc.ISimState>JSON.parse(message);
                 Winston.error("Received sim state: ", simState);

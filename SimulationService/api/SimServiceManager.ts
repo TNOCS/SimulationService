@@ -68,7 +68,7 @@ export class SimServiceManager extends Api.ApiManager {
     public fsm: TypeState.FiniteStateMachine<SimState>;
     public simTime: Date;
     public simSpeed: number = 1;
-    public simTimeStep: number;
+    public simTimeStep = 1000;
     public simCmd: SimCommand;
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
@@ -115,7 +115,7 @@ export class SimServiceManager extends Api.ApiManager {
      */
     private terminateProcess() {
         Winston.info("Terminating process. Bye!")
-        this.fsm.trigger(SimCommand.Exit);
+        this.sendAck(SimState.Exit);
     }
 
     /**
@@ -141,12 +141,12 @@ export class SimServiceManager extends Api.ApiManager {
      * Send a message, acknowledging the fact that we have received a time step and are, depending on the state,
      * ready to move on.
      */
-    private sendAck() {
+    sendAck(curState: SimState) {
         var state: ISimState = {
             id: this.id,
             name: this.name,
             time: this.simTime,
-            state: SimState[this.fsm.currentState]
+            state: SimState[curState]
         };
         if (this.message) state['msg'] = this.message;
 
@@ -160,7 +160,7 @@ export class SimServiceManager extends Api.ApiManager {
      */
     private publishStateChanged(fromState: SimState, toState: SimState) {
         Winston.info(`sim: transitioning from ${SimState[fromState]} to ${SimState[toState]}.`);
-        this.sendAck();
+        this.sendAck(toState);
     }
 
     /**
@@ -170,16 +170,19 @@ export class SimServiceManager extends Api.ApiManager {
         Winston.info(`sim: simulation time updated ${JSON.stringify(simState, null, 2) }`);
         if (simState.hasOwnProperty('simTime')) {
             this.simTime = new Date(+simState.simTime);
+            this.emit('simTimeChanged');
             Winston.info(`sim: new time is ${this.simTime}`);
         }
-        if (simState.hasOwnProperty('simSpeed')) {
+        if (simState.hasOwnProperty('simSpeed') && this.simSpeed !== +simState.simSpeed ) {
             this.simSpeed = +simState.simSpeed;
+            this.emit('simSpeedChanged');
             Winston.info(`sim: new speed is ${this.simSpeed}`);
         }
-        if (simState.hasOwnProperty('simTimeStep')) {
-            this.simTimeStep = +simState.simTimeStep;
-            Winston.info(`sim: new time step is ${this.simTimeStep} msec`);
-        }
+        // if (simState.hasOwnProperty('simTimeStep')) {
+        //     this.simTimeStep = +simState.simTimeStep;
+        //     this.emit('simTimeStepChanged');
+        //     Winston.info(`sim: new time step is ${this.simTimeStep} msec`);
+        // }
         if (simState.hasOwnProperty('simCmd')) {
             this.simCmd = SimCommand[simState.simCmd];
             if (typeof this.simCmd === 'undefined') {
@@ -188,7 +191,8 @@ export class SimServiceManager extends Api.ApiManager {
             }
             Winston.info(`sim: new command is ${SimCommand[this.simCmd]}`);
             this.fsm.trigger(this.simCmd);
+        } else {
+            this.sendAck(this.fsm.currentState);
         }
-        this.sendAck();
     }
 }

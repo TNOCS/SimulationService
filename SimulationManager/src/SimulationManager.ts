@@ -37,7 +37,8 @@ export class SimulationManager extends SimSvc.SimServiceManager {
 
         this.simTimeKey = `${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimTime]}.${this.name}.${this.id}`;
 
-        //this.collectSimState();
+        this.on('simSpeedChanged', () => this.startTimer() );
+        // this.on('simTimeStepChanged', () => this.startTimer() );
 
         // When ready, start sending messages.
         this.fsm.onEnter(SimSvc.SimState.Ready, () => {
@@ -45,8 +46,9 @@ export class SimulationManager extends SimSvc.SimServiceManager {
             return true;
         });
         // When moving to pause or idle, pause the timer.
-        this.fsm.onExit(SimSvc.SimState.Ready, () => {
+        this.fsm.onExit(SimSvc.SimState.Ready, (toState) => {
             this.timer.pause();
+            this.sendAck(toState);
             return true;
         });
     }
@@ -61,8 +63,9 @@ export class SimulationManager extends SimSvc.SimServiceManager {
         // Listen to Sim.SimState keys
         this.subscribeKey(`${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimState]}`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             try {
+                if (message === null || typeof message === 'object') return; // If we are dealing with an object, it means that we didn'treceive it via an external channel.
                 var simState = <SimSvc.ISimState>JSON.parse(message);
-                Winston.error("Received sim state: ", simState);
+                Winston.info("Received sim state: ", simState);
                 if (!simState) return;
                 var state = SimSvc.SimState[simState.state];
                 var index = this.simsNotReady.indexOf(simState.id);
@@ -124,7 +127,7 @@ export class SimulationManager extends SimSvc.SimServiceManager {
         this.timer.setInterval(() => {
             this.simTime = this.timer.getTime();
             if (this.continue()) this.publishTime();
-        }, this.simTimeStep || 5000); // Default every 5 seconds
+        }, this.simTimeStep * this.simSpeed); // Default every 5 seconds
     }
 
     /**

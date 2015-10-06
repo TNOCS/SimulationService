@@ -21,6 +21,8 @@ import FileStorage = require('./../ServerComponents/api/FileStorage');
 import ImbAPI = require('./../ServerComponents/api/ImbAPI');
 import Winston = require('winston');
 
+require('./../ServerComponents/helpers/DateUtils');
+
 import FloodSim = require('./src/FloodSim');
 
 Winston.remove(Winston.transports.Console);

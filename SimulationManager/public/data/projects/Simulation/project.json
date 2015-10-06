@@ -6,15 +6,21 @@
   "url": "https://github.com/TNOCS/csMap",
   "connected": true,
   "timeLine": {
-    "start": 1443385665918,
-    "end": 1443990465918,
+    "start": 1443753720144,
+    "end": 1444358520144,
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1443907305918,
+    "focus": 1444268642997,
     "zoomLevel": 3600000
   },
-  "datasources": null,
+  "datasources": [
+    {
+      "id": "keys",
+      "type": "dynamic",
+      "sensors": {}
+    }
+  ],
   "dashboards": [
     {
       "id": "home",
@@ -61,13 +67,13 @@
           "data": {
             "messages": [
               {
-                "name": "Test",
+                "name": "Start flooding Gorinchem",
                 "httpMethod": {
                   "name": "POST"
                 },
-                "url": "/api/keys/test",
-                "message": "{ \"Hello\": \"World\"}",
-                "description": "Test"
+                "url": "/api/keys/sim.floodSimCmd",
+                "message": "{ \"scenario\": \"Gorinchem\"}",
+                "description": "Start the Gorinchem flooding scenario."
               },
               {
                 "name": "Test 2",
@@ -159,5 +165,27 @@
   "expertMode": 3,
   "baselayers": {},
   "propertyTypeData": {},
-  "groups": null
+  "groups": [
+    {
+      "id": "76947763-7f29-4fa7-05af-901a08bc506d",
+      "title": "Incidents",
+      "layers": [
+        {
+          "id": "floodsim.floodsim",
+          "title": "Flooding",
+          "description": "Current flooding status.",
+          "type": "geojson",
+          "renderType": "geojson",
+          "heatmapItems": null,
+          "url": "http://localhost:3334/api/layers/floodsim",
+          "typeUrl": "http://localhost:3334/api/layers/floodsim",
+          "opacity": 75,
+          "defaultLegendProperty": "h",
+          "isDynamic": false,
+          "gui": {}
+        }
+      ]
+    }
+  ],
+  "layerDirectory": "/api/layers"
 }

@@ -1,0 +1,20 @@
+{
+    "c45792ae-0cac-4aa1-725a-79850e473bc9": {
+        "id": "c45792ae-0cac-4aa1-725a-79850e473bc9",
+        "storage": "file",
+        "title": "SimMan",
+        "connected": true,
+        "logo": "images/CommonSenseRound.png",
+        "groups": [],
+        "url": "/api/projects/c45792ae-0cac-4aa1-725a-79850e473bc9"
+    },
+    "Simulation": {
+        "id": "Simulation",
+        "storage": "file",
+        "title": "Simulation",
+        "connected": true,
+        "logo": "images/CommonSenseRound.png",
+        "groups": [],
+        "url": "https://github.com/TNOCS/csMap"
+    }
+}

@@ -63,3 +63,6 @@ SimulationManager/public/**/*.js
 FloodSim/**/*.js
 SimulationManager/public/bower_components/
 SimulationManager/public/cs/
+FloodSim/public/data/scenarios/
+FloodSim/public/data/breach/
+FloodSim/public/data/

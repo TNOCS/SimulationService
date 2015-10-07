@@ -12,13 +12,14 @@ import DynamicProject = require("./../ServerComponents/dynamic/DynamicProject");
 import LayerDirectory = require("./../ServerComponents/dynamic/LayerDirectory");
 import store = require('./../ServerComponents/import/Store');
 import ApiServiceManager = require('./../ServerComponents/api/ApiServiceManager');
-import ApiManager = require('./../ServerComponents/api/ApiManager');
+import Api = require('./../ServerComponents/api/ApiManager');
 import RestAPI = require('./../ServerComponents/api/RestAPI');
 import MqttAPI = require('./../ServerComponents/api/MqttAPI');
 import SocketIOAPI = require('./../ServerComponents/api/SocketIOAPI');
 import MongoDB = require('./../ServerComponents/api/MongoDB');
 import FileStorage = require('./../ServerComponents/api/FileStorage');
-import ImbAPI = require('./../ServerComponents/api/ImbAPI');
+// import ImbAPI = require('./../ServerComponents/api/ImbAPI');
+import Utils = require('./../ServerComponents/helpers/Utils');
 import Winston = require('winston');
 
 require('./../ServerComponents/helpers/DateUtils');
@@ -44,7 +45,7 @@ var config = new ConfigurationService('./configuration.json');
 //require('http').setMaxHeaderLength(26214400);
 
 // all environments
-var port = "3334";
+var port = 3334;
 server.set('port', port);
 server.use(favicon(__dirname + '/public/favicon.ico'));
 //increased limit size, see: http://stackoverflow.com/questions/19917401/node-js-express-request-entity-too-large
@@ -73,7 +74,10 @@ apiServiceMgr.addService(resourceTypeStore);
 
 server.use(express.static(path.join(__dirname, 'public')));
 
-var api = new FloodSim.FloodSim('cs', 'FloodSim');
+var api = new FloodSim.FloodSim('cs', 'FloodSim', false, <Api.IApiManagerOptions>{
+    host: Utils.getIPAddress(),
+    port: port
+});
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});
     api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});

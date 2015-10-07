@@ -89,17 +89,17 @@ export class FloodSim extends SimSvc.SimServiceManager {
      * Create and publish the flood layer.
      */
     private publishFloodLayer() {
-        var layer = this.createNewFloodingLayer('Current flooding status.');
+        var layer = this.createNewFloodingLayer('my new Current flooding status.');
         this.pubFloodingScenario = {
             scenario: '',
             timeStamp: -1,
             startTime: null,
             layer: layer
         }
-        this.addLayer(layer, <Api.ApiMeta>{}, () => { });
+        this.updateLayer(layer, <Api.ApiMeta>{}, () => { });
     }
 
-    private createNewFloodingLayer(description?: string) {
+    private createNewFloodingLayer(file: string, description?: string) {
         var layer = new Api.Layer();
         layer.id = 'FloodSim';
         layer.title = 'Flooding';
@@ -144,20 +144,17 @@ export class FloodSim extends SimSvc.SimServiceManager {
                 filesToProcess.push({ scenario: scenario, name: f, path: file })
             });
         });
-        if (filesToProcess.length === 0) {
-            this.fsm.trigger(SimSvc.SimCommand.Finish);
-            return;
-        }
         // Read each file in parallel
         async.each(
             filesToProcess,
-            (entry, cb) => this.readFloodingFile(entry),
+            (entry, cb) => {
+                this.readFloodingFile(entry, () => cb());
+            },
             (err) => {
+                this.fsm.trigger(SimSvc.SimCommand.Finish);
+                Winston.info('Finished processing flood files.');
                 if (err) {
                     Winston.error('Error processing flood files: ' + err);
-                } else {
-                    Winston.info('Finished processing flood files.');
-                    this.fsm.trigger(SimSvc.SimCommand.Finish);
                 }
             }
         );
@@ -165,7 +162,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
 
     private addToScenarios(scenario: string, file: string) {
         var timeStamp = this.extractTimeStamp(path.basename(file));
-        var layer = this.createNewFloodingLayer(`Flooding ${scenario}: situation after ${timeStamp} minutes.`);
+        var layer = this.createNewFloodingLayer(file, `Flooding ${scenario}: situation after ${timeStamp} minutes.`);
         if (!this.floodSims.hasOwnProperty(scenario)) this.floodSims[scenario] = [];
         this.floodSims[scenario].push({
             timeStamp: timeStamp,
@@ -194,22 +191,30 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.floodingHasStarted = this.floodSims.hasOwnProperty(scenario);
         if (!this.floodingHasStarted) return;
 
+        this.message = `The ${scenario} scenario is loaded. Waiting for time events.`;
+
         this.pubFloodingScenario.scenario = scenario;
         this.pubFloodingScenario.startTime = this.simTime;
 
         this.on(SimSvc.Event[SimSvc.Event.TimeChanged], () => {
+            this.fsm.trigger(SimSvc.SimCommand.Run);
             var pubTimeStamp = this.pubFloodingScenario.timeStamp;
+            var newLayerAvailable = false;
             this.floodSims[scenario].some(s => {
                 if (s.timeStamp < pubTimeStamp || s.timeStamp < this.simTime.diffMinutes(this.pubFloodingScenario.startTime)) return false;
+                newLayerAvailable = true;
                 fs.readFile(s.layer.url, 'utf8', (err: NodeJS.ErrnoException, data: string) => {
+                    this.message = `The ${scenario} scenario is loaded: Processed minute ${s.timeStamp}.`;
                     var geojson = JSON.parse(data);
                     var copy = _.clone(s);
                     copy.layer.features = geojson.features;
                     copy.layer.id = 'FloodSim';
                     this.updateFloodLayer(copy.timeStamp, copy.layer);
+                    this.fsm.trigger(SimSvc.SimCommand.Finish);
                 });
                 return true;
             });
+            if (!newLayerAvailable) this.fsm.trigger(SimSvc.SimCommand.Finish);
         });
     }
 
@@ -234,7 +239,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     }
 
     /** Read a flooding file. Currently, only ESRI ASCII GRID files in RD are supported */
-    private readFloodingFile(entry: { scenario: string, name: string, path: string }) {
+    private readFloodingFile(entry: { scenario: string, name: string, path: string }, callback: () => void) {
         fs.readFile(entry.path, 'utf8', (err: Error, data: Buffer) => {
             if (err) {
                 Winston.error(`Error reading file ${entry.path}: ${err.message}`);
@@ -258,6 +263,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
                     return value.toFixed ? Number(value.toFixed(7)) : value;
                 }));
                 this.addToScenarios(entry.scenario, outputFile);
+                callback();
             }
         });
     }

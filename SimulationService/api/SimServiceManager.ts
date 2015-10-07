@@ -151,7 +151,7 @@ export class SimServiceManager extends Api.ApiManager {
         if (this.message) state['msg'] = this.message;
 
         this.emit(Event[Event.TimeChanged], state);
-        this.updateKey(`${SimServiceManager.namespace}.${Keys[Keys.SimState]}.${this.name}_${this.id}`, state, <Api.ApiMeta>{}, () => { });
+        this.updateKey(`${SimServiceManager.namespace}.${Keys[Keys.SimState]}.${this.name}`, state, <Api.ApiMeta>{}, () => { });
     }
 
     /**

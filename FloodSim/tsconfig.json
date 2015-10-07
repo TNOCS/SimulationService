@@ -93,6 +93,7 @@
         "../ServerComponents/helpers/GeoJSON.d.ts",
         "../ServerComponents/helpers/Rss.d.ts",
         "../ServerComponents/helpers/RssGeoJSON.d.ts",
+        "../ServerComponents/helpers/StringExt.d.ts",
         "../ServerComponents/helpers/Utils.d.ts",
         "../ServerComponents/helpers/conrec.d.ts",
         "../ServerComponents/import/AggregateOpportunitiesToGeoJsonTransformer.d.ts",

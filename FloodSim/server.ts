@@ -75,8 +75,8 @@ apiServiceMgr.addService(resourceTypeStore);
 server.use(express.static(path.join(__dirname, 'public')));
 
 var api = new FloodSim.FloodSim('cs', 'FloodSim', false, <Api.IApiManagerOptions>{
-    host: Utils.getIPAddress(),
-    port: port
+    server: `${Utils.getIPAddress()}:${port}`,
+    mqttSubscriptions: [ 'cs/keys/#' ]
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});

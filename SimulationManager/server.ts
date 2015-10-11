@@ -20,6 +20,7 @@ import FileStorage = require('./../ServerComponents/api/FileStorage');
 import Winston = require('winston');
 import SimSvc = require('../SimulationService/api/SimServiceManager');
 import SimMngr = require('./src/SimulationManager');
+import Utils = require('./../ServerComponents/helpers/Utils');
 //import ImbAPI = require('./../ServerComponents/api/ImbAPI');
 //import MongoDB = require('./../ServerComponents/api/MongoDB');
 
@@ -75,7 +76,8 @@ server.use(express.static(path.join(__dirname, 'public')));
 var prefix = SimSvc.SimServiceManager.namespace;
 
 var api = new SimMngr.SimulationManager('cs', 'SimulationManager', false, {
-    mqttSubscriptions: [ '#' ]
+    server: `${Utils.getIPAddress()}:${port}`,
+    mqttSubscriptions: [ 'cs/layers/', 'cs/keys/#' ]
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});

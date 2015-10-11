@@ -33,10 +33,11 @@ export interface ISimTimeState {
     simCmd?: string;
 }
 
-/** Additional events that are emitted, besides the Api.Event */
-export enum Event {
-    TimeChanged
-}
+// /** Additional events that are emitted, besides the Api.Event */
+// export enum Event {
+//     TimeChanged,
+//     StateChanged
+// }
 
 /** Name of the emitted Keys */
 export enum Keys {
@@ -75,7 +76,7 @@ export class SimServiceManager extends Api.ApiManager {
         super(namespace, name, isClient, options);
         this.simTime = new Date();
 
-        Winston.info(`sim: Init layer manager (isClient=${this.isClient})`);
+        Winston.info(`${this.name}: Init layer manager (isClient=${this.isClient})`);
 
         this.fsm = new TypeState.FiniteStateMachine<SimState>(SimState.Idle);
         // Define transitions
@@ -114,7 +115,7 @@ export class SimServiceManager extends Api.ApiManager {
      * @return {[type]}         [description]
      */
     private terminateProcess() {
-        Winston.info("Terminating process. Bye!")
+        Winston.info("${this.name}: Terminating process. Bye!")
         this.sendAck(SimState.Exit);
     }
 
@@ -124,15 +125,16 @@ export class SimServiceManager extends Api.ApiManager {
      */
     public start(options?: Object) {
         // Listen to SimTime keys
-        this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.SimTime]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta? : Api.ApiMeta) => {
-            try {
-                var simTime = message.simTime;
-                Winston.info("Received sim time: ", simTime);
-                this.updateSimulationState(message);
-            } catch (e) {}
+        this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.SimTime]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta?: Api.ApiMeta) => {
+            this.updateSimulationState(message);
+
+            // try {
+            //     //this.simTime = message.simTime;
+            //     //Winston.error("Received Sim.SimTime: ", message);
+            // } catch (e) {}
         });
         // Listen to JOBS
-        this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.Job]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta?:Api.ApiMeta) => {
+        this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.Job]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta?: Api.ApiMeta) => {
             Winston.info("Received job: ", message);
         });
     }
@@ -149,8 +151,6 @@ export class SimServiceManager extends Api.ApiManager {
             state: SimState[curState]
         };
         if (this.message) state['msg'] = this.message;
-
-        this.emit(Event[Event.TimeChanged], state);
         this.updateKey(`${SimServiceManager.namespace}.${Keys[Keys.SimState]}.${this.name}`, state, <Api.ApiMeta>{}, () => { });
     }
 
@@ -159,40 +159,46 @@ export class SimServiceManager extends Api.ApiManager {
      * to the Ready state, we can continue running the simulation.
      */
     private publishStateChanged(fromState: SimState, toState: SimState) {
-        Winston.info(`sim: transitioning from ${SimState[fromState]} to ${SimState[toState]}.`);
+        Winston.info(`${this.name}: transitioning from ${SimState[fromState]} to ${SimState[toState]}.`);
         this.sendAck(toState);
     }
 
     /**
      * Set the simulation speed and time.
      */
-    private updateSimulationState(simState: ISimTimeState) {
-        Winston.info(`sim: simulation time updated ${JSON.stringify(simState, null, 2) }`);
-        if (simState.hasOwnProperty('simTime')) {
-            this.simTime = new Date(+simState.simTime);
+    private updateSimulationState(simState: ISimTimeState | number) {
+        if (typeof simState === 'number') {
+            // Simple message, just containing the time.
+            this.simTime = new Date(simState);
             this.emit('simTimeChanged');
-            Winston.info(`sim: new time is ${this.simTime}`);
-        }
-        if (simState.hasOwnProperty('simSpeed') && this.simSpeed !== +simState.simSpeed ) {
-            this.simSpeed = +simState.simSpeed;
-            this.emit('simSpeedChanged');
-            Winston.info(`sim: new speed is ${this.simSpeed}`);
-        }
-        // if (simState.hasOwnProperty('simTimeStep')) {
-        //     this.simTimeStep = +simState.simTimeStep;
-        //     this.emit('simTimeStepChanged');
-        //     Winston.info(`sim: new time step is ${this.simTimeStep} msec`);
-        // }
-        if (simState.hasOwnProperty('simCmd')) {
-            this.simCmd = SimCommand[simState.simCmd];
-            if (typeof this.simCmd === 'undefined') {
-                Winston.warn('Received unknown sim command ' + simState.simCmd);
-                return;
-            }
-            Winston.info(`sim: new command is ${SimCommand[this.simCmd]}`);
-            this.fsm.trigger(this.simCmd);
         } else {
-            this.sendAck(this.fsm.currentState);
+            //Winston.info(`${this.name}: simulation time updated ${JSON.stringify(simState, null, 2) }`);
+            if (simState.hasOwnProperty('simTime')) {
+                this.simTime = new Date(+simState.simTime);
+                this.emit('simTimeChanged');
+                Winston.error(`sim: new time is ${this.simTime}`);
+            }
+            if (simState.hasOwnProperty('simSpeed') && this.simSpeed !== +simState.simSpeed) {
+                this.simSpeed = +simState.simSpeed;
+                this.emit('simSpeedChanged');
+                Winston.info(`sim: new speed is ${this.simSpeed}`);
+            }
+            // if (simState.hasOwnProperty('simTimeStep')) {
+            //     this.simTimeStep = +simState.simTimeStep;
+            //     this.emit('simTimeStepChanged');
+            //     Winston.info(`sim: new time step is ${this.simTimeStep} msec`);
+            // }
+            if (simState.hasOwnProperty('simCmd')) {
+                this.simCmd = SimCommand[simState.simCmd];
+                if (typeof this.simCmd === 'undefined') {
+                    Winston.warn('${this.name}: Received unknown sim command ' + simState.simCmd);
+                    return;
+                }
+                Winston.info(`${this.name}: new command is ${SimCommand[this.simCmd]}`);
+                this.fsm.trigger(this.simCmd);
+            } else {
+                this.sendAck(this.fsm.currentState);
+            }
         }
     }
 }

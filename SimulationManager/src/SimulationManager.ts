@@ -35,7 +35,7 @@ export class SimulationManager extends SimSvc.SimServiceManager {
         // Listen to state changes and do not send any message (which is the default behaviour).
         this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }
 
-        this.simTimeKey = `${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimTime]}.${this.name}.${this.id}`;
+        this.simTimeKey = `${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimTime]}`;
 
         this.on('simSpeedChanged', () => this.startTimer() );
         // this.on('simTimeStepChanged', () => this.startTimer() );
@@ -62,11 +62,11 @@ export class SimulationManager extends SimSvc.SimServiceManager {
 
         // Listen to Sim.SimState keys
         this.subscribeKey(`${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimState]}`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+            if (message === null) return;
             try {
-                if (message === null || typeof message === 'object') return; // If we are dealing with an object, it means that we didn'treceive it via an external channel.
-                var simState = <SimSvc.ISimState>JSON.parse(message);
+                var simState: SimSvc.ISimState = (typeof message === 'object') ? message : JSON.parse(message);
                 Winston.info("Received sim state: ", simState);
-                if (!simState) return;
+                if (!simState || simState.id === this.id) return;
                 var state = SimSvc.SimState[simState.state];
                 var index = this.simsNotReady.indexOf(simState.id);
                 if (state !== SimSvc.SimState.Ready) {
@@ -78,36 +78,9 @@ export class SimulationManager extends SimSvc.SimServiceManager {
                 // Listen to sims that move to Exit (when they have exited, we always try to emit a final Exit message).
                 if (state === SimSvc.SimState.Exit) {
                     delete this.sims[simState.id];
+                    if (index >= 0) this.simsNotReady.splice(index, 1);
                 }
             } catch (e) {}
-        });
-    }
-
-
-    /**
-     * Listen to simulation state messages and collect their state, so we know whether we should pause the simulation.
-     * @method collectSimState
-     * @return {void}
-     */
-    private collectSimState() {
-        this.on(Api.Event[Api.Event.KeyChanged], (key: Api.IChangeEvent) => {
-            Winston.info(`SimMngr: Received ${key}`);
-            // Listen to sims that reply (so they are online and we may have to wait for them).
-            // In that case, add them to the sims list.
-            var simState = <SimSvc.ISimState>key.value;
-            if (!simState) return;
-            var state = SimSvc.SimState[simState.state];
-            var index = this.simsNotReady.indexOf(simState.id);
-            if (state !== SimSvc.SimState.Ready) {
-                if (index < 0) this.simsNotReady.push(simState.id);
-            } else {
-                if (index >= 0) this.simsNotReady.splice(index, 1);
-            }
-            this.sims[simState.id] = simState;
-            // Listen to sims that move to Exit (when they have exited, we always try to emit a final Exit message).
-            if (state === SimSvc.SimState.Exit) {
-                delete this.sims[simState.id];
-            }
         });
     }
 
@@ -155,6 +128,6 @@ export class SimulationManager extends SimSvc.SimServiceManager {
      * @return {void}
      */
     private publishTime() {
-        this.updateKey(this.simTimeKey, this.timer.getTime(), <Api.ApiMeta>{}, () => { });
+        this.updateKey(this.simTimeKey, this.timer.getTime().valueOf(), <Api.ApiMeta>{}, () => { });
     }
 }

@@ -51,11 +51,6 @@ export class FloodSim extends SimSvc.SimServiceManager {
         /** Time that the flooding started */
         startTime: Date,
         layer: Api.Layer
-    } = {
-        scenario: '',
-        timeStamp: -1,
-        startTime: null,
-        layer: null
     };
     /** Simulation start time */
     private simStartTime: Date;
@@ -89,27 +84,31 @@ export class FloodSim extends SimSvc.SimServiceManager {
      * Create and publish the flood layer.
      */
     private publishFloodLayer() {
-        var layer = this.createNewFloodingLayer('my new Current flooding status.');
+        var layer = this.createNewFloodLayer('', 'Initial flooding status.');
         this.pubFloodingScenario = {
             scenario: '',
             timeStamp: -1,
             startTime: null,
             layer: layer
         }
-        this.updateLayer(layer, <Api.ApiMeta>{}, () => { });
+        this.addUpdateLayer(layer, <Api.ApiMeta>{}, () => { });
     }
 
-    private createNewFloodingLayer(file: string, description?: string) {
-        var layer = new Api.Layer();
-        layer.id = 'FloodSim';
-        layer.title = 'Flooding';
-        layer.description = description;
-        layer.storage = 'file';
-        layer.features = [];
-        layer.defaultFeatureType = 'flooding';
-        layer.defaultLegendProperty = 'h';
-        //layer.url = 'http://localhost:3334/api/layers/floodSim.floodSim';
-        //layer.typeUrl = 'http://localhost:3334/api/resourceTypes/floodsim';
+    private createNewFloodLayer(file: string, description?: string) {
+        var layer = <Api.Layer>{
+            server: this.options.server,
+            id: 'FloodSim',
+            title: 'Flooding',
+            description: description,
+            features: [],
+            storage: 'file',
+            enabled: true,
+            url: file || `${this.options.server}/api/layers/floodsim`,
+            typeUrl: `${this.options.server}/api/resources/floodsimtypes`,
+            type: 'dynamicgeojson',
+            defaultFeatureType: 'flooding',
+            defaultLegendProperty: 'h'
+        }
         return layer;
     }
 
@@ -162,14 +161,14 @@ export class FloodSim extends SimSvc.SimServiceManager {
 
     private addToScenarios(scenario: string, file: string) {
         var timeStamp = this.extractTimeStamp(path.basename(file));
-        var layer = this.createNewFloodingLayer(file, `Flooding ${scenario}: situation after ${timeStamp} minutes.`);
+        var layer = this.createNewFloodLayer(file, `Flooding ${scenario}: situation after ${timeStamp} minutes.`);
         if (!this.floodSims.hasOwnProperty(scenario)) this.floodSims[scenario] = [];
         this.floodSims[scenario].push({
             timeStamp: timeStamp,
             layer: layer
         });
         // Sort files on every insertion, so we process them in the right sequence too.
-        this.floodSims[scenario].sort((a,b) => {
+        this.floodSims[scenario].sort((a, b) => {
             return (a.timeStamp < b.timeStamp) ? -1 : 1;
         });
     }
@@ -179,8 +178,44 @@ export class FloodSim extends SimSvc.SimServiceManager {
      */
     private waitForFloodSimCmds() {
         this.subscribeKey('sim.floodSimCmd', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
-            Winston.error(`Topic: ${topic}, Msg: ${message}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
+            Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2)}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
             this.startScenario('Gorinchem');
+        });
+
+        this.on('simTimeChanged', () => {
+            var scenario = this.pubFloodingScenario.scenario;
+            if (!scenario) return;
+            this.fsm.trigger(SimSvc.SimCommand.Run);
+            var publishedTimeStamp = this.pubFloodingScenario.timeStamp;
+            var minutesSinceStart = this.simTime.diffMinutes(this.pubFloodingScenario.startTime);
+            Winston.warn(`Start time: ${this.pubFloodingScenario.startTime.toLocaleTimeString()}.`);
+            Winston.warn(`Current time: ${this.simTime.toLocaleTimeString()}.`);
+            Winston.warn(`Minutes since start: ${minutesSinceStart}.`);
+            for (let i in this.floodSims[scenario]) {
+                var s = this.floodSims[scenario][i];
+                if (s.timeStamp <= publishedTimeStamp) continue;
+                if (s.timeStamp > minutesSinceStart) {
+                    this.fsm.trigger(SimSvc.SimCommand.Finish);
+                    return;
+                }
+                this.pubFloodingScenario.timeStamp = s.timeStamp;
+                fs.readFile(s.layer.url, 'utf8', (err: NodeJS.ErrnoException, data: string) => {
+                    if (err) {
+                        Winston.error(`Error reading file: ${err}.`);
+                        this.fsm.trigger(SimSvc.SimCommand.Finish);
+                        return;
+                    }
+                    this.message = `The ${scenario} scenario is loaded: Processed minute ${s.timeStamp}.`;
+                    Winston.info(`${this.message}.`);
+                    var geojson = JSON.parse(data);
+                    var copy = _.clone(s);
+                    copy.layer.features = geojson.features;
+                    // copy.layer.id = 'FloodSim';
+                    this.updateFloodLayer(copy.timeStamp, copy.layer);
+                    this.fsm.trigger(SimSvc.SimCommand.Finish);
+                });
+                return;
+            }
         });
     }
 
@@ -192,30 +227,10 @@ export class FloodSim extends SimSvc.SimServiceManager {
         if (!this.floodingHasStarted) return;
 
         this.message = `The ${scenario} scenario is loaded. Waiting for time events.`;
+        Winston.info(`${this.message}.`);
 
         this.pubFloodingScenario.scenario = scenario;
         this.pubFloodingScenario.startTime = this.simTime;
-
-        this.on(SimSvc.Event[SimSvc.Event.TimeChanged], () => {
-            this.fsm.trigger(SimSvc.SimCommand.Run);
-            var pubTimeStamp = this.pubFloodingScenario.timeStamp;
-            var newLayerAvailable = false;
-            this.floodSims[scenario].some(s => {
-                if (s.timeStamp < pubTimeStamp || s.timeStamp < this.simTime.diffMinutes(this.pubFloodingScenario.startTime)) return false;
-                newLayerAvailable = true;
-                fs.readFile(s.layer.url, 'utf8', (err: NodeJS.ErrnoException, data: string) => {
-                    this.message = `The ${scenario} scenario is loaded: Processed minute ${s.timeStamp}.`;
-                    var geojson = JSON.parse(data);
-                    var copy = _.clone(s);
-                    copy.layer.features = geojson.features;
-                    copy.layer.id = 'FloodSim';
-                    this.updateFloodLayer(copy.timeStamp, copy.layer);
-                    this.fsm.trigger(SimSvc.SimCommand.Finish);
-                });
-                return true;
-            });
-            if (!newLayerAvailable) this.fsm.trigger(SimSvc.SimCommand.Finish);
-        });
     }
 
     /**
@@ -224,7 +239,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     private updateFloodLayer(timeStamp: number, newLayer: Api.Layer) {
         this.pubFloodingScenario.layer = newLayer;
         this.pubFloodingScenario.timeStamp = timeStamp;
-        this.updateLayer(this.pubFloodingScenario.layer, <Api.ApiMeta>{}, () => { });
+        this.addUpdateLayer(this.pubFloodingScenario.layer, <Api.ApiMeta>{}, () => { });
     }
 
     private extractTimeStamp(filename: string) {

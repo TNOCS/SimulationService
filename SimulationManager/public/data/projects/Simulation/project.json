@@ -95,8 +95,8 @@
           "left": "380px",
           "right": "",
           "top": "26px",
-          "width": "300px",
-          "height": "594px",
+          "width": "213px",
+          "height": "436px",
           "data": {}
         }
       ],
@@ -171,17 +171,18 @@
       "title": "Incidents",
       "layers": [
         {
-          "id": "floodsim.floodsim",
+          "id": "floodsim",
           "title": "Flooding",
-          "description": "Current flooding status.",
-          "type": "geojson",
+          "description": "Initial flooding status.",
+          "type": "dynamicgeojson",
           "renderType": "geojson",
           "heatmapItems": null,
-          "url": "http://localhost:3334/api/layers/floodsim",
-          "typeUrl": "http://localhost:3334/api/layers/floodsim",
+          "url": "http://192.168.99.1:3334/api/layers/floodsim",
+          "typeUrl": "http://192.168.99.1:3334/api/resources/floodsimtypes",
           "opacity": 75,
+          "defaultFeatureType": "flooding",
           "defaultLegendProperty": "h",
-          "isDynamic": false,
+          "isDynamic": true,
           "gui": {}
         }
       ]

@@ -41,7 +41,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
             /** The time in minutes since the start of the simulation */
             timeStamp: number,
             /** The reference to the flooding data: the actual data still needs to be loaded */
-            layer: Api.Layer
+            layer: Api.ILayer
         }[]
     } = {};
     /** The published flooding scenario, time and layer */
@@ -50,7 +50,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
         timeStamp: number,
         /** Time that the flooding started */
         startTime: Date,
-        layer: Api.Layer
+        layer: Api.ILayer
     };
     /** Simulation start time */
     private simStartTime: Date;
@@ -84,7 +84,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
      * Create and publish the flood layer.
      */
     private publishFloodLayer() {
-        var layer = this.createNewFloodLayer('', 'Initial flooding status.');
+        var layer = this.createNewFloodLayer(`${this.options.server}/data/scenarios/Gorinchem/20160.asc`, 'Initial flooding status.');
         this.pubFloodingScenario = {
             scenario: '',
             timeStamp: -1,
@@ -95,7 +95,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     }
 
     private createNewFloodLayer(file: string, description?: string) {
-        var layer = <Api.Layer>{
+        var layer: Api.ILayer = {
             server: this.options.server,
             id: 'FloodSim',
             title: 'Flooding',
@@ -105,7 +105,17 @@ export class FloodSim extends SimSvc.SimServiceManager {
             enabled: true,
             url: file || `${this.options.server}/api/layers/floodsim`,
             typeUrl: `${this.options.server}/api/resources/floodsimtypes`,
-            type: 'dynamicgeojson',
+            // type: 'dynamicgeojson',
+            type: 'grid',
+            dataSourceParameters: <IsoLines.IGridDataSourceParameters>{
+                propertyName: 'h',
+                gridType: 'esri',
+                projection: 'RD',
+                noDataValue: -9999,
+                useContour: false,
+                minThreshold: 0,
+                contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
+            },
             defaultFeatureType: 'flooding',
             defaultLegendProperty: 'h'
         }
@@ -236,7 +246,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     /**
      * Update the published flood layer with new data.
      */
-    private updateFloodLayer(timeStamp: number, newLayer: Api.Layer) {
+    private updateFloodLayer(timeStamp: number, newLayer: Api.ILayer) {
         this.pubFloodingScenario.layer = newLayer;
         this.pubFloodingScenario.timeStamp = timeStamp;
         this.addUpdateLayer(this.pubFloodingScenario.layer, <Api.ApiMeta>{}, () => { });
@@ -264,7 +274,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
                     gridType: 'esri',
                     projection: 'RD',
                     noDataValue: -9999,
-                    useContour: true,
+                    useContour: false,
                     minThreshold: 0,
                     contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
                 };

@@ -2897,154 +2897,6 @@ declare module MapElement {
     }
 }
 
-declare module OfflineSearch {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module OfflineSearch {
-    interface IProjectLocation {
-        title: string;
-        url: string;
-    }
-    /**
-     * The name of the property you include in generating the offline search result.
-     */
-    interface IPropertyType {
-        /**
-         * Name of the property
-         * @type {string}
-         */
-        name: string;
-        /**
-         * The title of the property.
-         * @type {string}
-         */
-        title: string;
-        /**
-         * Language information for localisation.
-         * @type {f.ILanguageData}
-         */
-        languages?: csComp.Services.ILanguageData;
-    }
-    /**
-     * Specify the offline search options.
-     */
-    interface IOfflineSearchOptions {
-        /**
-         * Words you wish to exclude from the index.
-         * @type {string[]}
-         */
-        stopWords: string[];
-        /**
-         * The property types that you wish to use for generating the index.
-         * @type {osr.PropertyType}
-         */
-        propertyTypes: IPropertyType[];
-    }
-    class Layer {
-        groupTitle: string;
-        index: number;
-        id: string;
-        title: string;
-        path: string;
-        type: string;
-        /**
-         * Names of all the features.
-         * @type {string[]}
-         */
-        featureNames: string[];
-        constructor(groupTitle: string, index: number, id: string, title: string, path: string, type: string);
-    }
-    /**
-     * An index entry that contains a search result.
-     */
-    class Entry {
-        private v;
-        constructor(layerIndexOrArray: Array<number> | number, featureIndex?: number, propertyIndex?: number);
-        layerIndex: number;
-        featureIndex: number;
-        /**
-         * This function is called when serializing the Entry object to JSON, which is
-         * much less verbose than the default JSON. In the constructor, I've used a
-         * Union type to deserialize it again.
-         */
-        toJSON(): number[];
-    }
-    class KeywordIndex {
-        [key: string]: Entry[];
-    }
-    class OfflineSearchResult {
-        project: IProjectLocation;
-        options: IOfflineSearchOptions;
-        layers: Layer[];
-        keywordIndex: KeywordIndex;
-        constructor(project: IProjectLocation, options: IOfflineSearchOptions);
-    }
-}
-
-declare module OfflineSearch {
-    interface IOfflineSearchScope extends ng.IScope {
-        vm: OfflineSearchCtrl;
-    }
-    interface ILookupResult {
-        title?: string;
-        score: number;
-        key: string;
-        entries: Entry[];
-    }
-    class OfflineSearchResultViewModel {
-        title: string;
-        layerTitle: string;
-        groupTitle: string;
-        entry: Entry;
-        firstInGroup: boolean;
-        constructor(title: string, layerTitle: string, groupTitle: string, entry: Entry);
-        toString(): string;
-        fullTitle: string;
-    }
-    class OfflineSearchCtrl {
-        private $scope;
-        private $http;
-        private $layerService;
-        private $mapService;
-        private $messageBus;
-        private offlineSearchResult;
-        searchText: string;
-        isReady: boolean;
-        static $inject: string[];
-        constructor($scope: IOfflineSearchScope, $http: ng.IHttpService, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBus: csComp.Services.MessageBusService);
-        /**
-         * Load the offline search results (json file).
-         */
-        private loadSearchResults(url);
-        /**
-         * Get the locations based on the entered text.
-         */
-        getLocation(text: string, resultCount?: number): OfflineSearchResultViewModel[];
-        /**
-         * Merge the resuls of two keyword lookups by checking whether different entries refer
-         * to the same layer and feature.
-         * @result1 {ILookupResult[]}
-         * @result2 {ILookupResult[]}
-         */
-        private mergeResults(result1, result2);
-        /**
-         * Do a fuzzy keyword comparison between the entered text and the list of keywords,
-         * and return a subset.
-         * @text: {string}
-         */
-        private getKeywordHits(text);
-        /**
-         * When an item is selected, optionally open the layer and jump to the selected feature.
-         */
-        onSelect(selectedItem: OfflineSearchResultViewModel): void;
-        private selectFeature(layerId, featureIndex);
-    }
-}
-
 declare module Mca.Models {
     import IFeature = csComp.Services.IFeature;
     enum ScoringFunctionType {
@@ -3273,6 +3125,154 @@ declare module Mca {
     }
 }
 
+declare module OfflineSearch {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module OfflineSearch {
+    interface IProjectLocation {
+        title: string;
+        url: string;
+    }
+    /**
+     * The name of the property you include in generating the offline search result.
+     */
+    interface IPropertyType {
+        /**
+         * Name of the property
+         * @type {string}
+         */
+        name: string;
+        /**
+         * The title of the property.
+         * @type {string}
+         */
+        title: string;
+        /**
+         * Language information for localisation.
+         * @type {f.ILanguageData}
+         */
+        languages?: csComp.Services.ILanguageData;
+    }
+    /**
+     * Specify the offline search options.
+     */
+    interface IOfflineSearchOptions {
+        /**
+         * Words you wish to exclude from the index.
+         * @type {string[]}
+         */
+        stopWords: string[];
+        /**
+         * The property types that you wish to use for generating the index.
+         * @type {osr.PropertyType}
+         */
+        propertyTypes: IPropertyType[];
+    }
+    class Layer {
+        groupTitle: string;
+        index: number;
+        id: string;
+        title: string;
+        path: string;
+        type: string;
+        /**
+         * Names of all the features.
+         * @type {string[]}
+         */
+        featureNames: string[];
+        constructor(groupTitle: string, index: number, id: string, title: string, path: string, type: string);
+    }
+    /**
+     * An index entry that contains a search result.
+     */
+    class Entry {
+        private v;
+        constructor(layerIndexOrArray: Array<number> | number, featureIndex?: number, propertyIndex?: number);
+        layerIndex: number;
+        featureIndex: number;
+        /**
+         * This function is called when serializing the Entry object to JSON, which is
+         * much less verbose than the default JSON. In the constructor, I've used a
+         * Union type to deserialize it again.
+         */
+        toJSON(): number[];
+    }
+    class KeywordIndex {
+        [key: string]: Entry[];
+    }
+    class OfflineSearchResult {
+        project: IProjectLocation;
+        options: IOfflineSearchOptions;
+        layers: Layer[];
+        keywordIndex: KeywordIndex;
+        constructor(project: IProjectLocation, options: IOfflineSearchOptions);
+    }
+}
+
+declare module OfflineSearch {
+    interface IOfflineSearchScope extends ng.IScope {
+        vm: OfflineSearchCtrl;
+    }
+    interface ILookupResult {
+        title?: string;
+        score: number;
+        key: string;
+        entries: Entry[];
+    }
+    class OfflineSearchResultViewModel {
+        title: string;
+        layerTitle: string;
+        groupTitle: string;
+        entry: Entry;
+        firstInGroup: boolean;
+        constructor(title: string, layerTitle: string, groupTitle: string, entry: Entry);
+        toString(): string;
+        fullTitle: string;
+    }
+    class OfflineSearchCtrl {
+        private $scope;
+        private $http;
+        private $layerService;
+        private $mapService;
+        private $messageBus;
+        private offlineSearchResult;
+        searchText: string;
+        isReady: boolean;
+        static $inject: string[];
+        constructor($scope: IOfflineSearchScope, $http: ng.IHttpService, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBus: csComp.Services.MessageBusService);
+        /**
+         * Load the offline search results (json file).
+         */
+        private loadSearchResults(url);
+        /**
+         * Get the locations based on the entered text.
+         */
+        getLocation(text: string, resultCount?: number): OfflineSearchResultViewModel[];
+        /**
+         * Merge the resuls of two keyword lookups by checking whether different entries refer
+         * to the same layer and feature.
+         * @result1 {ILookupResult[]}
+         * @result2 {ILookupResult[]}
+         */
+        private mergeResults(result1, result2);
+        /**
+         * Do a fuzzy keyword comparison between the entered text and the list of keywords,
+         * and return a subset.
+         * @text: {string}
+         */
+        private getKeywordHits(text);
+        /**
+         * When an item is selected, optionally open the layer and jump to the selected feature.
+         */
+        onSelect(selectedItem: OfflineSearchResultViewModel): void;
+        private selectFeature(layerId, featureIndex);
+    }
+}
+
 declare module ProjectHeaderSelection {
     /**
       * Module
@@ -3361,57 +3361,6 @@ declare module StyleList {
     }
 }
 
-declare module TripPlanner {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module TripPlanner {
-    interface ITripPlannerScope extends ng.IScope {
-        vm: TripPlannerCtrl;
-    }
-    interface IOtpUrlParameters {
-        [key: string]: any;
-    }
-    interface IOtpTab {
-        icon: string;
-        title: string;
-    }
-    interface IOtpItinerary {
-        duration: number;
-        legs: csComp.Services.IOtpLeg[];
-    }
-    class TripPlannerCtrl {
-        private $scope;
-        private $mapService;
-        private $layerService;
-        private $messageBusService;
-        private $dashboardService;
-        private scope;
-        layer: csComp.Services.ProjectLayer;
-        private urlAddress;
-        private urlParameters;
-        private transportModes;
-        private transportMode;
-        private walkSpeedKm;
-        private bikeSpeedKm;
-        private time;
-        private fromLoc;
-        private toLoc;
-        private tabs;
-        private activeTab;
-        private itineraries;
-        urlKeys: string[];
-        static $inject: string[];
-        constructor($scope: ITripPlannerScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-        planRoute(): void;
-        parseUrl(): void;
-        private featureTabActivated(title);
-    }
-}
-
 declare module Timeline {
     interface ITimelineService {
         getTimelineOptions(): csComp.Services.ITimelineOptions;
@@ -3485,11 +3434,65 @@ declare module Timeline {
     }
 }
 
+declare module TripPlanner {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module TripPlanner {
+    interface ITripPlannerScope extends ng.IScope {
+        vm: TripPlannerCtrl;
+    }
+    interface IOtpUrlParameters {
+        [key: string]: any;
+    }
+    interface IOtpTab {
+        icon: string;
+        title: string;
+    }
+    interface IOtpItinerary {
+        duration: number;
+        legs: csComp.Services.IOtpLeg[];
+    }
+    class TripPlannerCtrl {
+        private $scope;
+        private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $dashboardService;
+        private scope;
+        layer: csComp.Services.ProjectLayer;
+        private urlAddress;
+        private urlParameters;
+        private transportModes;
+        private transportMode;
+        private walkSpeedKm;
+        private bikeSpeedKm;
+        private time;
+        private fromLoc;
+        private toLoc;
+        private tabs;
+        private activeTab;
+        private itineraries;
+        urlKeys: string[];
+        static $inject: string[];
+        constructor($scope: ITripPlannerScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        planRoute(): void;
+        parseUrl(): void;
+        private featureTabActivated(title);
+    }
+}
+
 declare module Voting {
     /**
       * Module
       */
     var myModule: any;
+}
+
+declare module Authentication {
 }
 
 declare module csComp.Services {
@@ -3641,9 +3644,6 @@ declare module csComp.Services {
     var myModule: any;
 }
 
-declare module Authentication {
-}
-
 declare module csComp.Services {
     class ConnectionService {
         private $messageBusService;
@@ -3728,60 +3728,6 @@ declare module csComp.Services {
         constructor(bus: Services.MessageBusService, $rootScope: ng.IRootScopeService, $window: ng.IWindowService, $q: ng.IQService);
         getLocation(): any;
         start(opts?: any): void;
-    }
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module csComp.Services {
-    class MapService {
-        private $localStorageService;
-        private $timeout;
-        private $messageBusService;
-        private static expertModeKey;
-        static $inject: string[];
-        map: L.Map;
-        baseLayers: any;
-        activeBaseLayer: BaseLayer;
-        mapVisible: boolean;
-        timelineVisible: boolean;
-        rightMenuVisible: boolean;
-        maxBounds: IBoundingBox;
-        expertMode: Expertise;
-        constructor($localStorageService: ng.localStorage.ILocalStorageService, $timeout: ng.ITimeoutService, $messageBusService: csComp.Services.MessageBusService);
-        /**
-      * The expert mode can either be set manually, e.g. using this directive, or by setting the expertMode property in the
-      * project.json file. In neither are set, we assume that we are dealing with an expert, so all features should be enabled.
-      *
-      * Precedence:
-      * - when a declaration is absent, assume Expert.
-      * - when the mode is set in local storage, take that value.
-      * - when the mode is set in the project.json file, take that value.
-      */
-        private initExpertMode();
-        isExpert: boolean;
-        isIntermediate: boolean;
-        isAdminExpert: boolean;
-        initMap(): void;
-        getBaselayer(layer: string): BaseLayer;
-        changeBaseLayer(layer: string): void;
-        invalidate(): void;
-        /**
-         * Zoom to a location on the map.
-         */
-        zoomToLocation(center: L.LatLng, zoomFactor?: number): void;
-        /**
-         * Zoom to a feature on the map.
-         */
-        zoomTo(feature: IFeature, zoomLevel?: number): void;
-        /**
-         * Compute the bounding box.
-         * Returns [min_x, max_x, min_y, max_y]
-         */
-        private getBoundingBox(arr);
-        getMap(): L.Map;
     }
     /**
       * Module
@@ -4146,6 +4092,60 @@ declare module csComp.Services {
     var myModule: any;
 }
 
+declare module csComp.Services {
+    class MapService {
+        private $localStorageService;
+        private $timeout;
+        private $messageBusService;
+        private static expertModeKey;
+        static $inject: string[];
+        map: L.Map;
+        baseLayers: any;
+        activeBaseLayer: BaseLayer;
+        mapVisible: boolean;
+        timelineVisible: boolean;
+        rightMenuVisible: boolean;
+        maxBounds: IBoundingBox;
+        expertMode: Expertise;
+        constructor($localStorageService: ng.localStorage.ILocalStorageService, $timeout: ng.ITimeoutService, $messageBusService: csComp.Services.MessageBusService);
+        /**
+      * The expert mode can either be set manually, e.g. using this directive, or by setting the expertMode property in the
+      * project.json file. In neither are set, we assume that we are dealing with an expert, so all features should be enabled.
+      *
+      * Precedence:
+      * - when a declaration is absent, assume Expert.
+      * - when the mode is set in local storage, take that value.
+      * - when the mode is set in the project.json file, take that value.
+      */
+        private initExpertMode();
+        isExpert: boolean;
+        isIntermediate: boolean;
+        isAdminExpert: boolean;
+        initMap(): void;
+        getBaselayer(layer: string): BaseLayer;
+        changeBaseLayer(layer: string): void;
+        invalidate(): void;
+        /**
+         * Zoom to a location on the map.
+         */
+        zoomToLocation(center: L.LatLng, zoomFactor?: number): void;
+        /**
+         * Zoom to a feature on the map.
+         */
+        zoomTo(feature: IFeature, zoomLevel?: number): void;
+        /**
+         * Compute the bounding box.
+         * Returns [min_x, max_x, min_y, max_y]
+         */
+        private getBoundingBox(arr);
+        getMap(): L.Map;
+    }
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
 declare module csComp.Search {
     interface ISearchFormScope extends ng.IScope {
         vm: SearchFormCtrl;
@@ -4347,35 +4347,6 @@ declare module WidgetEdit {
     }
 }
 
-declare module GroupEdit {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module GroupEdit {
-    interface IGroupEditScope extends ng.IScope {
-        vm: GroupEditCtrl;
-        group: csComp.Services.ProjectGroup;
-    }
-    class GroupEditCtrl {
-        private $scope;
-        private $mapService;
-        private $layerService;
-        private $messageBusService;
-        private $dashboardService;
-        private scope;
-        noLayerSelected: boolean;
-        static $inject: string[];
-        constructor($scope: IGroupEditScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-        updateLayers(): void;
-        removeGroup(): void;
-        toggleClustering(): void;
-        updateOws(): void;
-    }
-}
-
 declare module FeatureTypeEditor {
     /**
       * Module
@@ -4427,6 +4398,35 @@ declare module FeatureTypes {
         constructor($scope: IFeatureTypesScope, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService);
         updateFeatureTypes(ft: csComp.Services.IFeatureType): void;
         selectResource(): void;
+    }
+}
+
+declare module GroupEdit {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module GroupEdit {
+    interface IGroupEditScope extends ng.IScope {
+        vm: GroupEditCtrl;
+        group: csComp.Services.ProjectGroup;
+    }
+    class GroupEditCtrl {
+        private $scope;
+        private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $dashboardService;
+        private scope;
+        noLayerSelected: boolean;
+        static $inject: string[];
+        constructor($scope: IGroupEditScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        updateLayers(): void;
+        removeGroup(): void;
+        toggleClustering(): void;
+        updateOws(): void;
     }
 }
 
@@ -4498,6 +4498,78 @@ declare module PropertyTypes {
          * @todo {notice the strange syntax using a fat arrow =>, which is to preserve the this reference in a callback!}
          */
         private sidebarMessageReceived;
+    }
+}
+
+declare module ChartsWidget {
+    /**
+      * Module
+      */
+    var myModule: any;
+    interface IChartsEditCtrl extends ng.IScope {
+        vm: ChartsEditCtrl;
+        data: any;
+        spec: string;
+    }
+    class ChartsEditCtrl {
+        private $scope;
+        private $timeout;
+        private $compile;
+        private $layerService;
+        private $templateCache;
+        private $messageBus;
+        private $mapService;
+        private $dashboardService;
+        private scope;
+        widget: csComp.Services.IWidget;
+        editor: any;
+        static $inject: string[];
+        constructor($scope: IChartsEditCtrl, $timeout: ng.ITimeoutService, $compile: ng.ICompileService, $layerService: csComp.Services.LayerService, $templateCache: ng.ITemplateCacheService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
+        setupEditor(): void;
+        loadChart(): void;
+        updateChart(): void;
+        refreshChart(): void;
+    }
+}
+
+declare module ChartsWidget {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module ChartsWidget {
+    class ChartData {
+        title: string;
+        /**
+         * Content to display: you can either provide it directly, or specify a URL, in which case it will replace the content.
+         */
+        content: string;
+        key: string;
+        spec: any;
+        _id: string;
+        _view: any;
+    }
+    interface IChartScope extends ng.IScope {
+        vm: ChartCtrl;
+        data: ChartData;
+        spec: string;
+    }
+    class ChartCtrl {
+        private $scope;
+        private $timeout;
+        private $layerService;
+        private $messageBus;
+        private $mapService;
+        private scope;
+        widget: csComp.Services.IWidget;
+        private parentWidget;
+        private defaultSpec;
+        static $inject: string[];
+        constructor($scope: IChartScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService);
+        private keyHandle;
+        startChart(): void;
     }
 }
 
@@ -4724,78 +4796,6 @@ declare module Filters {
         initTextFilter(): void;
         updateTextFilter(): void;
         remove(): void;
-    }
-}
-
-declare module ChartsWidget {
-    /**
-      * Module
-      */
-    var myModule: any;
-    interface IChartsEditCtrl extends ng.IScope {
-        vm: ChartsEditCtrl;
-        data: any;
-        spec: string;
-    }
-    class ChartsEditCtrl {
-        private $scope;
-        private $timeout;
-        private $compile;
-        private $layerService;
-        private $templateCache;
-        private $messageBus;
-        private $mapService;
-        private $dashboardService;
-        private scope;
-        widget: csComp.Services.IWidget;
-        editor: any;
-        static $inject: string[];
-        constructor($scope: IChartsEditCtrl, $timeout: ng.ITimeoutService, $compile: ng.ICompileService, $layerService: csComp.Services.LayerService, $templateCache: ng.ITemplateCacheService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
-        setupEditor(): void;
-        loadChart(): void;
-        updateChart(): void;
-        refreshChart(): void;
-    }
-}
-
-declare module ChartsWidget {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module ChartsWidget {
-    class ChartData {
-        title: string;
-        /**
-         * Content to display: you can either provide it directly, or specify a URL, in which case it will replace the content.
-         */
-        content: string;
-        key: string;
-        spec: any;
-        _id: string;
-        _view: any;
-    }
-    interface IChartScope extends ng.IScope {
-        vm: ChartCtrl;
-        data: ChartData;
-        spec: string;
-    }
-    class ChartCtrl {
-        private $scope;
-        private $timeout;
-        private $layerService;
-        private $messageBus;
-        private $mapService;
-        private scope;
-        widget: csComp.Services.IWidget;
-        private parentWidget;
-        private defaultSpec;
-        static $inject: string[];
-        constructor($scope: IChartScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService);
-        private keyHandle;
-        startChart(): void;
     }
 }
 
@@ -5117,46 +5117,6 @@ declare module NavigatorWidget {
     }
 }
 
-declare module SimState {
-    /** Module */
-    var myModule: any;
-    interface ISimStateEditScope extends ng.IScope {
-        vm: SimStateEditCtrl;
-    }
-    class SimStateEditCtrl {
-        private $scope;
-        private $http;
-        private messageBusService;
-        private $timeout;
-        static $inject: string[];
-        constructor($scope: ISimStateEditScope, $http: ng.IHttpService, messageBusService: csComp.Services.MessageBusService, $timeout: ng.ITimeoutService);
-    }
-}
-
-declare module SimState {
-    /** Module */
-    var myModule: any;
-    interface ISimStateScope extends ng.IScope {
-        vm: SimStateCtrl;
-    }
-    interface ISimState {
-        id: string;
-        name: string;
-        state: string;
-        time: Date;
-        msg?: string;
-    }
-    class SimStateCtrl {
-        private $scope;
-        private $http;
-        private messageBusService;
-        private $timeout;
-        private states;
-        static $inject: string[];
-        constructor($scope: ISimStateScope, $http: ng.IHttpService, messageBusService: csComp.Services.MessageBusService, $timeout: ng.ITimeoutService);
-    }
-}
-
 declare module PostMan {
     /** Module */
     var myModule: any;
@@ -5217,6 +5177,46 @@ declare module PostMan {
         constructor($scope: IPostManEditScope, $timeout: ng.ITimeoutService, $messageBus: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
         addMessage(): void;
         deleteMessage(): void;
+    }
+}
+
+declare module SimState {
+    /** Module */
+    var myModule: any;
+    interface ISimStateEditScope extends ng.IScope {
+        vm: SimStateEditCtrl;
+    }
+    class SimStateEditCtrl {
+        private $scope;
+        private $http;
+        private messageBusService;
+        private $timeout;
+        static $inject: string[];
+        constructor($scope: ISimStateEditScope, $http: ng.IHttpService, messageBusService: csComp.Services.MessageBusService, $timeout: ng.ITimeoutService);
+    }
+}
+
+declare module SimState {
+    /** Module */
+    var myModule: any;
+    interface ISimStateScope extends ng.IScope {
+        vm: SimStateCtrl;
+    }
+    interface ISimState {
+        id: string;
+        name: string;
+        state: string;
+        time: Date;
+        msg?: string;
+    }
+    class SimStateCtrl {
+        private $scope;
+        private $http;
+        private messageBusService;
+        private $timeout;
+        private states;
+        static $inject: string[];
+        constructor($scope: ISimStateScope, $http: ng.IHttpService, messageBusService: csComp.Services.MessageBusService, $timeout: ng.ITimeoutService);
     }
 }
 
@@ -5320,103 +5320,6 @@ declare module SimTimeController {
         editor: any;
         static $inject: string[];
         constructor($scope: ISimTimeControllerEditCtrl, $timeout: ng.ITimeoutService, $messageBus: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-    }
-}
-
-declare module csComp.Services {
-    class CesiumRenderer implements IMapRenderer {
-        title: string;
-        service: LayerService;
-        viewer: any;
-        camera: any;
-        scene: any;
-        features: {
-            [key: string]: any;
-        };
-        private popup;
-        private popupShownFor;
-        init(service: LayerService): void;
-        enable(): void;
-        getLatLon(x: number, y: number): {
-            lat: number;
-            lon: number;
-        };
-        refreshLayer(): void;
-        getExtent(): csComp.Services.IBoundingBox;
-        getZoom(): number;
-        fitBounds(bounds: csComp.Services.IBoundingBox): void;
-        setUpMouseHandlers(): void;
-        disable(): void;
-        changeBaseLayer(layer: BaseLayer): void;
-        showFeatureTooltip(feature: IFeature, endPosition: any): void;
-        addLayer(layer: ProjectLayer): JQueryPromise<{}>;
-        removeLayer(layer: ProjectLayer): JQueryPromise<{}>;
-        updateMapFilter(group: ProjectGroup): JQueryPromise<{}>;
-        addGroup(group: ProjectGroup): void;
-        removeGroup(group: ProjectGroup): void;
-        removeFeature(feature: IFeature): void;
-        removeFeatures(features: IFeature[]): JQueryPromise<{}>;
-        updateFeature(feature: IFeature): void;
-        private updateEntity(entity, feature);
-        addFeature(feature: IFeature): void;
-        createFeature(feature: IFeature): any;
-        private createPolygon(coordinates);
-        private createMultiPolygon(coordinates);
-        private coordinatesArrayToCartesianArray(coordinates);
-        private defaultCrsFunction(coordinates);
-    }
-}
-
-declare module csComp.Services {
-    class LeafletRenderer implements IMapRenderer {
-        title: string;
-        service: LayerService;
-        $messageBusService: MessageBusService;
-        map: L.Map;
-        private popup;
-        private cntrlIsPressed;
-        init(service: LayerService): void;
-        enable(): void;
-        getLatLon(x: number, y: number): {
-            lat: number;
-            lon: number;
-        };
-        getExtent(): csComp.Services.IBoundingBox;
-        fitBounds(bounds: csComp.Services.IBoundingBox): void;
-        getZoom(): number;
-        disable(): void;
-        refreshLayer(): void;
-        addGroup(group: ProjectGroup): void;
-        removeLayer(layer: ProjectLayer): void;
-        baseLayer: L.ILayer;
-        changeBaseLayer(layerObj: BaseLayer): void;
-        private createBaseLayer(layerObj);
-        private getLeafletStyle(style);
-        addLayer(layer: ProjectLayer): void;
-        /***
-         * Update map markers in cluster after changing filter
-         */
-        updateMapFilter(group: ProjectGroup): void;
-        removeGroup(group: ProjectGroup): void;
-        removeFeature(feature: IFeature): void;
-        updateFeature(feature: IFeature): void;
-        selectFeature(feature: any): void;
-        addFeature(feature: IFeature): any;
-        private canDrag(feature);
-        /**
-         * add a feature
-         */
-        createFeature(feature: IFeature): any;
-        /**
-         * create icon based of feature style
-         */
-        getPointIcon(feature: IFeature): any;
-        /***
-         * Show tooltip with name, styles & filters.
-         */
-        showFeatureTooltip(e: any, group: ProjectGroup): void;
-        hideFeatureTooltip(e: any): void;
-        updateFeatureTooltip(e: any): void;
     }
 }
 
@@ -5742,5 +5645,102 @@ declare module csComp.Services {
         layerMenuOptions(layer: ProjectLayer): [[string, Function]];
         addLayer(layer: ProjectLayer, callback: Function): void;
         removeLayer(layer: ProjectLayer): void;
+    }
+}
+
+declare module csComp.Services {
+    class CesiumRenderer implements IMapRenderer {
+        title: string;
+        service: LayerService;
+        viewer: any;
+        camera: any;
+        scene: any;
+        features: {
+            [key: string]: any;
+        };
+        private popup;
+        private popupShownFor;
+        init(service: LayerService): void;
+        enable(): void;
+        getLatLon(x: number, y: number): {
+            lat: number;
+            lon: number;
+        };
+        refreshLayer(): void;
+        getExtent(): csComp.Services.IBoundingBox;
+        getZoom(): number;
+        fitBounds(bounds: csComp.Services.IBoundingBox): void;
+        setUpMouseHandlers(): void;
+        disable(): void;
+        changeBaseLayer(layer: BaseLayer): void;
+        showFeatureTooltip(feature: IFeature, endPosition: any): void;
+        addLayer(layer: ProjectLayer): JQueryPromise<{}>;
+        removeLayer(layer: ProjectLayer): JQueryPromise<{}>;
+        updateMapFilter(group: ProjectGroup): JQueryPromise<{}>;
+        addGroup(group: ProjectGroup): void;
+        removeGroup(group: ProjectGroup): void;
+        removeFeature(feature: IFeature): void;
+        removeFeatures(features: IFeature[]): JQueryPromise<{}>;
+        updateFeature(feature: IFeature): void;
+        private updateEntity(entity, feature);
+        addFeature(feature: IFeature): void;
+        createFeature(feature: IFeature): any;
+        private createPolygon(coordinates);
+        private createMultiPolygon(coordinates);
+        private coordinatesArrayToCartesianArray(coordinates);
+        private defaultCrsFunction(coordinates);
+    }
+}
+
+declare module csComp.Services {
+    class LeafletRenderer implements IMapRenderer {
+        title: string;
+        service: LayerService;
+        $messageBusService: MessageBusService;
+        map: L.Map;
+        private popup;
+        private cntrlIsPressed;
+        init(service: LayerService): void;
+        enable(): void;
+        getLatLon(x: number, y: number): {
+            lat: number;
+            lon: number;
+        };
+        getExtent(): csComp.Services.IBoundingBox;
+        fitBounds(bounds: csComp.Services.IBoundingBox): void;
+        getZoom(): number;
+        disable(): void;
+        refreshLayer(): void;
+        addGroup(group: ProjectGroup): void;
+        removeLayer(layer: ProjectLayer): void;
+        baseLayer: L.ILayer;
+        changeBaseLayer(layerObj: BaseLayer): void;
+        private createBaseLayer(layerObj);
+        private getLeafletStyle(style);
+        addLayer(layer: ProjectLayer): void;
+        /***
+         * Update map markers in cluster after changing filter
+         */
+        updateMapFilter(group: ProjectGroup): void;
+        removeGroup(group: ProjectGroup): void;
+        removeFeature(feature: IFeature): void;
+        updateFeature(feature: IFeature): void;
+        selectFeature(feature: any): void;
+        addFeature(feature: IFeature): any;
+        private canDrag(feature);
+        /**
+         * add a feature
+         */
+        createFeature(feature: IFeature): any;
+        /**
+         * create icon based of feature style
+         */
+        getPointIcon(feature: IFeature): any;
+        /***
+         * Show tooltip with name, styles & filters.
+         */
+        showFeatureTooltip(e: any, group: ProjectGroup): void;
+        hideFeatureTooltip(e: any): void;
+        updateFeatureTooltip(e: any): void;
     }
 }

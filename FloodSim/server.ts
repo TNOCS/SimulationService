@@ -52,6 +52,13 @@ server.use(favicon(__dirname + '/public/favicon.ico'));
 server.use(bodyParser.json({ limit: '25mb' })); // support json encoded bodies
 server.use(bodyParser.urlencoded({ limit: '25mb', extended: true })); // support encoded bodies
 
+// CORRS: see http://stackoverflow.com/a/25148861/319711
+server.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
+  next();
+});
 config.add("server", "http://localhost:" + port);
 
 var ld = new LayerDirectory.LayerDirectory(server, cm);

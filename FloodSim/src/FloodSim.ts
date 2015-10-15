@@ -103,9 +103,9 @@ export class FloodSim extends SimSvc.SimServiceManager {
             features: [],
             storage: 'file',
             enabled: true,
-            dynamic: true,
+            isDynamic: true,
             data: '',
-            url: file ? `${this.options.server}/data/scenarios/${file}` : '',
+            url: file,
             typeUrl: `${this.options.server}/api/resources/floodsimtypes`,
             // type: 'dynamicgeojson',
             type: 'grid',
@@ -221,15 +221,17 @@ export class FloodSim extends SimSvc.SimServiceManager {
      * Update the published flood layer with new data.
      */
     private updateFloodLayer(timeStamp: number, data: string) {
-        this.pubFloodingScenario.layer.data = data;
+        var layer: Api.ILayer = _.clone(this.pubFloodingScenario.layer);
+        layer.data = data;
+        layer.url = '';
         this.pubFloodingScenario.timeStamp = timeStamp;
-        this.addUpdateLayer(this.pubFloodingScenario.layer, <Api.ApiMeta>{}, () => { });
+        this.addUpdateLayer(layer, <Api.ApiMeta>{}, () => { });
     }
 
     private extractTimeStamp(filename: string) {
         var timeStamp: number;
         try {
-            timeStamp = +filename.replace('.asc', '').replace('.json', '').replace('.geojson', '');
+            timeStamp = +filename.replace('.asc', '');
         } catch (e) {
             Winston.error(`Error reading timestamp from ${filename}. The filename should be a number (the number of minutes since the start of the simulation)!`);
             return;

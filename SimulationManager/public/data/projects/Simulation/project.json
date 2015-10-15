@@ -11,7 +11,7 @@
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1444268642997,
+    "focus": 1444275360144,
     "zoomLevel": 3600000
   },
   "datasources": [
@@ -92,10 +92,10 @@
           "elementId": "widget-ac5f271b-5f06-4835-0d18-54727896ebaf",
           "enabled": true,
           "style": "default",
-          "left": "380px",
-          "right": "",
+          "left": "",
+          "right": "60px",
           "top": "26px",
-          "width": "213px",
+          "width": "312px",
           "height": "436px",
           "data": {}
         }
@@ -169,7 +169,48 @@
     {
       "id": "76947763-7f29-4fa7-05af-901a08bc506d",
       "title": "Incidents",
-      "layers": []
+      "layers": [
+        {
+          "id": "floodsim",
+          "title": "Flooding",
+          "description": "Initial flooding status.",
+          "type": "grid",
+          "renderType": "gridlayer",
+          "heatmapItems": null,
+          "url": "http://139.63.53.217:3334/api/layers/floodsim",
+          "typeUrl": "http://139.63.53.217:3334/api/resources/floodsimtypes",
+          "opacity": 75,
+          "dataSourceParameters": {
+            "propertyName": "h",
+            "gridType": "esri",
+            "projection": "RD",
+            "contourLevels": [
+              0.1,
+              0.5,
+              1,
+              3,
+              4,
+              5,
+              6
+            ],
+            "skipLines": 6,
+            "columns": 380,
+            "rows": 206,
+            "deltaLon": 0.0014584288488676631,
+            "deltaLat": -0.0008877224387042511,
+            "noDataValue": -9999,
+            "startLon": 4.624165116053319,
+            "startLat": 51.99900160775284,
+            "maxThreshold": 4,
+            "minThreshold": -9999
+          },
+          "defaultFeatureType": "flooding",
+          "defaultLegendProperty": "h",
+          "isDynamic": true,
+          "gui": {},
+          "tags": []
+        }
+      ]
     }
   ],
   "layerDirectory": "/api/layers"

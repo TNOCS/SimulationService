@@ -1693,29 +1693,6 @@ declare module Accessibility {
     }
 }
 
-declare module BaseMapList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module BaseMapList {
-    interface IBaseMapScope extends ng.IScope {
-        vm: BaseMapListCtrl;
-    }
-    class BaseMapListCtrl {
-        private $scope;
-        private $layerService;
-        private $mapService;
-        private $messageBusService;
-        private scope;
-        static $inject: string[];
-        constructor($scope: IBaseMapScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
-        selectBaseLayer(key: any): void;
-    }
-}
-
 declare module Charts {
     /**
       * Module
@@ -1930,6 +1907,29 @@ declare module DataTable {
          * Convert to trusted html string.
          */
         toTrusted(html: string): any;
+    }
+}
+
+declare module BaseMapList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module BaseMapList {
+    interface IBaseMapScope extends ng.IScope {
+        vm: BaseMapListCtrl;
+    }
+    class BaseMapListCtrl {
+        private $scope;
+        private $layerService;
+        private $mapService;
+        private $messageBusService;
+        private scope;
+        static $inject: string[];
+        constructor($scope: IBaseMapScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
+        selectBaseLayer(key: any): void;
     }
 }
 
@@ -2159,6 +2159,30 @@ declare module FeatureProps {
     }
 }
 
+declare module FilterList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module FilterList {
+    interface IFilterListScope extends ng.IScope {
+        vm: FilterListCtrl;
+    }
+    class FilterListCtrl {
+        private $scope;
+        private $layerService;
+        private $messageBus;
+        private scope;
+        noFilters: boolean;
+        locationFilterActive: boolean;
+        static $inject: string[];
+        constructor($scope: IFilterListScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
+        private setLocationFilter(group);
+    }
+}
+
 declare module FeatureRelations {
     /**
       * Module
@@ -2216,30 +2240,6 @@ declare module FeatureRelations {
                  */
         private sidebarMessageReceived;
         private featureMessageReceived;
-    }
-}
-
-declare module FilterList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module FilterList {
-    interface IFilterListScope extends ng.IScope {
-        vm: FilterListCtrl;
-    }
-    class FilterListCtrl {
-        private $scope;
-        private $layerService;
-        private $messageBus;
-        private scope;
-        noFilters: boolean;
-        locationFilterActive: boolean;
-        static $inject: string[];
-        constructor($scope: IFilterListScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
-        private setLocationFilter(group);
     }
 }
 
@@ -3344,6 +3344,20 @@ declare module ProjectHeaderSelection {
     }
 }
 
+declare module Helpers.Resize {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module ShowModal {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
 declare module ProjectSettings {
     /**
       * Module
@@ -3366,20 +3380,6 @@ declare module ProjectSettings {
         updateProject(): void;
         private updateProjectReady(data);
     }
-}
-
-declare module Helpers.Resize {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module ShowModal {
-    /**
-      * Module
-      */
-    var myModule: any;
 }
 
 declare module StyleList {
@@ -3782,60 +3782,6 @@ declare module csComp.Services {
     var myModule: any;
 }
 
-declare module csComp.Services {
-    class MapService {
-        private $localStorageService;
-        private $timeout;
-        private $messageBusService;
-        private static expertModeKey;
-        static $inject: string[];
-        map: L.Map;
-        baseLayers: any;
-        activeBaseLayer: BaseLayer;
-        mapVisible: boolean;
-        timelineVisible: boolean;
-        rightMenuVisible: boolean;
-        maxBounds: IBoundingBox;
-        expertMode: Expertise;
-        constructor($localStorageService: ng.localStorage.ILocalStorageService, $timeout: ng.ITimeoutService, $messageBusService: csComp.Services.MessageBusService);
-        /**
-      * The expert mode can either be set manually, e.g. using this directive, or by setting the expertMode property in the
-      * project.json file. In neither are set, we assume that we are dealing with an expert, so all features should be enabled.
-      *
-      * Precedence:
-      * - when a declaration is absent, assume Expert.
-      * - when the mode is set in local storage, take that value.
-      * - when the mode is set in the project.json file, take that value.
-      */
-        private initExpertMode();
-        isExpert: boolean;
-        isIntermediate: boolean;
-        isAdminExpert: boolean;
-        initMap(): void;
-        getBaselayer(layer: string): BaseLayer;
-        changeBaseLayer(layer: string): void;
-        invalidate(): void;
-        /**
-         * Zoom to a location on the map.
-         */
-        zoomToLocation(center: L.LatLng, zoomFactor?: number): void;
-        /**
-         * Zoom to a feature on the map.
-         */
-        zoomTo(feature: IFeature, zoomLevel?: number): void;
-        /**
-         * Compute the bounding box.
-         * Returns [min_x, max_x, min_y, max_y]
-         */
-        private getBoundingBox(arr);
-        getMap(): L.Map;
-    }
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
 declare module ContourAction {
     import IFeature = csComp.Services.IFeature;
     import IActionOption = csComp.Services.IActionOption;
@@ -4217,6 +4163,60 @@ declare module csComp.Services {
         updateFeature = 0,
         updateLog = 1,
         deleteFeature = 2,
+    }
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module csComp.Services {
+    class MapService {
+        private $localStorageService;
+        private $timeout;
+        private $messageBusService;
+        private static expertModeKey;
+        static $inject: string[];
+        map: L.Map;
+        baseLayers: any;
+        activeBaseLayer: BaseLayer;
+        mapVisible: boolean;
+        timelineVisible: boolean;
+        rightMenuVisible: boolean;
+        maxBounds: IBoundingBox;
+        expertMode: Expertise;
+        constructor($localStorageService: ng.localStorage.ILocalStorageService, $timeout: ng.ITimeoutService, $messageBusService: csComp.Services.MessageBusService);
+        /**
+      * The expert mode can either be set manually, e.g. using this directive, or by setting the expertMode property in the
+      * project.json file. In neither are set, we assume that we are dealing with an expert, so all features should be enabled.
+      *
+      * Precedence:
+      * - when a declaration is absent, assume Expert.
+      * - when the mode is set in local storage, take that value.
+      * - when the mode is set in the project.json file, take that value.
+      */
+        private initExpertMode();
+        isExpert: boolean;
+        isIntermediate: boolean;
+        isAdminExpert: boolean;
+        initMap(): void;
+        getBaselayer(layer: string): BaseLayer;
+        changeBaseLayer(layer: string): void;
+        invalidate(): void;
+        /**
+         * Zoom to a location on the map.
+         */
+        zoomToLocation(center: L.LatLng, zoomFactor?: number): void;
+        /**
+         * Zoom to a feature on the map.
+         */
+        zoomTo(feature: IFeature, zoomLevel?: number): void;
+        /**
+         * Compute the bounding box.
+         * Returns [min_x, max_x, min_y, max_y]
+         */
+        private getBoundingBox(arr);
+        getMap(): L.Map;
     }
     /**
       * Module
@@ -5445,170 +5445,6 @@ declare module SimTimeController {
     }
 }
 
-declare module L {
-    interface IUserDrawSettings {
-        /** Canvas element for drawing */
-        canvas: HTMLCanvasElement;
-        /** Bounds of the map in WGS84 */
-        bounds: L.Bounds;
-        /** Size of the map in pixels in x and y direction */
-        size: {
-            x: number;
-            y: number;
-        };
-        /** Zoom scale, e.g. 0.0026 */
-        zoomScale: number;
-        /** Zoom level, e.g. 12 */
-        zoom: number;
-        options: {
-            data: number[][];
-            noDataValue: number;
-            topLeftLat: number;
-            topLeftLon: number;
-            deltaLat: number;
-            deltaLon: number;
-            /** A value between 0 (transparent) and 1 (opaque) */
-            opacity?: number;
-            legend?: {
-                val: number;
-                color: string;
-            }[];
-            [key: string]: any;
-        };
-    }
-    function canvasOverlay(userDrawFunc: (overlay: any, settings: IUserDrawSettings) => void, options: Object): any;
-}
-
-declare module csComp.Services {
-    class GeojsonRenderer {
-        static render(service: LayerService, layer: ProjectLayer, mapRenderer: IMapRenderer): void;
-        static remove(service: LayerService, layer: ProjectLayer): void;
-    }
-}
-
-declare module csComp.Services {
-    class GridLayerRenderer {
-        static render(service: LayerService, layer: ProjectLayer): void;
-        static drawFunction(overlay: any, settings: L.IUserDrawSettings): void;
-    }
-}
-
-declare module csComp.Services {
-    class HeatmapRenderer {
-        static render(service: LayerService, layer: ProjectLayer, mapRenderer: LeafletRenderer): void;
-    }
-}
-
-declare module csComp.Services {
-    class TileLayerRenderer {
-        static render(service: LayerService, layer: ProjectLayer): void;
-    }
-}
-
-declare module csComp.Services {
-    class WmsRenderer {
-        static render(service: LayerService, layer: ProjectLayer): void;
-    }
-}
-
-declare module csComp.Services {
-    class CesiumRenderer implements IMapRenderer {
-        title: string;
-        service: LayerService;
-        viewer: any;
-        camera: any;
-        scene: any;
-        features: {
-            [key: string]: any;
-        };
-        private popup;
-        private popupShownFor;
-        init(service: LayerService): void;
-        enable(): void;
-        getLatLon(x: number, y: number): {
-            lat: number;
-            lon: number;
-        };
-        refreshLayer(): void;
-        getExtent(): csComp.Services.IBoundingBox;
-        getZoom(): number;
-        fitBounds(bounds: csComp.Services.IBoundingBox): void;
-        setUpMouseHandlers(): void;
-        disable(): void;
-        changeBaseLayer(layer: BaseLayer): void;
-        showFeatureTooltip(feature: IFeature, endPosition: any): void;
-        addLayer(layer: ProjectLayer): JQueryPromise<{}>;
-        removeLayer(layer: ProjectLayer): JQueryPromise<{}>;
-        updateMapFilter(group: ProjectGroup): JQueryPromise<{}>;
-        addGroup(group: ProjectGroup): void;
-        removeGroup(group: ProjectGroup): void;
-        removeFeature(feature: IFeature): void;
-        removeFeatures(features: IFeature[]): JQueryPromise<{}>;
-        updateFeature(feature: IFeature): void;
-        private updateEntity(entity, feature);
-        addFeature(feature: IFeature): void;
-        selectFeature(feature: IFeature): void;
-        createFeature(feature: IFeature): any;
-        private createPolygon(coordinates);
-        private createMultiPolygon(coordinates);
-        private coordinatesArrayToCartesianArray(coordinates);
-        private defaultCrsFunction(coordinates);
-    }
-}
-
-declare module csComp.Services {
-    class LeafletRenderer implements IMapRenderer {
-        title: string;
-        service: LayerService;
-        $messageBusService: MessageBusService;
-        map: L.Map;
-        private popup;
-        private cntrlIsPressed;
-        init(service: LayerService): void;
-        enable(): void;
-        getLatLon(x: number, y: number): {
-            lat: number;
-            lon: number;
-        };
-        getExtent(): csComp.Services.IBoundingBox;
-        fitBounds(bounds: csComp.Services.IBoundingBox): void;
-        getZoom(): number;
-        disable(): void;
-        refreshLayer(): void;
-        addGroup(group: ProjectGroup): void;
-        removeLayer(layer: ProjectLayer): void;
-        baseLayer: L.ILayer;
-        changeBaseLayer(layerObj: BaseLayer): void;
-        private createBaseLayer(layerObj);
-        private getLeafletStyle(style);
-        addLayer(layer: ProjectLayer): void;
-        /***
-         * Update map markers in cluster after changing filter
-         */
-        updateMapFilter(group: ProjectGroup): void;
-        removeGroup(group: ProjectGroup): void;
-        removeFeature(feature: IFeature): void;
-        updateFeature(feature: IFeature): void;
-        selectFeature(feature: any): void;
-        addFeature(feature: IFeature): any;
-        private canDrag(feature);
-        /**
-         * add a feature
-         */
-        createFeature(feature: IFeature): any;
-        /**
-         * create icon based of feature style
-         */
-        getPointIcon(feature: IFeature): any;
-        /***
-         * Show tooltip with name, styles & filters.
-         */
-        showFeatureTooltip(e: L.LeafletMouseEvent, group: ProjectGroup): void;
-        hideFeatureTooltip(e: L.LeafletMouseEvent): void;
-        updateFeatureTooltip(e: L.LeafletMouseEvent): void;
-    }
-}
-
 declare module csComp.Services {
     class DatabaseSource implements ILayerSource {
         service: LayerService;
@@ -5939,5 +5775,173 @@ declare module csComp.Services {
         layerMenuOptions(layer: ProjectLayer): [[string, Function]];
         addLayer(layer: ProjectLayer, callback: Function): void;
         removeLayer(layer: ProjectLayer): void;
+    }
+}
+
+declare module L {
+    interface IUserDrawSettings {
+        /** Canvas element for drawing */
+        canvas: HTMLCanvasElement;
+        /** Bounds of the map in WGS84 */
+        bounds: L.Bounds;
+        /** Size of the map in pixels in x and y direction */
+        size: {
+            x: number;
+            y: number;
+        };
+        /** Zoom scale, e.g. 0.0026 */
+        zoomScale: number;
+        /** Zoom level, e.g. 12 */
+        zoom: number;
+        options: {
+            data: number[][];
+            noDataValue: number;
+            topLeftLat: number;
+            topLeftLon: number;
+            deltaLat: number;
+            deltaLon: number;
+            /** The minimum data value: below (<) this value, the cell is not drawn */
+            min?: number;
+            /** The maximum data value: above (>) this value, the cell is not drawn */
+            max?: number;
+            /** A value between 0 (transparent) and 1 (opaque) */
+            opacity?: number;
+            legend?: {
+                val: number;
+                color: string;
+            }[];
+            [key: string]: any;
+        };
+    }
+    function canvasOverlay(userDrawFunc: (overlay: any, settings: IUserDrawSettings) => void, options: Object): any;
+}
+
+declare module csComp.Services {
+    class GeojsonRenderer {
+        static render(service: LayerService, layer: ProjectLayer, mapRenderer: IMapRenderer): void;
+        static remove(service: LayerService, layer: ProjectLayer): void;
+    }
+}
+
+declare module csComp.Services {
+    class GridLayerRenderer {
+        static render(service: LayerService, layer: ProjectLayer): void;
+        static drawFunction(overlay: any, settings: L.IUserDrawSettings): void;
+    }
+}
+
+declare module csComp.Services {
+    class HeatmapRenderer {
+        static render(service: LayerService, layer: ProjectLayer, mapRenderer: LeafletRenderer): void;
+    }
+}
+
+declare module csComp.Services {
+    class TileLayerRenderer {
+        static render(service: LayerService, layer: ProjectLayer): void;
+    }
+}
+
+declare module csComp.Services {
+    class WmsRenderer {
+        static render(service: LayerService, layer: ProjectLayer): void;
+    }
+}
+
+declare module csComp.Services {
+    class CesiumRenderer implements IMapRenderer {
+        title: string;
+        service: LayerService;
+        viewer: any;
+        camera: any;
+        scene: any;
+        features: {
+            [key: string]: any;
+        };
+        private popup;
+        private popupShownFor;
+        init(service: LayerService): void;
+        enable(): void;
+        getLatLon(x: number, y: number): {
+            lat: number;
+            lon: number;
+        };
+        refreshLayer(): void;
+        getExtent(): csComp.Services.IBoundingBox;
+        getZoom(): number;
+        fitBounds(bounds: csComp.Services.IBoundingBox): void;
+        setUpMouseHandlers(): void;
+        disable(): void;
+        changeBaseLayer(layer: BaseLayer): void;
+        showFeatureTooltip(feature: IFeature, endPosition: any): void;
+        addLayer(layer: ProjectLayer): JQueryPromise<{}>;
+        removeLayer(layer: ProjectLayer): JQueryPromise<{}>;
+        updateMapFilter(group: ProjectGroup): JQueryPromise<{}>;
+        addGroup(group: ProjectGroup): void;
+        removeGroup(group: ProjectGroup): void;
+        removeFeature(feature: IFeature): void;
+        removeFeatures(features: IFeature[]): JQueryPromise<{}>;
+        updateFeature(feature: IFeature): void;
+        private updateEntity(entity, feature);
+        addFeature(feature: IFeature): void;
+        selectFeature(feature: IFeature): void;
+        createFeature(feature: IFeature): any;
+        private createPolygon(coordinates);
+        private createMultiPolygon(coordinates);
+        private coordinatesArrayToCartesianArray(coordinates);
+        private defaultCrsFunction(coordinates);
+    }
+}
+
+declare module csComp.Services {
+    class LeafletRenderer implements IMapRenderer {
+        title: string;
+        service: LayerService;
+        $messageBusService: MessageBusService;
+        map: L.Map;
+        private popup;
+        private cntrlIsPressed;
+        init(service: LayerService): void;
+        enable(): void;
+        getLatLon(x: number, y: number): {
+            lat: number;
+            lon: number;
+        };
+        getExtent(): csComp.Services.IBoundingBox;
+        fitBounds(bounds: csComp.Services.IBoundingBox): void;
+        getZoom(): number;
+        disable(): void;
+        refreshLayer(): void;
+        addGroup(group: ProjectGroup): void;
+        removeLayer(layer: ProjectLayer): void;
+        baseLayer: L.ILayer;
+        changeBaseLayer(layerObj: BaseLayer): void;
+        private createBaseLayer(layerObj);
+        private getLeafletStyle(style);
+        addLayer(layer: ProjectLayer): void;
+        /***
+         * Update map markers in cluster after changing filter
+         */
+        updateMapFilter(group: ProjectGroup): void;
+        removeGroup(group: ProjectGroup): void;
+        removeFeature(feature: IFeature): void;
+        updateFeature(feature: IFeature): void;
+        selectFeature(feature: any): void;
+        addFeature(feature: IFeature): any;
+        private canDrag(feature);
+        /**
+         * add a feature
+         */
+        createFeature(feature: IFeature): any;
+        /**
+         * create icon based of feature style
+         */
+        getPointIcon(feature: IFeature): any;
+        /***
+         * Show tooltip with name, styles & filters.
+         */
+        showFeatureTooltip(e: L.LeafletMouseEvent, group: ProjectGroup): void;
+        hideFeatureTooltip(e: L.LeafletMouseEvent): void;
+        updateFeatureTooltip(e: L.LeafletMouseEvent): void;
     }
 }

@@ -84,7 +84,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
      * Create and publish the flood layer.
      */
     private publishFloodLayer() {
-        var layer = this.createNewFloodLayer(`${this.options.server}/data/scenarios/Gorinchem/20160.asc`, 'Initial flooding status.');
+        var layer = this.createNewFloodLayer(``, 'Initial flooding status.');
         this.pubFloodingScenario = {
             scenario: '',
             timeStamp: -1,
@@ -103,17 +103,17 @@ export class FloodSim extends SimSvc.SimServiceManager {
             features: [],
             storage: 'file',
             enabled: true,
-            url: file || `${this.options.server}/api/layers/floodsim`,
+            dynamic: true,
+            data: '',
+            url: file ? `${this.options.server}/data/scenarios/${file}` : '',
             typeUrl: `${this.options.server}/api/resources/floodsimtypes`,
             // type: 'dynamicgeojson',
             type: 'grid',
+            renderType: 'gridlayer',
             dataSourceParameters: <IsoLines.IGridDataSourceParameters>{
                 propertyName: 'h',
                 gridType: 'esri',
                 projection: 'RD',
-                noDataValue: -9999,
-                useContour: false,
-                minThreshold: 0,
                 contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
             },
             defaultFeatureType: 'flooding',
@@ -131,42 +131,17 @@ export class FloodSim extends SimSvc.SimServiceManager {
         if (!fs.existsSync(this.scenarioFolder)) return;
 
         // Start loading all data
-        this.fsm.trigger(SimSvc.SimCommand.Run);
-
-        // Get all files
-        var filesToProcess: { scenario: string, name: string, path: string }[] = [];
         var scenarios = Utils.getDirectories(this.scenarioFolder);
         scenarios.forEach(scenario => {
-            var scenarioFile = path.join(this.scenarioFolder, scenario);
-            var files = fs.readdirSync(scenarioFile);
+            var scenarioFolder = path.join(this.scenarioFolder, scenario);
+            var files = fs.readdirSync(scenarioFolder);
             files.forEach(f => {
                 var ext = path.extname(f);
-                var file = path.join(scenarioFile, f);
-                if (ext === '.geojson' || ext === '.json') {
-                    this.addToScenarios(scenario, file);
-                    return;
-                }
+                var file = path.join(scenarioFolder, f);
                 if (ext !== '.asc') return;
-                // Check if we already have a converted version.
-                var baseFile = f.replace('.asc', '');
-                if (files.indexOf(baseFile + '.json') >= 0 || files.indexOf(baseFile + '.geojson') >= 0) return;
-                filesToProcess.push({ scenario: scenario, name: f, path: file })
+                this.addToScenarios(scenario, file);
             });
         });
-        // Read each file in parallel
-        async.each(
-            filesToProcess,
-            (entry, cb) => {
-                this.readFloodingFile(entry, () => cb());
-            },
-            (err) => {
-                this.fsm.trigger(SimSvc.SimCommand.Finish);
-                Winston.info('Finished processing flood files.');
-                if (err) {
-                    Winston.error('Error processing flood files: ' + err);
-                }
-            }
-        );
     }
 
     private addToScenarios(scenario: string, file: string) {
@@ -192,6 +167,9 @@ export class FloodSim extends SimSvc.SimServiceManager {
             this.startScenario('Gorinchem');
         });
 
+        // When the simulation time is changed:
+        // 1. Check if we have to publish a new Layer
+        // 2. If there is a new layer, read the asc grid file and put it in the layer.data property
         this.on('simTimeChanged', () => {
             var scenario = this.pubFloodingScenario.scenario;
             if (!scenario) return;
@@ -217,11 +195,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
                     }
                     this.message = `The ${scenario} scenario is loaded: Processed minute ${s.timeStamp}.`;
                     Winston.info(`${this.message}.`);
-                    var geojson = JSON.parse(data);
-                    var copy = _.clone(s);
-                    copy.layer.features = geojson.features;
-                    // copy.layer.id = 'FloodSim';
-                    this.updateFloodLayer(copy.timeStamp, copy.layer);
+                    this.updateFloodLayer(s.timeStamp, data);
                     this.fsm.trigger(SimSvc.SimCommand.Finish);
                 });
                 return;
@@ -246,8 +220,8 @@ export class FloodSim extends SimSvc.SimServiceManager {
     /**
      * Update the published flood layer with new data.
      */
-    private updateFloodLayer(timeStamp: number, newLayer: Api.ILayer) {
-        this.pubFloodingScenario.layer = newLayer;
+    private updateFloodLayer(timeStamp: number, data: string) {
+        this.pubFloodingScenario.layer.data = data;
         this.pubFloodingScenario.timeStamp = timeStamp;
         this.addUpdateLayer(this.pubFloodingScenario.layer, <Api.ApiMeta>{}, () => { });
     }
@@ -263,33 +237,33 @@ export class FloodSim extends SimSvc.SimServiceManager {
         return timeStamp;
     }
 
-    /** Read a flooding file. Currently, only ESRI ASCII GRID files in RD are supported */
-    private readFloodingFile(entry: { scenario: string, name: string, path: string }, callback: () => void) {
-        fs.readFile(entry.path, 'utf8', (err: Error, data: Buffer) => {
-            if (err) {
-                Winston.error(`Error reading file ${entry.path}: ${err.message}`);
-            } else {
-                var params: IsoLines.IGridDataSourceParameters = <IsoLines.IGridDataSourceParameters>{
-                    propertyName: 'h',
-                    gridType: 'esri',
-                    projection: 'RD',
-                    noDataValue: -9999,
-                    useContour: false,
-                    minThreshold: 0,
-                    contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
-                };
-                var timeStamp = this.extractTimeStamp(entry.name);
-                Winston.info(`Converting ${entry.path}...`);
-                var floodSim = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
-                Winston.info(`Done converting ${entry.path}: ${floodSim.features.length} features found.`);
-                var outputFile = entry.path.replace('.asc', '.geojson');
-                fs.writeFileSync(outputFile, JSON.stringify(floodSim, (key, value) => {
-                    if (isNaN(+key)) return value;
-                    return value.toFixed ? Number(value.toFixed(7)) : value;
-                }));
-                this.addToScenarios(entry.scenario, outputFile);
-                callback();
-            }
-        });
-    }
+    // /** Read a flooding file. Currently, only ESRI ASCII GRID files in RD are supported */
+    // private readFloodingFile(entry: { scenario: string, name: string, path: string }, callback: () => void) {
+    //     fs.readFile(entry.path, 'utf8', (err: Error, data: Buffer) => {
+    //         if (err) {
+    //             Winston.error(`Error reading file ${entry.path}: ${err.message}`);
+    //         } else {
+    //             var params: IsoLines.IGridDataSourceParameters = <IsoLines.IGridDataSourceParameters>{
+    //                 propertyName: 'h',
+    //                 gridType: 'esri',
+    //                 projection: 'RD',
+    //                 noDataValue: -9999,
+    //                 useContour: false,
+    //                 minThreshold: 0,
+    //                 contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
+    //             };
+    //             var timeStamp = this.extractTimeStamp(entry.name);
+    //             Winston.info(`Converting ${entry.path}...`);
+    //             var floodSim = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
+    //             Winston.info(`Done converting ${entry.path}: ${floodSim.features.length} features found.`);
+    //             var outputFile = entry.path.replace('.asc', '.geojson');
+    //             fs.writeFileSync(outputFile, JSON.stringify(floodSim, (key, value) => {
+    //                 if (isNaN(+key)) return value;
+    //                 return value.toFixed ? Number(value.toFixed(7)) : value;
+    //             }));
+    //             this.addToScenarios(entry.scenario, outputFile);
+    //             callback();
+    //         }
+    //     });
+    // }
 }

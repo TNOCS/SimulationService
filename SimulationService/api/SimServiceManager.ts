@@ -80,13 +80,11 @@ export class SimServiceManager extends Api.ApiManager {
 
         this.fsm = new TypeState.FiniteStateMachine<SimState>(SimState.Idle);
         // Define transitions
-        this.fsm.from(SimState.Idle).to(SimState.Ready).on(SimCommand.Start);
+        this.fsm.from(SimState.Idle, SimState.Pause).to(SimState.Ready).on(SimCommand.Start);
         this.fsm.from(SimState.Idle).to(SimState.Busy).on(SimCommand.Run);
-        this.fsm.from(SimState.Ready).to(SimState.Idle).on(SimCommand.Stop);
         this.fsm.from(SimState.Ready).to(SimState.Busy).on(SimCommand.Run);
         this.fsm.from(SimState.Ready).to(SimState.Pause).on(SimCommand.Pause);
-        this.fsm.from(SimState.Pause).to(SimState.Ready).on(SimCommand.Start);
-        this.fsm.from(SimState.Pause).to(SimState.Idle).on(SimCommand.Stop);
+        this.fsm.from(SimState.Ready, SimState.Pause, SimState.Busy).to(SimState.Idle).on(SimCommand.Stop);
         this.fsm.from(SimState.Busy).to(SimState.Ready).on(SimCommand.Finish);
         this.fsm.from(SimState.Idle, SimState.Ready, SimState.Busy, SimState.Pause).to(SimState.Exit).on(SimCommand.Exit);
 
@@ -176,7 +174,7 @@ export class SimServiceManager extends Api.ApiManager {
             if (simState.hasOwnProperty('simTime')) {
                 this.simTime = new Date(+simState.simTime);
                 this.emit('simTimeChanged');
-                Winston.error(`sim: new time is ${this.simTime}`);
+                Winston.info(`sim: new time is ${this.simTime}`);
             }
             if (simState.hasOwnProperty('simSpeed') && this.simSpeed !== +simState.simSpeed) {
                 this.simSpeed = +simState.simSpeed;

@@ -33,7 +33,7 @@ export class SimulationManager extends SimSvc.SimServiceManager {
         super(namespace, name, isClient, options);
 
         // Listen to state changes and do not send any message (which is the default behaviour).
-        this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }
+        //this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }
 
         this.simTimeKey = `${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimTime]}`;
 
@@ -81,6 +81,11 @@ export class SimulationManager extends SimSvc.SimServiceManager {
                     if (index >= 0) this.simsNotReady.splice(index, 1);
                 }
             } catch (e) {}
+        });
+
+        this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
+            this.message = 'Reset received.'
+            return true;
         });
     }
 

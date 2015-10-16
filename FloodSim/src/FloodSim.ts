@@ -78,6 +78,12 @@ export class FloodSim extends SimSvc.SimServiceManager {
                 this.simStartTime = this.simTime;
             return true;
         });
+
+        this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
+            this.publishFloodLayer();
+            this.message = 'Scenario has been reset.'
+            return true;
+        });
     }
 
     /**
@@ -113,7 +119,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
             dataSourceParameters: <IsoLines.IGridDataSourceParameters>{
                 propertyName: 'h',
                 gridType: 'esri',
-                projection: 'RD',
+                projection: 'WGS84',
                 contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
             },
             defaultFeatureType: 'flooding',
@@ -164,7 +170,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     private waitForFloodSimCmds() {
         this.subscribeKey('sim.floodSimCmd', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2)}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
-            this.startScenario('Gorinchem');
+            if (message.hasOwnProperty('scenario')) this.startScenario(message['scenario']);
         });
 
         // When the simulation time is changed:
@@ -173,6 +179,11 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.on('simTimeChanged', () => {
             var scenario = this.pubFloodingScenario.scenario;
             if (!scenario) return;
+            if (this.floodSims[scenario][this.floodSims[scenario].length-1].timeStamp === publishedTimeStamp) {
+                this.message = `${scenario} scenario has ended.`;
+                this.sendAck(this.fsm.currentState);
+                return;
+            }
             this.fsm.trigger(SimSvc.SimCommand.Run);
             var publishedTimeStamp = this.pubFloodingScenario.timeStamp;
             var minutesSinceStart = this.simTime.diffMinutes(this.pubFloodingScenario.startTime);
@@ -193,7 +204,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
                         this.fsm.trigger(SimSvc.SimCommand.Finish);
                         return;
                     }
-                    this.message = `The ${scenario} scenario is loaded: Processed minute ${s.timeStamp}.`;
+                    this.message = `${scenario}: minute ${s.timeStamp}.`;
                     Winston.info(`${this.message}.`);
                     this.updateFloodLayer(s.timeStamp, data);
                     this.fsm.trigger(SimSvc.SimCommand.Finish);
@@ -210,7 +221,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.floodingHasStarted = this.floodSims.hasOwnProperty(scenario);
         if (!this.floodingHasStarted) return;
 
-        this.message = `The ${scenario} scenario is loaded. Waiting for time events.`;
+        this.message = `${scenario} is loaded...`;
         Winston.info(`${this.message}.`);
 
         this.pubFloodingScenario.scenario = scenario;

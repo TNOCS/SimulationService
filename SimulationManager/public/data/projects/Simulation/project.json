@@ -6,12 +6,12 @@
   "url": "https://github.com/TNOCS/csMap",
   "connected": true,
   "timeLine": {
-    "start": 1443753720144,
-    "end": 1444358520144,
+    "start": 1447661392962,
+    "end": 1448266192962,
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1444275360144,
+    "focus": 1448176315815,
     "zoomLevel": 3600000
   },
   "datasources": [
@@ -73,15 +73,16 @@
                 },
                 "url": "/api/keys/sim.floodSimCmd",
                 "message": "{ \"scenario\": \"Gorinchem\"}",
-                "description": "Start the Gorinchem flooding scenario."
+                "description": "Start the Gorinchem flooding scenario provided by HKV."
               },
               {
-                "name": "Test 2",
+                "name": "Start 'breach'",
                 "httpMethod": {
                   "name": "POST"
                 },
-                "url": "/api/keys/test2",
-                "message": "World"
+                "url": "/api/keys/sim.floodSimCmd",
+                "message": "{ \"scenario\": \"breach\"}",
+                "description": "Scenario provided by Deltares."
               }
             ]
           }
@@ -177,13 +178,13 @@
           "type": "grid",
           "renderType": "gridlayer",
           "heatmapItems": null,
-          "url": "http://139.63.53.217:3334/api/layers/floodsim",
-          "typeUrl": "http://139.63.53.217:3334/api/resources/floodsimtypes",
+          "url": "http://localhost:3334/api/layers/floodsim",
+          "typeUrl": "http://localhost:3334/api/resources/floodsimtypes",
           "opacity": 75,
           "dataSourceParameters": {
             "propertyName": "h",
             "gridType": "esri",
-            "projection": "RD",
+            "projection": "WGS84",
             "contourLevels": [
               0.1,
               0.5,
@@ -201,7 +202,7 @@
             "noDataValue": -9999,
             "startLon": 4.624165116053319,
             "startLat": 51.99900160775284,
-            "maxThreshold": 4,
+            "maxThreshold": 5.25,
             "minThreshold": -9999
           },
           "defaultFeatureType": "flooding",

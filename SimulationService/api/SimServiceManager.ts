@@ -21,6 +21,25 @@ export enum SimState {
     Exit
 }
 
+/** In what state is the (critical) infrastructure */
+export enum InfrastructureState {
+    /** 100% functional */
+    Ok,
+    /** Still working, but partially failing */
+    Stressed,
+    /** Not working anymore */
+    Failed
+}
+
+/** When the infrastructure is stressed or has failed, what was the cause of its failure. */
+export enum FailureMode {
+    None = 0,
+    Flooded = 1,
+    NoMainPower = 2,
+    NoBackupPower = 4,
+    NoComms = 8    
+}
+
 /** For setting the simulation time */
 export interface ISimTimeState {
     /** Simulation time */

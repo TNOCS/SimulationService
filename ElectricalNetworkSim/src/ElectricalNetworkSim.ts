@@ -23,7 +23,6 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
     private relativeSourceFolder = 'source';
     /** Simulation start time */
     private simStartTime: Date;
-    private powerLines: Api.ILayer;
     private powerStations: Api.ILayer;
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
@@ -63,25 +62,14 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);
 
-        var linesFile = path.join(sourceFolder, 'electrical_network_lines.json');
-        fs.readFile(linesFile, (err, data) => {
-            if (err) {
-                Winston.error(`Error reading ${linesFile}: ${err}`);
-                return;
-            }
-            let result = JSON.parse(data.toString());
-            this.powerLines = this.createNewLayer('powerlines','Elektrisch netwerk', result.features, 'Elektrisch netwerk.');
-            this.publishLayer(this.powerLines);
-        });
-
         var stationsFile = path.join(sourceFolder, 'power_stations.json');
         fs.readFile(stationsFile, (err, data) => {
             if (err) {
                 Winston.error(`Error reading ${stationsFile}: ${err}`);
                 return;
             }
-            let result = JSON.parse(data.toString());
-            this.powerStations = this.createNewLayer('powerstations','Stroomstations', result.features, 'Elektrische stroomstations');
+            let ps = JSON.parse(data.toString());
+            this.powerStations = this.createNewLayer('powerstations','Stroomstations', ps.features, 'Elektrische stroomstations');
             this.clearAllStates(this.powerStations.features);
             this.publishLayer(this.powerStations);
         });
@@ -89,7 +77,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
 
     /** Set the state of a feature */
     private setFeatureState(feature: Api.Feature, state: SimSvc.InfrastructureState) {
-        feature.properties['state'] = SimSvc.InfrastructureState[state];
+        feature.properties['state'] = state; //SimSvc.InfrastructureState[state];
     }
 
     /** Clear (reset) all feature states to OK */

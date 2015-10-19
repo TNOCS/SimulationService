@@ -11,7 +11,7 @@
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1448176315815,
+    "focus": 1448166400962,
     "zoomLevel": 3600000
   },
   "datasources": [
@@ -207,6 +207,20 @@
           },
           "defaultFeatureType": "flooding",
           "defaultLegendProperty": "h",
+          "isDynamic": true,
+          "gui": {},
+          "tags": []
+        },
+        {
+          "id": "powerstations",
+          "title": "Stroomstations",
+          "description": "Elektrische stroomstations",
+          "type": "dynamicgeojson",
+          "renderType": "geojson",
+          "heatmapItems": null,
+          "url": "http://192.168.1.48:3335/api/layers/powerstations",
+          "typeUrl": "http://192.168.1.48:3335/api/resources/electrical_network",
+          "opacity": 75,
           "isDynamic": true,
           "gui": {},
           "tags": []

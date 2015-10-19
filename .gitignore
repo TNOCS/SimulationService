@@ -66,3 +66,12 @@ SimulationManager/public/cs/
 FloodSim/public/data/scenarios/
 FloodSim/public/data/breach/
 FloodSim/public/data/
+ElectricalNetworkSim/src/**/*.js
+SimulationManager/public/data/keys/
+SimulationManager/public/data/layers.json
+ElectricalNetworkSim/public/data/layers/
+ElectricalNetworkSim/public/data/keys/
+ElectricalNetworkSim/public/data/layers.json
+SimulationManager/public/data/layers/
+SimulationManager/public/images/gauge.png
+SimulationManager/public/data/resourceTypes/

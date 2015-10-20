@@ -71,6 +71,17 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
             let ps = JSON.parse(data.toString());
             this.powerStations = this.createNewLayer('powerstations','Stroomstations', ps.features, 'Elektrische stroomstations');
             this.clearAllStates(this.powerStations.features);
+
+            // TEST CODE
+            this.powerStations.features.forEach(f => {
+                if (f.properties.hasOwnProperty('featureTypeId') && f.properties['featureTypeId'] === 'msn_50_{state}') {
+                    Winston.info(`Failing ${f.properties["name"]}`);
+                    this.setFeatureState(f, SimSvc.InfrastructureState.Failed);
+                    f.properties['failureMode'] = SimSvc.FailureMode.Flooded;
+                    f.properties['timeOfFailure'] = Date.now();
+                }
+            });
+
             this.publishLayer(this.powerStations);
         });
     }

@@ -120,7 +120,8 @@ export class FloodSim extends SimSvc.SimServiceManager {
                 propertyName: 'h',
                 gridType: 'esri',
                 projection: 'WGS84',
-                contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
+                legendStringFormat: '{0:0.00}m'
+                //,contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
             },
             defaultFeatureType: 'flooding',
             defaultLegendProperty: 'h'

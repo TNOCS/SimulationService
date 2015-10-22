@@ -3,9 +3,9 @@ import path = require('path');
 import Winston = require('winston');
 import async = require('async');
 import GeoJSON = require('../../ServerComponents/helpers/GeoJSON')
-import Utils = require('../../ServerComponents/helpers/Utils')
-import TypeState = require('../../ServerComponents/helpers/typestate')
+//import TypeState = require('../../ServerComponents/helpers/typestate')
 import Api = require('../../ServerComponents/api/ApiManager');
+import Utils = require('../../ServerComponents/Helpers/Utils');
 import SimSvc = require('../../SimulationService/api/SimServiceManager');
 import Grid = require('../../ServerComponents/import/IsoLines');
 import _ = require('underscore');
@@ -86,7 +86,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
             if (message.hasOwnProperty('powerStation') && message.hasOwnProperty('state')) {
                 var name = message['powerStation'];
                 this.powerStations.some(ps => {
-                    if (ps.properties['name'] !== name) return false;
+                    if (ps.properties.hasOwnProperty('name') && ps.properties['name'] !== name) return false;
                     this.setFeatureState(ps, message['state'], SimSvc.FailureMode.Unknown, true);
                     return true;
                 });
@@ -108,7 +108,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         // Check is Powerstation is flooded
         this.powerStations.forEach(ps => {
             var state = this.getFeatureState(ps);
-            if (state === SimSvc.InfrastructureState.Failed) failedPowerStations.push(ps); 
+            if (state === SimSvc.InfrastructureState.Failed) failedPowerStations.push(ps);
             if (state !== SimSvc.InfrastructureState.Ok) return;
             var waterLevel = getWaterLevel(ps.geometry.coordinates);
             if (waterLevel > 0) {
@@ -118,7 +118,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         });
 
         // Check if Powerstation's dependencies have failed
-        this.powerStations.forEach(ps => { 
+        this.powerStations.forEach(ps => {
             if (!ps.properties.hasOwnProperty('dependencies')) return;
             var state = this.getFeatureState(ps);
             if (state !== SimSvc.InfrastructureState.Failed) return;
@@ -156,7 +156,8 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
             }
             let ps = JSON.parse(data.toString());
             this.powerLayer = this.createNewLayer('powerstations', 'Stroomstations', ps.features, 'Elektrische stroomstations');
-            this.powerLayer.features.forEach(f => { 
+            this.powerLayer.features.forEach(f => {
+                if (!f.id) f.id = Utils.newGuid();
                 if (f.geometry.type !== 'Point') return;
                 this.setFeatureState(f, SimSvc.InfrastructureState.Ok);
                 this.powerStations.push(f);
@@ -180,15 +181,17 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
     private setFeatureState(feature: Api.Feature, state: SimSvc.InfrastructureState, failureMode: SimSvc.FailureMode = SimSvc.FailureMode.None, publish: boolean = false) {
         feature.properties['state'] = state;
         feature.properties['failureMode'] = failureMode;
-        if (!publish) return; 
+        if (!publish) return;
         // Publish feature update
         this.updateFeature(this.powerLayer.id, feature, <Api.ApiMeta>{}, () => { });
         // Publish PowerSupplyArea layer
         if (state === SimSvc.InfrastructureState.Failed && feature.properties.hasOwnProperty('powerSupplyArea')) {
             var psa = new Api.Feature();
-            psa.properties['name'] = "Blackout area";
-            psa.properties['featureTypeId'] = 'AffectedArea';
-            psa.geometry = feature.properties['powerSupplyArea'];
+            psa.properties = {
+                name: 'Blackout area',
+                featureTypeId: 'AffectedArea'
+            };
+            psa.geometry = JSON.parse(feature.properties['powerSupplyArea']);
             this.addFeature(this.powerLayer.id, psa, <Api.ApiMeta>{}, () => { });
         }
     }

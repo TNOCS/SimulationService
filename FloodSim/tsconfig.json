@@ -80,7 +80,6 @@
         "../ServerComponents/creator/RssService.d.ts",
         "../ServerComponents/database/BagDatabase.d.ts",
         "../ServerComponents/database/IBagAddress.d.ts",
-        "../ServerComponents/database/IBagConnector.d.ts",
         "../ServerComponents/database/IBagOptions.d.ts",
         "../ServerComponents/database/LocalBag.d.ts",
         "../ServerComponents/database/Location.d.ts",

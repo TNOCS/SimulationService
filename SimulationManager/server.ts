@@ -77,7 +77,7 @@ var prefix = SimSvc.SimServiceManager.namespace;
 
 var api = new SimMngr.SimulationManager('cs', 'SimulationManager', false, {
     server: `${Utils.getIPAddress()}:${port}`,
-    mqttSubscriptions: [ 'cs/layers/', 'cs/keys/#' ]
+    mqttSubscriptions: [ 'cs/layers/#', 'cs/keys/#' ]
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});

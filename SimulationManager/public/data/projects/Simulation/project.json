@@ -11,7 +11,7 @@
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1448166400962,
+    "focus": 1448183032962,
     "zoomLevel": 3600000
   },
   "datasources": [
@@ -83,6 +83,15 @@
                 "url": "/api/keys/sim.floodSimCmd",
                 "message": "{ \"scenario\": \"breach\"}",
                 "description": "Scenario provided by Deltares."
+              },
+              {
+                "name": "Fail power station Bergambacht",
+                "httpMethod": {
+                  "name": "POST"
+                },
+                "description": "Let power station Bergambacht fail.",
+                "url": "/api/keys/sim.PowerStationCmd",
+                "message": "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
               }
             ]
           }
@@ -218,8 +227,8 @@
           "type": "dynamicgeojson",
           "renderType": "geojson",
           "heatmapItems": null,
-          "url": "http://192.168.1.48:3335/api/layers/powerstations",
-          "typeUrl": "http://192.168.1.48:3335/api/resources/electrical_network",
+          "url": "http://139.63.53.217:3335/api/layers/powerstations",
+          "typeUrl": "http://139.63.53.217:3335/api/resources/electrical_network",
           "opacity": 75,
           "isDynamic": true,
           "gui": {},

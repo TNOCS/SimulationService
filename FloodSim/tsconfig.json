@@ -94,6 +94,7 @@
         "../ServerComponents/helpers/Rss.d.ts",
         "../ServerComponents/helpers/RssGeoJSON.d.ts",
         "../ServerComponents/helpers/StringExt.d.ts",
+        "../ServerComponents/helpers/typestate.d.ts",
         "../ServerComponents/helpers/Utils.d.ts",
         "../ServerComponents/import/AggregateOpportunitiesToGeoJsonTransformer.d.ts",
         "../ServerComponents/import/AggregateOpportunitiesToOrganisationTransformer.d.ts",

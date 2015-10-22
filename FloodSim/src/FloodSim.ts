@@ -84,6 +84,8 @@ export class FloodSim extends SimSvc.SimServiceManager {
             this.message = 'Scenario has been reset.'
             return true;
         });
+
+
     }
 
     /**
@@ -172,6 +174,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.subscribeKey('sim.floodSimCmd', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2)}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
             if (message.hasOwnProperty('scenario')) this.startScenario(message['scenario']);
+            if (message.hasOwnProperty('next')) this.publishNextFloodLayer(Number.MAX_VALUE);
         });
 
         // When the simulation time is changed:
@@ -180,39 +183,45 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.on('simTimeChanged', () => {
             var scenario = this.pubFloodingScenario.scenario;
             if (!scenario) return;
-            if (this.floodSims[scenario][this.floodSims[scenario].length-1].timeStamp === publishedTimeStamp) {
+            if (this.floodSims[scenario][this.floodSims[scenario].length-1].timeStamp === this.pubFloodingScenario.timeStamp) {
                 this.message = `${scenario} scenario has ended.`;
                 this.sendAck(this.fsm.currentState);
                 return;
             }
-            this.fsm.trigger(SimSvc.SimCommand.Run);
-            var publishedTimeStamp = this.pubFloodingScenario.timeStamp;
             var minutesSinceStart = this.simTime.diffMinutes(this.pubFloodingScenario.startTime);
-            Winston.warn(`Start time: ${this.pubFloodingScenario.startTime.toLocaleTimeString()}.`);
-            Winston.warn(`Current time: ${this.simTime.toLocaleTimeString()}.`);
-            Winston.warn(`Minutes since start: ${minutesSinceStart}.`);
-            for (let i in this.floodSims[scenario]) {
-                var s = this.floodSims[scenario][i];
-                if (s.timeStamp <= publishedTimeStamp) continue;
-                if (s.timeStamp > minutesSinceStart) {
+            this.publishNextFloodLayer(minutesSinceStart);
+        });
+    }
+
+    /** Publish the next available flooding layer. */
+    private publishNextFloodLayer(minutesSinceStart: number) {
+        var scenario = this.pubFloodingScenario.scenario;
+        var publishedTimeStamp = this.pubFloodingScenario.timeStamp;
+        this.fsm.trigger(SimSvc.SimCommand.Run);
+        Winston.warn(`Start time: ${this.pubFloodingScenario.startTime.toLocaleTimeString()}.`);
+        Winston.warn(`Current time: ${this.simTime.toLocaleTimeString()}.`);
+        Winston.warn(`Minutes since start: ${minutesSinceStart}.`);
+        for (let i in this.floodSims[scenario]) {
+            var s = this.floodSims[scenario][i];
+            if (s.timeStamp <= publishedTimeStamp) continue;
+            if (s.timeStamp > minutesSinceStart) {
+                this.fsm.trigger(SimSvc.SimCommand.Finish);
+                return;
+            }
+            this.pubFloodingScenario.timeStamp = s.timeStamp;
+            fs.readFile(s.layer.url, 'utf8', (err: NodeJS.ErrnoException, data: string) => {
+                if (err) {
+                    Winston.error(`Error reading file: ${err}.`);
                     this.fsm.trigger(SimSvc.SimCommand.Finish);
                     return;
                 }
-                this.pubFloodingScenario.timeStamp = s.timeStamp;
-                fs.readFile(s.layer.url, 'utf8', (err: NodeJS.ErrnoException, data: string) => {
-                    if (err) {
-                        Winston.error(`Error reading file: ${err}.`);
-                        this.fsm.trigger(SimSvc.SimCommand.Finish);
-                        return;
-                    }
-                    this.message = `${scenario}: minute ${s.timeStamp}.`;
-                    Winston.info(`${this.message}.`);
-                    this.updateFloodLayer(s.timeStamp, data);
-                    this.fsm.trigger(SimSvc.SimCommand.Finish);
-                });
-                return;
-            }
-        });
+                this.message = `${scenario}: minute ${s.timeStamp}.`;
+                Winston.info(`${this.message}.`);
+                this.updateFloodLayer(s.timeStamp, data);
+                this.fsm.trigger(SimSvc.SimCommand.Finish);
+            });
+            return;
+        }
     }
 
     /**

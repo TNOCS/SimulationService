@@ -25,7 +25,6 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
     private simStartTime: Date;
     private powerLayer: Api.ILayer;
     private powerStations: Api.Feature[];
-    //private powerStationFsm: TypeState.FiniteStateMachine<SimSvc.InfrastructureState>;
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
@@ -34,36 +33,9 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
     start() {
         super.start();
 
-        //this.createPowerStationFsm();
         this.reset();
         this.initFSM();
     }
-
-    // /** Create a power station, which
-    //  *  - Goes from OK or Stressed to Failed when flooded
-    //  *  - May go from OK or Stressed to Stressed when another power stations fails
-    //  */
-    // private createPowerStationFsm() {
-    //     this.powerStationFsm = new TypeState.FiniteStateMachine<SimSvc.InfrastructureState>(SimSvc.InfrastructureState.Ok);
-
-    //     this.powerStationFsm.from(SimSvc.InfrastructureState.Ok).to(SimSvc.InfrastructureState.Stressed).on(SimSvc.Incident.PowerStationFailure);
-    //     this.powerStationFsm.from(SimSvc.InfrastructureState.Ok).to(SimSvc.InfrastructureState.Failed).on(SimSvc.Incident.PowerStationFailure);
-    //     this.powerStationFsm.from(SimSvc.InfrastructureState.Stressed).to(SimSvc.InfrastructureState.Failed).on(SimSvc.Incident.PowerStationFailure);
-    //     this.powerStationFsm.from(SimSvc.InfrastructureState.Ok, SimSvc.InfrastructureState.Stressed).to(SimSvc.InfrastructureState.Failed).on(SimSvc.Incident.Flooding);
-
-    //     this.powerStationFsm.onExit(SimSvc.InfrastructureState.Ok, (to, options) => {
-    //         if (!options || !options.hasOwnProperty('trigger')) return true;
-    //         switch (options['trigger']) {
-    //             case SimSvc.Incident.Flooding:
-    //                 // Check if flooded
-    //                 return false;
-    //             case SimSvc.Incident.PowerStationFailure:
-    //                 // Check if powerstation is dependend on failing powerstation
-    //                 return true;
-    //         }
-    //         return true;
-    //     });
-    // }
 
     /**
      * Initialize the FSM, basically setting the simulation start time.
@@ -93,11 +65,14 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
             }
         });
 
-        this.subscribeKey(`cs.layers.floodsim`, <Api.ApiMeta>{}, (topic: string, message: any, params: Object) => {
-            Winston.info('Floodsim key received');
-            Winston.info(`Topic: ${topic}`);
-            Winston.info(`Message: ${message}`);
-            this.flooding(message);
+        this.on(Api.Event[Api.Event.LayerChanged], (changed: Api.IChangeEvent) => {
+            if (changed.id !== 'floodsim') return;
+            var layer = <Api.ILayer> changed.value;
+            if (!layer.data) return;
+            Winston.info('Floodsim layer received');
+            Winston.info(`ID  : ${changed.id}`);
+            Winston.info(`Type: ${changed.type}`);
+            this.flooding(layer);
         });
     }
 
@@ -109,7 +84,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         this.powerStations.forEach(ps => {
             var state = this.getFeatureState(ps);
             if (state === SimSvc.InfrastructureState.Failed) failedPowerStations.push(ps);
-            if (state !== SimSvc.InfrastructureState.Ok) return;
+            // if (state !== SimSvc.InfrastructureState.Ok) return;
             var waterLevel = getWaterLevel(ps.geometry.coordinates);
             if (waterLevel > 0) {
                 this.setFeatureState(ps, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, true);
@@ -121,7 +96,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         this.powerStations.forEach(ps => {
             if (!ps.properties.hasOwnProperty('dependencies')) return;
             var state = this.getFeatureState(ps);
-            if (state !== SimSvc.InfrastructureState.Failed) return;
+            if (state === SimSvc.InfrastructureState.Failed) return;
             var dependencies = ps.properties['dependencies'];
 
         });
@@ -133,10 +108,10 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         var gridData = Grid.IsoLines.convertDataToGrid(layer, gridParams);
 
         return function getWaterLevel(pt: number[]): number {
-            var row = (pt[0] - gridParams.startLon) / gridParams.deltaLon;
-            if (row < 0 || row >= gridData.length) return -1;
-            var col = (pt[1] - gridParams.startLat) / gridParams.deltaLat;
+            var col = Math.floor((pt[0] - gridParams.startLon) / gridParams.deltaLon);
             if (col < 0 || col >= gridData[0].length) return -1;
+            var row = Math.floor((pt[1] - gridParams.startLat) / gridParams.deltaLat);
+            if (row < 0 || row >= gridData.length) return -1;
             var waterLevel = gridData[row][col];
             return waterLevel;
         }
@@ -162,16 +137,6 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
                 this.setFeatureState(f, SimSvc.InfrastructureState.Ok);
                 this.powerStations.push(f);
             });
-
-            // // TEST CODE
-            // this.powerLayer.features.forEach(f => {
-            //     if (f.properties.hasOwnProperty('featureTypeId') && f.properties['featureTypeId'] === 'msn_50_{state}') {
-            //         Winston.info(`Failing ${f.properties["name"]}`);
-            //         this.setFeatureState(f, SimSvc.InfrastructureState.Failed);
-            //         f.properties['failureMode'] = SimSvc.FailureMode.Flooded;
-            //         f.properties['timeOfFailure'] = Date.now();
-            //     }
-            // });
 
             this.publishLayer(this.powerLayer);
         });

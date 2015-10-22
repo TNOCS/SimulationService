@@ -92,6 +92,15 @@
                 "description": "Let power station Bergambacht fail.",
                 "url": "/api/keys/sim.PowerStationCmd",
                 "message": "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
+              },
+              {
+                "name": "Gorinchem next",
+                "httpMethod": {
+                  "name": "POST"
+                },
+                "description": "Show the next available flooding layer.",
+                "message": "{ \"scenario\": \"Gorinchem\", \"next\": true }",
+                "url": "/api/keys/sim.floodSimCmd"
               }
             ]
           }
@@ -227,8 +236,8 @@
           "type": "dynamicgeojson",
           "renderType": "geojson",
           "heatmapItems": null,
-          "url": "http://139.63.53.217:3335/api/layers/powerstations",
-          "typeUrl": "http://139.63.53.217:3335/api/resources/electrical_network",
+          "url": "http://localhost:3335/api/layers/powerstations",
+          "typeUrl": "http://localhost:3335/api/resources/electrical_network",
           "opacity": 75,
           "isDynamic": true,
           "gui": {},

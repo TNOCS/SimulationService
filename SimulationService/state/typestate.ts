@@ -71,9 +71,9 @@ export class FiniteStateMachine<T> {
     public currentState: T;
     private _startState: T;
     private _transitionFunctions: TransitionFunction<T>[] = [];
-    private _onCallbacks: { [key: string]: { (from: T): void; }[] } = {};
-    private _exitCallbacks: { [key: string]: { (to: T): boolean; }[] } = {};
-    private _enterCallbacks: { [key: string]: { (from: T): boolean; }[] } = {};
+    private _onCallbacks: { [key: string]: { (from: T, options?: Object): void; }[] } = {};
+    private _exitCallbacks: { [key: string]: { (to: T, options?: Object): boolean; }[] } = {};
+    private _enterCallbacks: { [key: string]: { (from: T, options?: Object): boolean; }[] } = {};
     private _triggers: { [from: string]: { [trigger: string]: T } } = {};
 
     /**
@@ -105,12 +105,14 @@ export class FiniteStateMachine<T> {
         this._triggers[fr][trigger.toString()] = toState;
     }
 
-    public trigger(trigger: number) {
+    public trigger(trigger: number, options?: Object) {
         if (typeof trigger === 'undefined') return;
         var t = trigger.toString();
         var current = this.currentState.toString();
         if (!this._triggers.hasOwnProperty(current) || !this._triggers[current].hasOwnProperty(t)) return;
-        this.go(this._triggers[current][t]);
+        if (!options) options = {};
+        options['trigger'] = t;
+        this.go(this._triggers[current][t], options);
     }
 
     /**
@@ -135,7 +137,7 @@ export class FiniteStateMachine<T> {
         * @param state {T} State to listen to
         * @param callback {fcn} Callback to fire
         */
-    public onEnter(state: T, callback: (from?: T) => boolean): FiniteStateMachine<T> {
+    public onEnter(state: T, callback: (from?: T, options?: Object) => boolean): FiniteStateMachine<T> {
         var key = state.toString();
         if (!this._enterCallbacks[key]) {
             this._enterCallbacks[key] = [];
@@ -151,7 +153,7 @@ export class FiniteStateMachine<T> {
         * @param state {T} State to listen to
         * @param callback {fcn} Callback to fire
         */
-    public onExit(state: T, callback: (to?: T) => boolean): FiniteStateMachine<T> {
+    public onExit(state: T, callback: (to?: T, options?: Object) => boolean): FiniteStateMachine<T> {
         var key = state.toString();
         if (!this._exitCallbacks[key]) {
             this._exitCallbacks[key] = [];
@@ -191,24 +193,24 @@ export class FiniteStateMachine<T> {
     }
 
     /**
-  * Check whether a transition to a new state is valide
-  * @method canGo
-  * @param state {T}
-  */
+     * Check whether a transition to a new state is valide
+     * @method canGo
+     * @param state {T}
+     */
     public canGo(state: T): boolean {
         return this.currentState === state || this._validTransition(this.currentState, state);
     }
 
     /**
-  * Transition to another valid state
-  * @method go
-  * @param state {T}
-  */
-    public go(state: T): void {
+     * Transition to another valid state
+     * @method go
+     * @param state {T}
+     */
+    public go(state: T, options?: Object): void {
         if (!this.canGo(state)) {
             throw new Error('Error no transition function exists from state ' + this.currentState.toString() + ' to ' + state.toString());
         }
-        this._transitionTo(state);
+        this._transitionTo(state, options);
     }
 
     /**
@@ -218,7 +220,7 @@ export class FiniteStateMachine<T> {
      * @param from {T}
      * @param to {T}
      */
-    public onTransition(from: T, to: T) {
+    public onTransition(from: T, to: T, options?: Object) {
         // pass, does nothing untill overridden
     }
 
@@ -231,7 +233,7 @@ export class FiniteStateMachine<T> {
         this.currentState = this._startState;
     }
 
-    private _transitionTo(state: T) {
+    private _transitionTo(state: T, options?: Object) {
         if (!this._exitCallbacks[this.currentState.toString()]) {
             this._exitCallbacks[this.currentState.toString()] = [];
         }
@@ -245,11 +247,11 @@ export class FiniteStateMachine<T> {
         }
 
         var canExit = this._exitCallbacks[this.currentState.toString()].reduce<boolean>((accum: boolean, next: () => boolean) => {
-            return accum && (<boolean>next.call(this, state));
+            return accum && (<boolean>next.call(this, state, options));
         }, true);
 
         var canEnter = this._enterCallbacks[state.toString()].reduce<boolean>((accum: boolean, next: () => boolean) => {
-            return accum && (<boolean>next.call(this, this.currentState));
+            return accum && (<boolean>next.call(this, this.currentState, options));
         }, true);
 
         if (canExit && canEnter) {
@@ -258,7 +260,7 @@ export class FiniteStateMachine<T> {
             this._onCallbacks[this.currentState.toString()].forEach(fcn => {
                 fcn.call(this, old, state);
             });
-            this.onTransition(old, state);
+            this.onTransition(old, state, options);
         }
     }
 }

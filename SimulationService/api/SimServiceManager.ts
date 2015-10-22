@@ -34,10 +34,24 @@ export enum InfrastructureState {
 /** When the infrastructure is stressed or has failed, what was the cause of its failure. */
 export enum FailureMode {
     None = 0,
-    Flooded = 1,
-    NoMainPower = 2,
-    NoBackupPower = 4,
-    NoComms = 8    
+    Unknown = 1,
+    Flooded = 2,
+    NoMainPower = 4,
+    NoBackupPower = 8,
+    NoComms = 16   
+}
+
+/** Incident that has happened */
+export enum Incident {
+    Flooding,
+    Earthquake,
+    Fire,
+    Explosion,
+    GasDispersion,
+    TerroristAttack,
+    PowerFailure,
+    CommunicationFailure,
+    TrafficAccident
 }
 
 /** For setting the simulation time */

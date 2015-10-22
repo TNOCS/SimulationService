@@ -1,1 +1,74 @@
-{"featureTypes":{"Flooding":{"name":"Flooding","defaultLegendProperty":"i","style":{"drawingMode":"Polygon","iconWidth":32,"iconHeight":32,"stroke":false,"iconUri":"images/flooding.jpg"},"propertyTypeKeys":"Name;h"}},"propertyTypeData":{"Name":{"label":"Name","type":"text","title":"Name"},"h":{"title":"Maximale waterdiepte","description":"Waterdiepte [m]","label":"h","type":"number","legend":{"id":"Waterdiepte","visualAspect":"fillColor","description":"Waterdiepte [m]","legendKind":"interpolated","legendEntries":[{"label":"0.1","value":0.1,"color":"#00fbff"},{"label":"0.5m","value":0.5,"color":"#00e5ff"},{"label":"1m","value":1,"color":"#00ccff"},{"label":"2m","value":2,"color":"#0099ff"},{"label":"3m","value":3,"color":"#0066ff"},{"label":"4m","value":4,"color":"#0033ff"},{"label":"5m","value":5,"color":"#0400ff"},{"label":"10m","value":10,"color":"#0400ff"},{"label":"15m en hoger","value":15,"color":"#0400ff"}]}}},"id":"floodsimtypes","propertyTypes":{}}
+{
+    "featureTypes": {
+        "Flooding": {
+            "name": "Flooding",
+            "defaultLegendProperty": "i",
+            "style": {
+                "drawingMode": "Polygon",
+                "iconWidth": 32,
+                "iconHeight": 32,
+                "stroke": false,
+                "iconUri": "images/flooding.jpg"
+            },
+            "propertyTypeKeys": "Name;h"
+        }
+    },
+    "propertyTypeData": {
+        "Name": {
+            "label": "Name",
+            "type": "text",
+            "title": "Name"
+        },
+        "h": {
+            "title": "Maximale waterdiepte",
+            "description": "Waterdiepte [m]",
+            "label": "h",
+            "type": "number",
+            "legend": {
+                "id": "Waterdiepte",
+                "visualAspect": "fillColor",
+                "description": "Waterdiepte [m]",
+                "legendKind": "interpolated",
+                "legendEntries": [{
+                    "label": "0.1",
+                    "value": 0.1,
+                    "color": "#00fbff"
+                }, {
+                    "label": "0.5m",
+                    "value": 0.5,
+                    "color": "#00e5ff"
+                }, {
+                    "label": "1m",
+                    "value": 1,
+                    "color": "#00ccff"
+                }, {
+                    "label": "2m",
+                    "value": 2,
+                    "color": "#0099ff"
+                }, {
+                    "label": "3m",
+                    "value": 3,
+                    "color": "#0066ff"
+                }, {
+                    "label": "4m",
+                    "value": 4,
+                    "color": "#0033ff"
+                }, {
+                    "label": "5m",
+                    "value": 5,
+                    "color": "#0400ff"
+                }, {
+                    "label": "10m",
+                    "value": 10,
+                    "color": "#0400ff"
+                }, {
+                    "label": "15m en hoger",
+                    "value": 15,
+                    "color": "#0400ff"
+                }]
+            }
+        }
+    },
+    "id": "floodsimtypes",
+    "propertyTypes": {}
+}

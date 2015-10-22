@@ -1,5 +1,601 @@
 /// <reference path="../crossfilter/crossfilter.d.ts" />
 /// <reference path="../leaflet/leaflet.d.ts" />
+declare module ColorExt {
+    /** Color utility class */
+    class Utils {
+        /**
+         * HSV to RGB color conversion.
+         *
+         * HSV:
+         * 		Hue (the actual color between 0 and 360 degrees),
+         *   	Saturation between 0 (grey) and 100 (full color),
+         *   	Value of Brightness between 0 (black) and 100 white.
+         */
+        static hsv2rgb(h: any, s: any, v: any): string;
+        static toColor(val: number, min: number, max: number, primaryColorHue: number, secondaryColorHue: any): string;
+        /**
+         * Calculate the hue value from a hexadecimal RGB string. Return a value between 0 and 360 degrees
+         * equation from: en.wikipedia.org/wiki/Hue#Computing_hue_from_RGB
+         */
+        static rgbToHue(rgb: string): number;
+        /**
+         * Convert an R, G and B combination to hexadecimal string (with preceding #)
+         * @param  number[] rgb array
+         * @return string  hex string
+         */
+        static rgbToHex(rgb: any): string;
+        static colorNameToHex(color: any): any;
+    }
+}
+
+declare module csComp.Helpers {
+    interface IGenericPoint<T> {
+        x: T;
+        y: T;
+    }
+    /**
+     * An (x,y) point
+     */
+    interface IPoint extends IGenericPoint<number> {
+    }
+    /**
+     * A linked list of type T
+     */
+    interface ILinkedList<T> {
+        head?: ILinkedList<T>;
+        tail?: ILinkedList<T>;
+        next?: ILinkedList<T>;
+        prev?: ILinkedList<T>;
+        p?: IGenericPoint<T>;
+    }
+    /**
+     * A linked list of type T
+     */
+    interface ILinkedPointList extends ILinkedList<number> {
+        closed?: boolean;
+    }
+    interface IDrawContour {
+        (startX: number, startY: number, endX: number, endY: number, contourLevel: number, k: number): void;
+    }
+    /**
+      * Implements CONREC.
+      *
+      * @param {function} drawContour function for drawing contour.  Defaults to a
+      *                               custom "contour builder", which populates the
+      *                               contourList property.
+      */
+    class Conrec {
+        private h;
+        private sh;
+        private xh;
+        private yh;
+        private contours;
+        /**
+         * Create a new Conrec class, optionally specifying the function to use for drawing the contour line.
+         * @param  {number} drawContour [description]
+         * @return {[type]}             [description]
+         */
+        constructor(drawContour?: IDrawContour);
+        /**
+         * contour is a contouring subroutine for rectangularily spaced data
+         *
+         * It emits calls to a line drawing subroutine supplied by the user which
+         * draws a contour map corresponding to real*4data on a randomly spaced
+         * rectangular grid. The coordinates emitted are in the same units given in
+         * the x() and y() arrays.
+         *
+         * Any number of contour levels may be specified but they must be in order of
+         * increasing value.
+         *
+         *
+         * @param {number[][]} d - matrix of data to contour
+         * @param {number} ilb,iub,jlb,jub - index lower and upper bounds of data matrix,
+         *                                 	 i in rows/latitude direction, j in columns/longitude direction
+         *
+         *             The following two, one dimensional arrays (x and y) contain
+         *             the horizontal and vertical coordinates of each sample points.
+         * @param {number[]} x  - data matrix column coordinates, e.g. latitude coordinates
+         * @param {number[]} y  - data matrix row coordinates, e.g. longitude coordinates
+         * @param {number} nc   - number of contour levels
+         * @param {number[]} z  - contour levels in increasing order.
+         * @param {number[]} noDataValue  - when one of the corners of the grid cell contains a noDataValue, that cell is skipped.
+         */
+        contour(d: number[][], ilb: number, iub: number, jlb: number, jub: number, x: number[], y: number[], nc: number, z: number[], noDataValue?: number): void;
+        /**
+         * drawContour - interface for implementing the user supplied method to
+         * render the countours.
+         *
+         * Draws a line between the start and end coordinates.
+         *
+         * @param startX    - start coordinate for X
+         * @param startY    - start coordinate for Y
+         * @param endX      - end coordinate for X
+         * @param endY      - end coordinate for Y
+         * @param contourLevel - Contour level for line.
+         */
+        private drawContour(startX, startY, endX, endY, contourLevel, k);
+        contourList: IContourList;
+    }
+    interface IContour extends Array<{
+        x: number;
+        y: number;
+    }> {
+        k: number;
+        level: number;
+    }
+    interface IContourList extends Array<IContour> {
+    }
+}
+
+interface Date {
+    getJulian(): number;
+    getGMST(): number;
+    /**
+     * Get date in YYYYMMDD format
+     */
+    yyyymmdd(): string;
+}
+
+declare module csComp.Helpers {
+    interface IDictionary<T> {
+        add(key: string, value: T): void;
+        remove(key: string): void;
+        containsKey(key: string): boolean;
+        keys(): string[];
+        clear(): void;
+        count(): number;
+        values(): Array<T>;
+    }
+    class Dictionary<T> implements IDictionary<T> {
+        private theKeys;
+        private theValues;
+        constructor();
+        initialize(init: {
+            key: string;
+            value: T;
+        }[]): void;
+        add(key: string, value: any): void;
+        remove(key: string): void;
+        clear(): void;
+        count(): number;
+        keys(): string[];
+        values(): Array<T>;
+        containsKey(key: string): boolean;
+        toLookup(): IDictionary<T>;
+    }
+}
+
+declare module esriJsonConverter {
+    class esriJsonConverter {
+        ringIsClockwise(ringToTest: any): boolean;
+        esriCon: {};
+        esriGeometryToGcGeometry(esriGeom: any): any;
+        esriFeatureToGcFeature(esriFeature: any): any;
+        toGeoJson(esriObject: any): any;
+        /************************************************
+         * GeoJSON to ESRI Rest Converter
+         ************************************************/
+        gCon: {};
+        isCompatible(esriGeomType: any, gcGeomType: any): boolean;
+        gcGeomTypeToEsriGeomInfo(gcType: any): {
+            type: any;
+            geomHolder: any;
+        };
+        gcPolygonCoordinatesToEsriPolygonCoordinates(gcCoords: any): any[];
+        gcCoordinatesToEsriCoordinates(gcGeom: any): any;
+        gcGeometryToEsriGeometry(gcGeom: any): any;
+        gcFeatureToEsriFeature(gcFeature: any): any;
+        toEsri(geoJsonObject: any): any;
+    }
+}
+
+declare module csComp.Helpers {
+    interface IGeoFeature {
+        type: string;
+        geometry: {
+            type: string;
+            coordinates: Array<number> | Array<Array<number>> | Array<Array<Array<number>>>;
+        };
+        properties: Object;
+    }
+    interface IGeoFeatureCollection {
+        type: string;
+        features: IGeoFeature[];
+    }
+    /**
+    * A set of static geo tools
+    * Source: http://www.csgnetwork.com/degreelenllavcalc.html
+    */
+    class GeoExtensions {
+        static getBoundingBox(data: any): any;
+        /**
+        * Convert topojson data to geojson data.
+        */
+        static convertTopoToGeoJson(data: any): any;
+        static deg2rad(degree: number): number;
+        static rad2deg(rad: number): number;
+        /**
+         * Convert RD (Rijksdriehoek) coordinates to WGS84.
+         * @param  {number} x [RD X coordinate]
+         * @param  {number} y [RD Y coordinate]
+         * @return {[type]}   [object with latitude and longitude coordinate in WGS84]
+         * Source: http://home.solcon.nl/pvanmanen/Download/Transformatieformules.pdf, http://www.roelvanlisdonk.nl/?p=2950
+         */
+        static convertRDToWGS84(x: number, y: number): {
+            latitude: number;
+            longitude: number;
+        };
+        /**
+        * Calculate the log base 10 of val
+        */
+        static log10(val: any): number;
+        static convertDegreesToMeters(latitudeDegrees: number): {
+            latitudeLength: number;
+            longitudeLength: number;
+        };
+        /**
+         * Takes an array of LinearRings and optionally an {@link Object} with properties and returns a {@link Polygon} feature.
+         *
+         * @module turf/polygon
+         * @category helper
+         * @param {Array<Array<Number>>} rings an array of LinearRings
+         * @param {Object=} properties a properties object
+         * @returns {Feature<Polygon>} a Polygon feature
+         * @throws {Error} throw an error if a LinearRing of the polygon has too few positions
+         * or if a LinearRing of the Polygon does not have matching Positions at the
+         * beginning & end.
+         * @example
+         * var polygon = createPolygon([[
+         *  [-2.275543, 53.464547],
+         *  [-2.275543, 53.489271],
+         *  [-2.215118, 53.489271],
+         *  [-2.215118, 53.464547],
+         *  [-2.275543, 53.464547]
+         * ]], { name: 'poly1', population: 400});
+         *
+         * @seealso https://github.com/Turfjs/turf-polygon/blob/master/index.js
+         */
+        static createPolygonFeature(coordinates: Array<Array<Array<number>>>, properties: Object): IGeoFeature;
+        /**
+         * Takes one or more {@link Feature|Features} and creates a {@link FeatureCollection}.
+         *
+         * @param {Feature[]} features input features
+         * @returns {FeatureCollection} a FeatureCollection of input features
+         * @example
+         * var features = [
+         *  turf.point([-75.343, 39.984], {name: 'Location A'}),
+         *  turf.point([-75.833, 39.284], {name: 'Location B'}),
+         *  turf.point([-75.534, 39.123], {name: 'Location C'})
+         * ];
+         *
+         * var fc = turf.featurecollection(features);
+         *
+         * @seealso https://github.com/Turfjs/turf-featurecollection/blob/master/index.js
+         */
+        static createFeatureCollection(features: IGeoFeature[]): IGeoFeatureCollection;
+        static createPointFeature(lon: number, lat: number, properties?: csComp.Services.IProperty, sensors?: csComp.Services.IProperty): IGeoFeature;
+        static createLineFeature(coordinates: Array<Array<number>>, properties?: Object): IGeoFeature;
+        static createPropertyType(name: string, section?: string): csComp.Services.IPropertyType;
+        static convertMileToKm(miles: number): number;
+        static convertKmToMile(km: number): number;
+        /**
+         * pointInsidePolygon returns true if a 2D point lies within a polygon of 2D points
+         * @param  {number[]}   point   [lat, lng]
+         * @param  {number[][]} polygon [[lat, lng], [lat,lng],...]
+         * @return {boolean}            Inside == true
+         */
+        static pointInsidePolygon(point: number[], polygon: number[][][]): boolean;
+        /**
+         * pointInsideMultiPolygon returns true if a 2D point lies within a multipolygon
+         * @param  {number[]}   point   [lat, lng]
+         * @param  {number[][][]} polygon [[[lat, lng], [lat,lng]],...]]
+         * @return {boolean}            Inside == true
+         */
+        static pointInsideMultiPolygon(point: number[], multipoly: number[][][][]): boolean;
+    }
+}
+
+declare module csComp.Helpers {
+    /**
+     * Serialize an array of type T to a JSON string, by calling the callback on each array element.
+     */
+    function serialize<T>(arr: Array<T>, callback: (T) => Object): Object[];
+    function getDefaultFeatureStyle(): csComp.Services.IFeatureTypeStyle;
+    /**
+     * Export data to the file system.
+     */
+    function saveData(data: string, filename: string, fileType: string): void;
+    function supportsDataUri(): boolean;
+    function standardDeviation(values: number[]): {
+        avg: number;
+        stdDev: number;
+    };
+    function average(data: number[]): number;
+    function getFeatureTitle(feature: IFeature): string;
+    function featureTitle(type: csComp.Services.IFeatureType, feature: IFeature): string;
+    /**
+     * Collect all the property types that are referenced by a feature type.
+     */
+    function getPropertyTypes(type: csComp.Services.IFeatureType, propertyTypeData: csComp.Services.IPropertyTypeData, feature?: csComp.Services.IFeature): Services.IPropertyType[];
+    function getMissingPropertyTypes(feature: csComp.Services.IFeature): csComp.Services.IPropertyType[];
+    function addPropertyTypes(feature: csComp.Services.IFeature, featureType: csComp.Services.IFeatureType): csComp.Services.IFeatureType;
+    /**
+     * In case we are dealing with a regular JSON file without type information, create a default type.
+     */
+    function createDefaultType(feature: csComp.Services.IFeature): csComp.Services.IFeatureType;
+    /**
+     * Convert a property value to a display value using the property info.
+     */
+    function convertPropertyInfo(pt: csComp.Services.IPropertyType, text: any): string;
+    /**
+    * Set the name of a feature.
+    * @param {csComp.Services.IFeature} feature
+    */
+    function setFeatureName(feature: csComp.Services.IFeature, propertyTypeData?: csComp.Services.IPropertyTypeData): IFeature;
+    /**
+    * Convert a feature's stringFormat to a string.
+    * @param {Services.IFeature} feature
+    * @param {string} stringFormat
+    */
+    function convertStringFormat(feature: Services.IFeature, stringFormat: string): string;
+    /**
+    * Get all indexes of the 'find' substring in the 'source' string.
+    * @param {string} source
+    * @param {string} find
+    */
+    function indexes(source: string, find: string): number[];
+    function getGuid(): string;
+    function S4(): string;
+    /**
+     * Load the features as visible on the map, effectively creating a virtual
+     * GeoJSON file that represents all visible items.
+     * Also loads the keys into the featuretype's propertyTypeData collection.
+     */
+    function loadMapLayers(layerService: Services.LayerService): Services.IGeoJsonFile;
+    /**
+     * Helper function to create content for the RightPanelTab
+     * @param  {string} container The container name
+     * @param  {string} directive The directive of the container
+     * @param  {any}    data      Panel data
+     * @return {RightPanelTab}    Returns the RightPanelTab instance. Add it to the
+     * rightpanel by publishing it on the MessageBus.
+     */
+    function createRightPanelTab(container: string, directive: string, data: any, title: string, popover?: string, icon?: string): Services.RightPanelTab;
+    /**
+     * Helper function to parse a query of an url (e.g localhost:8080/api?a=1&b=2&c=3)
+     */
+    function parseUrlParameters(url: string, baseDelimiter: string, subDelimiter: string, valueDelimiter: string): {
+        [key: string]: any;
+    };
+    /**
+     * Helper function to parse a query of an url (e.g localhost:8080/api?a=1&b=2&c=3)
+     */
+    function joinUrlParameters(params: {
+        [key: string]: any;
+    }, baseDelimiter: string, subDelimiter: string, valueDelimiter: string): string;
+    function createIconHtml(feature: IFeature, featureType: csComp.Services.IFeatureType): {
+        [key: string]: any;
+    };
+}
+
+declare module csComp.Helpers {
+    class PieData {
+        id: number;
+        label: string;
+        color: string;
+        weight: number;
+    }
+    class AsterPieData extends PieData {
+        score: number;
+    }
+    interface IHistogramOptions {
+        id?: string;
+        numberOfBins?: number;
+        width?: number;
+        height?: number;
+        xLabel?: string;
+        selectedValue?: number;
+    }
+    interface IMcaPlotOptions extends IHistogramOptions {
+        /** Scoring function x,y points */
+        xy?: {
+            x: number[];
+            y: number[];
+        };
+        /** Value of the feature, i.e. the point that we wish to highlight */
+        featureValue?: number;
+    }
+    class Plot {
+        static pieColors: string[];
+        /**
+         * Draw a histogram, and, if xy is specified, a line plot of x versus y (e.g. a scoring function).
+         */
+        static drawHistogram(values: number[], options?: IHistogramOptions): void;
+        static getScale(stepSize: number, max: number): number;
+        static drawMcaPlot(values: number[], options?: IMcaPlotOptions): void;
+        /**
+        * Draw a Pie chart.
+        */
+        static drawPie(pieRadius: number, data?: PieData[], parentId?: string, colorScale?: string, svgId?: string): void;
+        /**
+        * Draw an Aster Pie chart, i.e. a pie chart with varying radius depending on the score,
+        * where the maximum score of 100 equals the pie radius.
+        * See http://bl.ocks.org/bbest/2de0e25d4840c68f2db1
+        */
+        static drawAsterPlot(pieRadius: number, data?: AsterPieData[], parentId?: string, colorScale?: string, svgId?: string): void;
+        private static clearSvg(svgId);
+    }
+}
+
+declare module csComp.StringExt {
+    function isNullOrEmpty(s: string): boolean;
+    /**
+     * String formatting
+     * 'Added {0} by {1} to your collection'.f(title, artist)
+     * 'Your balance is {0} USD'.f(77.7)
+     */
+    function format(s: string, ...args: string[]): string;
+    function isDate(n: any): boolean;
+    function isNumber(n: any): boolean;
+    function isBoolean(s: any): boolean;
+    function isArray(s: any): boolean;
+    function isBbcode(s: any): boolean;
+}
+
+declare module StringFormat {
+    /**
+     * Module
+     */
+    var myModule: any;
+}
+
+interface String {
+    score(text: string, fuzziness?: any): number;
+}
+
+declare module csComp.Helpers {
+    function getColorFromStringValue(v: string, gs: csComp.Services.GroupStyle): string;
+    function getImageUri(ft: csComp.Services.IFeatureType): string;
+    function getColorFromStringLegend(v: string, l: csComp.Services.Legend): string;
+    function getColorFromLegend(v: number, l: csComp.Services.Legend, defaultcolor?: string): string;
+    function getColor(v: number, gs: csComp.Services.GroupStyle): string;
+    /**
+     * Extract a valid color string, without transparency.
+     */
+    function getColorString(color: string, defaultColor?: string): string;
+}
+
+declare module FSM {
+    /**
+     * Transition grouping to faciliate fluent api
+     * @class Transitions<T>
+     */
+    class Transitions<T> {
+        fsm: FiniteStateMachine<T>;
+        constructor(fsm: FiniteStateMachine<T>);
+        fromStates: T[];
+        toStates: T[];
+        /**
+         * Specify the end state(s) of a transition function
+         * @method to
+         * @param ...states {T[]}
+         */
+        to(...states: T[]): TransitionFunctions<T>;
+        toAny(states: any): void;
+    }
+    /**
+     * Internal representation of a transition function
+     * @class TransitionFunction<T>
+     */
+    class TransitionFunction<T> {
+        fsm: FiniteStateMachine<T>;
+        from: T;
+        to: T;
+        constructor(fsm: FiniteStateMachine<T>, from: T, to: T);
+    }
+    class TransitionFunctions<T> extends Array<TransitionFunction<T>> {
+        private fsm;
+        constructor(fsm: FiniteStateMachine<T>);
+        on(trigger: number, callback?: (from: T, to: T) => any): void;
+    }
+    /***
+     * A simple finite state machine implemented in TypeScript, the templated argument is meant to be used
+     * with an enumeration.
+     * @class FiniteStateMachine<T>
+     */
+    class FiniteStateMachine<T> {
+        currentState: T;
+        private _startState;
+        private _transitionFunctions;
+        private _onCallbacks;
+        private _exitCallbacks;
+        private _enterCallbacks;
+        private _triggers;
+        /**
+         * @constructor
+         * @param startState {T} Intial starting state
+         */
+        constructor(startState: T);
+        addTransitions(fcn: Transitions<T>): TransitionFunctions<T>;
+        addEvent(trigger: number, fromState: T, toState: T): void;
+        trigger(trigger: number): void;
+        /**
+         * Listen for the transition to this state and fire the associated callback
+         * @method on
+         * @param state {T} State to listen to
+         * @param callback {fcn} Callback to fire
+         */
+        on(state: T, callback: (from?: T, to?: T) => any): FiniteStateMachine<T>;
+        /**
+            * Listen for the transition to this state and fire the associated callback, returning
+            * false in the callback will block the transition to this state.
+            * @method on
+            * @param state {T} State to listen to
+            * @param callback {fcn} Callback to fire
+            */
+        onEnter(state: T, callback: (from?: T) => boolean): FiniteStateMachine<T>;
+        /**
+            * Listen for the transition to this state and fire the associated callback, returning
+            * false in the callback will block the transition from this state.
+            * @method on
+            * @param state {T} State to listen to
+            * @param callback {fcn} Callback to fire
+            */
+        onExit(state: T, callback: (to?: T) => boolean): FiniteStateMachine<T>;
+        /**
+            * Declares the start state(s) of a transition function, must be followed with a '.to(...endStates)'
+            * @method from
+            * @param ...states {T[]}
+            */
+        from(...states: T[]): Transitions<T>;
+        fromAny(states: any): Transitions<T>;
+        private _validTransition(from, to);
+        /**
+          * Check whether a transition to a new state is valide
+          * @method canGo
+          * @param state {T}
+          */
+        canGo(state: T): boolean;
+        /**
+          * Transition to another valid state
+          * @method go
+          * @param state {T}
+          */
+        go(state: T): void;
+        /**
+         * This method is availble for overridding for the sake of extensibility.
+         * It is called in the event of a successful transition.
+         * @method onTransition
+         * @param from {T}
+         * @param to {T}
+         */
+        onTransition(from: T, to: T): void;
+        /**
+         * Reset the finite state machine back to the start state, DO NOT USE THIS AS A SHORTCUT for a transition.
+         * This is for starting the fsm from the beginning.
+         * @method reset
+         */
+        reset(): void;
+        private _transitionTo(state);
+    }
+}
+
+declare module csComp {
+    enum FileType {
+        Js = 0,
+        Css = 1,
+    }
+    class Utils {
+        static loadedFiles: string[];
+        static twoDigitStr(v: Number): string;
+        /**
+        * Load a JavaScript or CSS file dynamically by adding it to the end of the HEAD section in your document.
+        * See also: http://www.javascriptkit.com/javatutors/loadjavascriptcss.shtml
+        */
+        static loadJsCssfile(filename: string, filetype: FileType, callback?: (evt: Event) => void): void;
+    }
+}
+
 declare module csComp.Services {
     class Widget {
         content: Function;
@@ -1038,602 +1634,6 @@ declare module csComp.Services {
     }
 }
 
-declare module ColorExt {
-    /** Color utility class */
-    class Utils {
-        /**
-         * HSV to RGB color conversion.
-         *
-         * HSV:
-         * 		Hue (the actual color between 0 and 360 degrees),
-         *   	Saturation between 0 (grey) and 100 (full color),
-         *   	Value of Brightness between 0 (black) and 100 white.
-         */
-        static hsv2rgb(h: any, s: any, v: any): string;
-        static toColor(val: number, min: number, max: number, primaryColorHue: number, secondaryColorHue: any): string;
-        /**
-         * Calculate the hue value from a hexadecimal RGB string. Return a value between 0 and 360 degrees
-         * equation from: en.wikipedia.org/wiki/Hue#Computing_hue_from_RGB
-         */
-        static rgbToHue(rgb: string): number;
-        /**
-         * Convert an R, G and B combination to hexadecimal string (with preceding #)
-         * @param  number[] rgb array
-         * @return string  hex string
-         */
-        static rgbToHex(rgb: any): string;
-        static colorNameToHex(color: any): any;
-    }
-}
-
-declare module csComp.Helpers {
-    interface IGenericPoint<T> {
-        x: T;
-        y: T;
-    }
-    /**
-     * An (x,y) point
-     */
-    interface IPoint extends IGenericPoint<number> {
-    }
-    /**
-     * A linked list of type T
-     */
-    interface ILinkedList<T> {
-        head?: ILinkedList<T>;
-        tail?: ILinkedList<T>;
-        next?: ILinkedList<T>;
-        prev?: ILinkedList<T>;
-        p?: IGenericPoint<T>;
-    }
-    /**
-     * A linked list of type T
-     */
-    interface ILinkedPointList extends ILinkedList<number> {
-        closed?: boolean;
-    }
-    interface IDrawContour {
-        (startX: number, startY: number, endX: number, endY: number, contourLevel: number, k: number): void;
-    }
-    /**
-      * Implements CONREC.
-      *
-      * @param {function} drawContour function for drawing contour.  Defaults to a
-      *                               custom "contour builder", which populates the
-      *                               contourList property.
-      */
-    class Conrec {
-        private h;
-        private sh;
-        private xh;
-        private yh;
-        private contours;
-        /**
-         * Create a new Conrec class, optionally specifying the function to use for drawing the contour line.
-         * @param  {number} drawContour [description]
-         * @return {[type]}             [description]
-         */
-        constructor(drawContour?: IDrawContour);
-        /**
-         * contour is a contouring subroutine for rectangularily spaced data
-         *
-         * It emits calls to a line drawing subroutine supplied by the user which
-         * draws a contour map corresponding to real*4data on a randomly spaced
-         * rectangular grid. The coordinates emitted are in the same units given in
-         * the x() and y() arrays.
-         *
-         * Any number of contour levels may be specified but they must be in order of
-         * increasing value.
-         *
-         *
-         * @param {number[][]} d - matrix of data to contour
-         * @param {number} ilb,iub,jlb,jub - index lower and upper bounds of data matrix,
-         *                                 	 i in rows/latitude direction, j in columns/longitude direction
-         *
-         *             The following two, one dimensional arrays (x and y) contain
-         *             the horizontal and vertical coordinates of each sample points.
-         * @param {number[]} x  - data matrix column coordinates, e.g. latitude coordinates
-         * @param {number[]} y  - data matrix row coordinates, e.g. longitude coordinates
-         * @param {number} nc   - number of contour levels
-         * @param {number[]} z  - contour levels in increasing order.
-         * @param {number[]} noDataValue  - when one of the corners of the grid cell contains a noDataValue, that cell is skipped.
-         */
-        contour(d: number[][], ilb: number, iub: number, jlb: number, jub: number, x: number[], y: number[], nc: number, z: number[], noDataValue?: number): void;
-        /**
-         * drawContour - interface for implementing the user supplied method to
-         * render the countours.
-         *
-         * Draws a line between the start and end coordinates.
-         *
-         * @param startX    - start coordinate for X
-         * @param startY    - start coordinate for Y
-         * @param endX      - end coordinate for X
-         * @param endY      - end coordinate for Y
-         * @param contourLevel - Contour level for line.
-         */
-        private drawContour(startX, startY, endX, endY, contourLevel, k);
-        contourList: IContourList;
-    }
-    interface IContour extends Array<{
-        x: number;
-        y: number;
-    }> {
-        k: number;
-        level: number;
-    }
-    interface IContourList extends Array<IContour> {
-    }
-}
-
-interface Date {
-    getJulian(): number;
-    getGMST(): number;
-    /**
-     * Get date in YYYYMMDD format
-     */
-    yyyymmdd(): string;
-}
-
-declare module csComp.Helpers {
-    interface IDictionary<T> {
-        add(key: string, value: T): void;
-        remove(key: string): void;
-        containsKey(key: string): boolean;
-        keys(): string[];
-        clear(): void;
-        count(): number;
-        values(): Array<T>;
-    }
-    class Dictionary<T> implements IDictionary<T> {
-        private theKeys;
-        private theValues;
-        constructor();
-        initialize(init: {
-            key: string;
-            value: T;
-        }[]): void;
-        add(key: string, value: any): void;
-        remove(key: string): void;
-        clear(): void;
-        count(): number;
-        keys(): string[];
-        values(): Array<T>;
-        containsKey(key: string): boolean;
-        toLookup(): IDictionary<T>;
-    }
-}
-
-declare module esriJsonConverter {
-    class esriJsonConverter {
-        ringIsClockwise(ringToTest: any): boolean;
-        esriCon: {};
-        esriGeometryToGcGeometry(esriGeom: any): any;
-        esriFeatureToGcFeature(esriFeature: any): any;
-        toGeoJson(esriObject: any): any;
-        /************************************************
-         * GeoJSON to ESRI Rest Converter
-         ************************************************/
-        gCon: {};
-        isCompatible(esriGeomType: any, gcGeomType: any): boolean;
-        gcGeomTypeToEsriGeomInfo(gcType: any): {
-            type: any;
-            geomHolder: any;
-        };
-        gcPolygonCoordinatesToEsriPolygonCoordinates(gcCoords: any): any[];
-        gcCoordinatesToEsriCoordinates(gcGeom: any): any;
-        gcGeometryToEsriGeometry(gcGeom: any): any;
-        gcFeatureToEsriFeature(gcFeature: any): any;
-        toEsri(geoJsonObject: any): any;
-    }
-}
-
-declare module csComp.Helpers {
-    interface IGeoFeature {
-        type: string;
-        geometry: {
-            type: string;
-            coordinates: Array<number> | Array<Array<number>> | Array<Array<Array<number>>>;
-        };
-        properties: Object;
-    }
-    interface IGeoFeatureCollection {
-        type: string;
-        features: IGeoFeature[];
-    }
-    /**
-    * A set of static geo tools
-    * Source: http://www.csgnetwork.com/degreelenllavcalc.html
-    */
-    class GeoExtensions {
-        static getBoundingBox(data: any): any;
-        /**
-        * Convert topojson data to geojson data.
-        */
-        static convertTopoToGeoJson(data: any): any;
-        static deg2rad(degree: number): number;
-        static rad2deg(rad: number): number;
-        /**
-         * Convert RD (Rijksdriehoek) coordinates to WGS84.
-         * @param  {number} x [RD X coordinate]
-         * @param  {number} y [RD Y coordinate]
-         * @return {[type]}   [object with latitude and longitude coordinate in WGS84]
-         * Source: http://home.solcon.nl/pvanmanen/Download/Transformatieformules.pdf, http://www.roelvanlisdonk.nl/?p=2950
-         */
-        static convertRDToWGS84(x: number, y: number): {
-            latitude: number;
-            longitude: number;
-        };
-        /**
-        * Calculate the log base 10 of val
-        */
-        static log10(val: any): number;
-        static convertDegreesToMeters(latitudeDegrees: number): {
-            latitudeLength: number;
-            longitudeLength: number;
-        };
-        /**
-         * Takes an array of LinearRings and optionally an {@link Object} with properties and returns a {@link Polygon} feature.
-         *
-         * @module turf/polygon
-         * @category helper
-         * @param {Array<Array<Number>>} rings an array of LinearRings
-         * @param {Object=} properties a properties object
-         * @returns {Feature<Polygon>} a Polygon feature
-         * @throws {Error} throw an error if a LinearRing of the polygon has too few positions
-         * or if a LinearRing of the Polygon does not have matching Positions at the
-         * beginning & end.
-         * @example
-         * var polygon = createPolygon([[
-         *  [-2.275543, 53.464547],
-         *  [-2.275543, 53.489271],
-         *  [-2.215118, 53.489271],
-         *  [-2.215118, 53.464547],
-         *  [-2.275543, 53.464547]
-         * ]], { name: 'poly1', population: 400});
-         *
-         * @seealso https://github.com/Turfjs/turf-polygon/blob/master/index.js
-         */
-        static createPolygonFeature(coordinates: Array<Array<Array<number>>>, properties: Object): IGeoFeature;
-        /**
-         * Takes one or more {@link Feature|Features} and creates a {@link FeatureCollection}.
-         *
-         * @param {Feature[]} features input features
-         * @returns {FeatureCollection} a FeatureCollection of input features
-         * @example
-         * var features = [
-         *  turf.point([-75.343, 39.984], {name: 'Location A'}),
-         *  turf.point([-75.833, 39.284], {name: 'Location B'}),
-         *  turf.point([-75.534, 39.123], {name: 'Location C'})
-         * ];
-         *
-         * var fc = turf.featurecollection(features);
-         *
-         * @seealso https://github.com/Turfjs/turf-featurecollection/blob/master/index.js
-         */
-        static createFeatureCollection(features: IGeoFeature[]): IGeoFeatureCollection;
-        static createPointFeature(lon: number, lat: number, properties?: csComp.Services.IProperty, sensors?: csComp.Services.IProperty): IGeoFeature;
-        static createLineFeature(coordinates: Array<Array<number>>, properties?: Object): IGeoFeature;
-        static createPropertyType(name: string, section?: string): csComp.Services.IPropertyType;
-        static convertMileToKm(miles: number): number;
-        static convertKmToMile(km: number): number;
-        /**
-         * pointInsidePolygon returns true if a 2D point lies within a polygon of 2D points
-         * @param  {number[]}   point   [lat, lng]
-         * @param  {number[][]} polygon [[lat, lng], [lat,lng],...]
-         * @return {boolean}            Inside == true
-         */
-        static pointInsidePolygon(point: number[], polygon: number[][][]): boolean;
-        /**
-         * pointInsideMultiPolygon returns true if a 2D point lies within a multipolygon
-         * @param  {number[]}   point   [lat, lng]
-         * @param  {number[][][]} polygon [[[lat, lng], [lat,lng]],...]]
-         * @return {boolean}            Inside == true
-         */
-        static pointInsideMultiPolygon(point: number[], multipoly: number[][][][]): boolean;
-    }
-}
-
-declare module csComp.Helpers {
-    /**
-     * Serialize an array of type T to a JSON string, by calling the callback on each array element.
-     */
-    function serialize<T>(arr: Array<T>, callback: (T) => Object): Object[];
-    function getDefaultFeatureStyle(): csComp.Services.IFeatureTypeStyle;
-    /**
-     * Export data to the file system.
-     */
-    function saveData(data: string, filename: string, fileType: string): void;
-    function supportsDataUri(): boolean;
-    function standardDeviation(values: number[]): {
-        avg: number;
-        stdDev: number;
-    };
-    function average(data: number[]): number;
-    function getFeatureTitle(feature: IFeature): string;
-    function featureTitle(type: csComp.Services.IFeatureType, feature: IFeature): string;
-    /**
-     * Collect all the property types that are referenced by a feature type.
-     */
-    function getPropertyTypes(type: csComp.Services.IFeatureType, propertyTypeData: csComp.Services.IPropertyTypeData, feature?: csComp.Services.IFeature): Services.IPropertyType[];
-    function getMissingPropertyTypes(feature: csComp.Services.IFeature): csComp.Services.IPropertyType[];
-    function addPropertyTypes(feature: csComp.Services.IFeature, featureType: csComp.Services.IFeatureType): csComp.Services.IFeatureType;
-    /**
-     * In case we are dealing with a regular JSON file without type information, create a default type.
-     */
-    function createDefaultType(feature: csComp.Services.IFeature): csComp.Services.IFeatureType;
-    /**
-     * Convert a property value to a display value using the property info.
-     */
-    function convertPropertyInfo(pt: csComp.Services.IPropertyType, text: any): string;
-    /**
-    * Set the name of a feature.
-    * @param {csComp.Services.IFeature} feature
-    */
-    function setFeatureName(feature: csComp.Services.IFeature, propertyTypeData?: csComp.Services.IPropertyTypeData): IFeature;
-    /**
-    * Convert a feature's stringFormat to a string.
-    * @param {Services.IFeature} feature
-    * @param {string} stringFormat
-    */
-    function convertStringFormat(feature: Services.IFeature, stringFormat: string): string;
-    /**
-    * Get all indexes of the 'find' substring in the 'source' string.
-    * @param {string} source
-    * @param {string} find
-    */
-    function indexes(source: string, find: string): number[];
-    function getGuid(): string;
-    function S4(): string;
-    /**
-     * Load the features as visible on the map, effectively creating a virtual
-     * GeoJSON file that represents all visible items.
-     * Also loads the keys into the featuretype's propertyTypeData collection.
-     */
-    function loadMapLayers(layerService: Services.LayerService): Services.IGeoJsonFile;
-    /**
-     * Helper function to create content for the RightPanelTab
-     * @param  {string} container The container name
-     * @param  {string} directive The directive of the container
-     * @param  {any}    data      Panel data
-     * @return {RightPanelTab}    Returns the RightPanelTab instance. Add it to the
-     * rightpanel by publishing it on the MessageBus.
-     */
-    function createRightPanelTab(container: string, directive: string, data: any, title: string, popover?: string, icon?: string): Services.RightPanelTab;
-    /**
-     * Helper function to parse a query of an url (e.g localhost:8080/api?a=1&b=2&c=3)
-     */
-    function parseUrlParameters(url: string, baseDelimiter: string, subDelimiter: string, valueDelimiter: string): {
-        [key: string]: any;
-    };
-    /**
-     * Helper function to parse a query of an url (e.g localhost:8080/api?a=1&b=2&c=3)
-     */
-    function joinUrlParameters(params: {
-        [key: string]: any;
-    }, baseDelimiter: string, subDelimiter: string, valueDelimiter: string): string;
-    function createIconHtml(feature: IFeature, featureType: csComp.Services.IFeatureType): {
-        [key: string]: any;
-    };
-}
-
-declare module csComp.Helpers {
-    class PieData {
-        id: number;
-        label: string;
-        color: string;
-        weight: number;
-    }
-    class AsterPieData extends PieData {
-        score: number;
-    }
-    interface IHistogramOptions {
-        id?: string;
-        numberOfBins?: number;
-        width?: number;
-        height?: number;
-        xLabel?: string;
-        selectedValue?: number;
-    }
-    interface IMcaPlotOptions extends IHistogramOptions {
-        /** Scoring function x,y points */
-        xy?: {
-            x: number[];
-            y: number[];
-        };
-        /** Value of the feature, i.e. the point that we wish to highlight */
-        featureValue?: number;
-    }
-    class Plot {
-        static pieColors: string[];
-        /**
-         * Draw a histogram, and, if xy is specified, a line plot of x versus y (e.g. a scoring function).
-         */
-        static drawHistogram(values: number[], options?: IHistogramOptions): void;
-        static getScale(stepSize: number, max: number): number;
-        static drawMcaPlot(values: number[], options?: IMcaPlotOptions): void;
-        /**
-        * Draw a Pie chart.
-        */
-        static drawPie(pieRadius: number, data?: PieData[], parentId?: string, colorScale?: string, svgId?: string): void;
-        /**
-        * Draw an Aster Pie chart, i.e. a pie chart with varying radius depending on the score,
-        * where the maximum score of 100 equals the pie radius.
-        * See http://bl.ocks.org/bbest/2de0e25d4840c68f2db1
-        */
-        static drawAsterPlot(pieRadius: number, data?: AsterPieData[], parentId?: string, colorScale?: string, svgId?: string): void;
-        private static clearSvg(svgId);
-    }
-}
-
-declare module csComp.StringExt {
-    function isNullOrEmpty(s: string): boolean;
-    /**
-     * String formatting
-     * 'Added {0} by {1} to your collection'.f(title, artist)
-     * 'Your balance is {0} USD'.f(77.7)
-     */
-    function format(s: string, ...args: string[]): string;
-    function isDate(n: any): boolean;
-    function isNumber(n: any): boolean;
-    function isBoolean(s: any): boolean;
-    function isArray(s: any): boolean;
-    function isBbcode(s: any): boolean;
-}
-
-declare module StringFormat {
-    /**
-     * Module
-     */
-    var myModule: any;
-}
-
-interface String {
-    score(text: string, fuzziness?: any): number;
-}
-
-declare module csComp.Helpers {
-    function getColorFromStringValue(v: string, gs: csComp.Services.GroupStyle): string;
-    function getImageUri(ft: csComp.Services.IFeatureType): string;
-    function getColorFromStringLegend(v: string, l: csComp.Services.Legend): string;
-    function getColorFromLegend(v: number, l: csComp.Services.Legend, defaultcolor?: string): string;
-    function getColor(v: number, gs: csComp.Services.GroupStyle): string;
-    /**
-     * Extract a valid color string, without transparency.
-     */
-    function getColorString(color: string, defaultColor?: string): string;
-}
-
-declare module FSM {
-    /**
-     * Transition grouping to faciliate fluent api
-     * @class Transitions<T>
-     */
-    class Transitions<T> {
-        fsm: FiniteStateMachine<T>;
-        constructor(fsm: FiniteStateMachine<T>);
-        fromStates: T[];
-        toStates: T[];
-        /**
-         * Specify the end state(s) of a transition function
-         * @method to
-         * @param ...states {T[]}
-         */
-        to(...states: T[]): TransitionFunctions<T>;
-        toAny(states: any): void;
-    }
-    /**
-     * Internal representation of a transition function
-     * @class TransitionFunction<T>
-     */
-    class TransitionFunction<T> {
-        fsm: FiniteStateMachine<T>;
-        from: T;
-        to: T;
-        constructor(fsm: FiniteStateMachine<T>, from: T, to: T);
-    }
-    class TransitionFunctions<T> extends Array<TransitionFunction<T>> {
-        private fsm;
-        constructor(fsm: FiniteStateMachine<T>);
-        on(trigger: number, callback?: (from: T, to: T) => any): void;
-    }
-    /***
-     * A simple finite state machine implemented in TypeScript, the templated argument is meant to be used
-     * with an enumeration.
-     * @class FiniteStateMachine<T>
-     */
-    class FiniteStateMachine<T> {
-        currentState: T;
-        private _startState;
-        private _transitionFunctions;
-        private _onCallbacks;
-        private _exitCallbacks;
-        private _enterCallbacks;
-        private _triggers;
-        /**
-         * @constructor
-         * @param startState {T} Intial starting state
-         */
-        constructor(startState: T);
-        addTransitions(fcn: Transitions<T>): TransitionFunctions<T>;
-        addEvent(trigger: number, fromState: T, toState: T): void;
-        trigger(trigger: number): void;
-        /**
-         * Listen for the transition to this state and fire the associated callback
-         * @method on
-         * @param state {T} State to listen to
-         * @param callback {fcn} Callback to fire
-         */
-        on(state: T, callback: (from?: T, to?: T) => any): FiniteStateMachine<T>;
-        /**
-            * Listen for the transition to this state and fire the associated callback, returning
-            * false in the callback will block the transition to this state.
-            * @method on
-            * @param state {T} State to listen to
-            * @param callback {fcn} Callback to fire
-            */
-        onEnter(state: T, callback: (from?: T) => boolean): FiniteStateMachine<T>;
-        /**
-            * Listen for the transition to this state and fire the associated callback, returning
-            * false in the callback will block the transition from this state.
-            * @method on
-            * @param state {T} State to listen to
-            * @param callback {fcn} Callback to fire
-            */
-        onExit(state: T, callback: (to?: T) => boolean): FiniteStateMachine<T>;
-        /**
-            * Declares the start state(s) of a transition function, must be followed with a '.to(...endStates)'
-            * @method from
-            * @param ...states {T[]}
-            */
-        from(...states: T[]): Transitions<T>;
-        fromAny(states: any): Transitions<T>;
-        private _validTransition(from, to);
-        /**
-      * Check whether a transition to a new state is valide
-      * @method canGo
-      * @param state {T}
-      */
-        canGo(state: T): boolean;
-        /**
-      * Transition to another valid state
-      * @method go
-      * @param state {T}
-      */
-        go(state: T): void;
-        /**
-         * This method is availble for overridding for the sake of extensibility.
-         * It is called in the event of a successful transition.
-         * @method onTransition
-         * @param from {T}
-         * @param to {T}
-         */
-        onTransition(from: T, to: T): void;
-        /**
-         * Reset the finite state machine back to the start state, DO NOT USE THIS AS A SHORTCUT for a transition.
-         * This is for starting the fsm from the beginning.
-         * @method reset
-         */
-        reset(): void;
-        private _transitionTo(state);
-    }
-}
-
-declare module csComp {
-    enum FileType {
-        Js = 0,
-        Css = 1,
-    }
-    class Utils {
-        static loadedFiles: string[];
-        static twoDigitStr(v: Number): string;
-        /**
-        * Load a JavaScript or CSS file dynamically by adding it to the end of the HEAD section in your document.
-        * See also: http://www.javascriptkit.com/javatutors/loadjavascriptcss.shtml
-        */
-        static loadJsCssfile(filename: string, filetype: FileType, callback?: (evt: Event) => void): void;
-    }
-}
-
 declare module Translations {
     class English {
         static locale: ng.translate.ITranslationTable;
@@ -1643,6 +1643,29 @@ declare module Translations {
 declare module Translations {
     class Dutch {
         static locale: ng.translate.ITranslationTable;
+    }
+}
+
+declare module BaseMapList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module BaseMapList {
+    interface IBaseMapScope extends ng.IScope {
+        vm: BaseMapListCtrl;
+    }
+    class BaseMapListCtrl {
+        private $scope;
+        private $layerService;
+        private $mapService;
+        private $messageBusService;
+        private scope;
+        static $inject: string[];
+        constructor($scope: IBaseMapScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
+        selectBaseLayer(key: any): void;
     }
 }
 
@@ -1704,29 +1727,6 @@ declare module Accessibility {
         parseUrl(): void;
         private addCutoffTime();
         private removeCutoffTime(index);
-    }
-}
-
-declare module BaseMapList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module BaseMapList {
-    interface IBaseMapScope extends ng.IScope {
-        vm: BaseMapListCtrl;
-    }
-    class BaseMapListCtrl {
-        private $scope;
-        private $layerService;
-        private $mapService;
-        private $messageBusService;
-        private scope;
-        static $inject: string[];
-        constructor($scope: IBaseMapScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService);
-        selectBaseLayer(key: any): void;
     }
 }
 
@@ -1847,14 +1847,14 @@ declare module Charts {
     }
 }
 
-declare module Directives.Clock {
+declare module Helpers.ContextMenu {
     /**
       * Module
       */
     var myModule: any;
 }
 
-declare module Helpers.ContextMenu {
+declare module Directives.Clock {
     /**
       * Module
       */
@@ -1978,6 +1978,28 @@ declare module ExpertMode {
         * This is to reduce the dependency on this directive.
         */
         private setExpertMode(expertMode);
+    }
+}
+
+declare module FeatureList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module FeatureList {
+    interface IFeatureListScope extends ng.IScope {
+        vm: FeatureListCtrl;
+        numberOfItems: number;
+    }
+    class FeatureListCtrl {
+        private $scope;
+        private $layerService;
+        private $mapService;
+        private scope;
+        static $inject: string[];
+        constructor($scope: IFeatureListScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService);
     }
 }
 
@@ -2150,28 +2172,6 @@ declare module FeatureProps {
     }
 }
 
-declare module FeatureList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module FeatureList {
-    interface IFeatureListScope extends ng.IScope {
-        vm: FeatureListCtrl;
-        numberOfItems: number;
-    }
-    class FeatureListCtrl {
-        private $scope;
-        private $layerService;
-        private $mapService;
-        private scope;
-        static $inject: string[];
-        constructor($scope: IFeatureListScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService);
-    }
-}
-
 declare module FeatureRelations {
     /**
       * Module
@@ -2229,6 +2229,30 @@ declare module FeatureRelations {
                  */
         private sidebarMessageReceived;
         private featureMessageReceived;
+    }
+}
+
+declare module FilterList {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module FilterList {
+    interface IFilterListScope extends ng.IScope {
+        vm: FilterListCtrl;
+    }
+    class FilterListCtrl {
+        private $scope;
+        private $layerService;
+        private $messageBus;
+        private scope;
+        noFilters: boolean;
+        locationFilterActive: boolean;
+        static $inject: string[];
+        constructor($scope: IFilterListScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
+        private setLocationFilter(group);
     }
 }
 
@@ -2548,30 +2572,6 @@ declare module Heatmap {
     }
 }
 
-declare module FilterList {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module FilterList {
-    interface IFilterListScope extends ng.IScope {
-        vm: FilterListCtrl;
-    }
-    class FilterListCtrl {
-        private $scope;
-        private $layerService;
-        private $messageBus;
-        private scope;
-        noFilters: boolean;
-        locationFilterActive: boolean;
-        static $inject: string[];
-        constructor($scope: IFilterListScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
-        private setLocationFilter(group);
-    }
-}
-
 declare module KanbanBoard {
     /**
       * Module
@@ -2740,46 +2740,6 @@ declare module LanguageSwitch {
     }
 }
 
-declare module Legend {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module Legend {
-    class LegendData {
-        propertyTypeKey: string;
-        mode: string;
-    }
-    interface ILegendDirectiveScope extends ng.IScope {
-        vm: LegendCtrl;
-        data: LegendData;
-        legend: csComp.Services.Legend;
-    }
-    class LegendCtrl {
-        private $scope;
-        private $layerService;
-        private $messageBus;
-        private scope;
-        private widget;
-        private passcount;
-        private subscribeHandle;
-        static $inject: string[];
-        constructor($scope: ILegendDirectiveScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
-        createLegend(): csComp.Services.Legend;
-        createLegendEntry(activeStyle: csComp.Services.GroupStyle, ptd: csComp.Services.IPropertyType, value: number): csComp.Services.LegendEntry;
-        getStyle(legend: csComp.Services.Legend, le: csComp.Services.LegendEntry, key: number): {
-            'float': string;
-            'position': string;
-            'top': string;
-            'background': string;
-            'border-left': string;
-            'border-right': string;
-        };
-    }
-}
-
 declare module LayersDirective {
     interface IAddLayerScope extends ng.IScope {
         vm: AddLayerCtrl;
@@ -2871,6 +2831,46 @@ declare module LayersDirective {
         toggleLayer(layer: csComp.Services.ProjectLayer): void;
         collapseAll(): void;
         expandAll(): void;
+    }
+}
+
+declare module Legend {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module Legend {
+    class LegendData {
+        propertyTypeKey: string;
+        mode: string;
+    }
+    interface ILegendDirectiveScope extends ng.IScope {
+        vm: LegendCtrl;
+        data: LegendData;
+        legend: csComp.Services.Legend;
+    }
+    class LegendCtrl {
+        private $scope;
+        private $layerService;
+        private $messageBus;
+        private scope;
+        private widget;
+        private passcount;
+        private subscribeHandle;
+        static $inject: string[];
+        constructor($scope: ILegendDirectiveScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService);
+        createLegend(): csComp.Services.Legend;
+        createLegendEntry(activeStyle: csComp.Services.GroupStyle, ptd: csComp.Services.IPropertyType, value: number): csComp.Services.LegendEntry;
+        getStyle(legend: csComp.Services.Legend, le: csComp.Services.LegendEntry, key: number): {
+            'float': string;
+            'position': string;
+            'top': string;
+            'background': string;
+            'border-left': string;
+            'border-right': string;
+        };
     }
 }
 
@@ -3186,6 +3186,41 @@ declare module Mca {
     }
 }
 
+declare module Navigate {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module Navigate {
+    interface INavigateScope extends ng.IScope {
+        vm: NavigateCtrl;
+    }
+    class RecentFeature {
+        id: string;
+        name: string;
+        layerId: string;
+        feature: csComp.Services.IFeature;
+    }
+    class NavigateCtrl {
+        private $scope;
+        private $layerService;
+        private $messageBus;
+        private localStorageService;
+        private scope;
+        RecentLayers: csComp.Services.ProjectLayer[];
+        RecentFeatures: RecentFeature[];
+        static $inject: string[];
+        constructor($scope: INavigateScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, localStorageService: ng.localStorage.ILocalStorageService);
+        private updateRecentFeaturesList();
+        private selectFeature(feature);
+        private initRecentFeatures();
+        toggleLayer(layer: csComp.Services.ProjectLayer): void;
+        private initRecentLayers();
+    }
+}
+
 declare module OfflineSearch {
     /**
       * Module
@@ -3334,41 +3369,6 @@ declare module OfflineSearch {
     }
 }
 
-declare module Navigate {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module Navigate {
-    interface INavigateScope extends ng.IScope {
-        vm: NavigateCtrl;
-    }
-    class RecentFeature {
-        id: string;
-        name: string;
-        layerId: string;
-        feature: csComp.Services.IFeature;
-    }
-    class NavigateCtrl {
-        private $scope;
-        private $layerService;
-        private $messageBus;
-        private localStorageService;
-        private scope;
-        RecentLayers: csComp.Services.ProjectLayer[];
-        RecentFeatures: RecentFeature[];
-        static $inject: string[];
-        constructor($scope: INavigateScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, localStorageService: ng.localStorage.ILocalStorageService);
-        private updateRecentFeaturesList();
-        private selectFeature(feature);
-        private initRecentFeatures();
-        toggleLayer(layer: csComp.Services.ProjectLayer): void;
-        private initRecentLayers();
-    }
-}
-
 declare module ProjectHeaderSelection {
     /**
       * Module
@@ -3424,6 +3424,13 @@ declare module Helpers.Resize {
     var myModule: any;
 }
 
+declare module ShowModal {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
 declare module StyleList {
     /**
       * Module
@@ -3448,13 +3455,6 @@ declare module StyleList {
             'background': string;
         };
     }
-}
-
-declare module ShowModal {
-    /**
-      * Module
-      */
-    var myModule: any;
 }
 
 declare module Timeline {
@@ -4295,52 +4295,6 @@ declare module csComp.Search {
     }
 }
 
-declare module Dashboard {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module Dashboard {
-    interface IDashboardScope extends ng.IScope {
-        vm: DashboardCtrl;
-        dashboard: csComp.Services.Dashboard;
-        container: string;
-        param: any;
-        initDashboard: Function;
-        minus: Function;
-    }
-    interface IWidgetScope extends ng.IScope {
-        data: any;
-    }
-    class DashboardCtrl {
-        private $scope;
-        private $compile;
-        private $layerService;
-        private $mapService;
-        private $messageBusService;
-        private $dashboardService;
-        private $templateCache;
-        private $timeout;
-        private scope;
-        private project;
-        static $inject: string[];
-        constructor($scope: IDashboardScope, $compile: any, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService, $templateCache: any, $timeout: ng.ITimeoutService);
-        toggleWidget(widget: csComp.Services.IWidget): void;
-        updateWidget(w: csComp.Services.IWidget): void;
-        toggleInteract(widget: csComp.Services.IWidget): void;
-        checkMap(): void;
-        checkLayers(): void;
-        checkViewbound(): void;
-        checkTimeline(): void;
-        private setValue(diff, value);
-        removeWidget(widget: csComp.Services.IWidget): void;
-        isReady(widget: csComp.Services.IWidget): void;
-        updateDashboard(): void;
-    }
-}
-
 declare module DashboarHeaderdSelection {
     /**
       * Module
@@ -4420,6 +4374,52 @@ declare module DashboardSelection {
     }
 }
 
+declare module Dashboard {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module Dashboard {
+    interface IDashboardScope extends ng.IScope {
+        vm: DashboardCtrl;
+        dashboard: csComp.Services.Dashboard;
+        container: string;
+        param: any;
+        initDashboard: Function;
+        minus: Function;
+    }
+    interface IWidgetScope extends ng.IScope {
+        data: any;
+    }
+    class DashboardCtrl {
+        private $scope;
+        private $compile;
+        private $layerService;
+        private $mapService;
+        private $messageBusService;
+        private $dashboardService;
+        private $templateCache;
+        private $timeout;
+        private scope;
+        private project;
+        static $inject: string[];
+        constructor($scope: IDashboardScope, $compile: any, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService, $templateCache: any, $timeout: ng.ITimeoutService);
+        toggleWidget(widget: csComp.Services.IWidget): void;
+        updateWidget(w: csComp.Services.IWidget): void;
+        toggleInteract(widget: csComp.Services.IWidget): void;
+        checkMap(): void;
+        checkLayers(): void;
+        checkViewbound(): void;
+        checkTimeline(): void;
+        private setValue(diff, value);
+        removeWidget(widget: csComp.Services.IWidget): void;
+        isReady(widget: csComp.Services.IWidget): void;
+        updateDashboard(): void;
+    }
+}
+
 declare module DashboardEdit {
     /**
       * Module
@@ -4482,6 +4482,35 @@ declare module WidgetEdit {
     }
 }
 
+declare module GroupEdit {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module GroupEdit {
+    interface IGroupEditScope extends ng.IScope {
+        vm: GroupEditCtrl;
+        group: csComp.Services.ProjectGroup;
+    }
+    class GroupEditCtrl {
+        private $scope;
+        private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $dashboardService;
+        private scope;
+        noLayerSelected: boolean;
+        static $inject: string[];
+        constructor($scope: IGroupEditScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        updateLayers(): void;
+        removeGroup(): void;
+        toggleClustering(): void;
+        updateOws(): void;
+    }
+}
+
 declare module FeatureTypeEditor {
     /**
       * Module
@@ -4534,35 +4563,6 @@ declare module FeatureTypes {
         constructor($scope: IFeatureTypesScope, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService);
         updateFeatureTypes(ft: csComp.Services.IFeatureType): void;
         selectResource(): void;
-    }
-}
-
-declare module GroupEdit {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module GroupEdit {
-    interface IGroupEditScope extends ng.IScope {
-        vm: GroupEditCtrl;
-        group: csComp.Services.ProjectGroup;
-    }
-    class GroupEditCtrl {
-        private $scope;
-        private $mapService;
-        private $layerService;
-        private $messageBusService;
-        private $dashboardService;
-        private scope;
-        noLayerSelected: boolean;
-        static $inject: string[];
-        constructor($scope: IGroupEditScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-        updateLayers(): void;
-        removeGroup(): void;
-        toggleClustering(): void;
-        updateOws(): void;
     }
 }
 
@@ -5502,84 +5502,6 @@ declare module SimTimeController {
     }
 }
 
-declare module L {
-    interface IUserDrawSettings {
-        /** Canvas element for drawing */
-        canvas: HTMLCanvasElement;
-        /** Bounds of the map in WGS84 */
-        bounds: L.Bounds;
-        /** Size of the map in pixels in x and y direction */
-        size: {
-            x: number;
-            y: number;
-        };
-        /** Zoom scale, e.g. 0.0026 */
-        zoomScale: number;
-        /** Zoom level, e.g. 12 */
-        zoom: number;
-        options: {
-            data: number[][];
-            noDataValue: number;
-            topLeftLat: number;
-            topLeftLon: number;
-            deltaLat: number;
-            deltaLon: number;
-            /** The minimum data value: below (<) this value, the cell is not drawn */
-            min?: number;
-            /** The maximum data value: above (>) this value, the cell is not drawn */
-            max?: number;
-            /** A value between 0 (transparent) and 1 (opaque) */
-            opacity?: number;
-            /** Define the color used to draw grid cells having the minimum value. */
-            minColor: string;
-            /** Define the color used to draw grid cells having the minimum value. */
-            maxColor: string;
-            /** Defines the contour levels of the grid layer */
-            levels: number[];
-            /** When true, forces a recalculatiion */
-            areColorsUpdated: boolean;
-            legend?: {
-                val: number;
-                color: string;
-            }[];
-            [key: string]: any;
-        };
-    }
-    function canvasOverlay(userDrawFunc: (overlay: any, layer: csComp.Services.IProjectLayer, settings: IUserDrawSettings) => void, layer: csComp.Services.IProjectLayer, options: Object): any;
-}
-
-declare module csComp.Services {
-    class GeojsonRenderer {
-        static render(service: LayerService, layer: ProjectLayer, mapRenderer: IMapRenderer): void;
-        static remove(service: LayerService, layer: ProjectLayer): void;
-    }
-}
-
-declare module csComp.Services {
-    class GridLayerRenderer {
-        static render(service: LayerService, layer: ProjectLayer): void;
-        static drawFunction(overlay: any, layer: ProjectLayer, settings: L.IUserDrawSettings): void;
-    }
-}
-
-declare module csComp.Services {
-    class HeatmapRenderer {
-        static render(service: LayerService, layer: ProjectLayer, mapRenderer: LeafletRenderer): void;
-    }
-}
-
-declare module csComp.Services {
-    class TileLayerRenderer {
-        static render(service: LayerService, layer: ProjectLayer): void;
-    }
-}
-
-declare module csComp.Services {
-    class WmsRenderer {
-        static render(service: LayerService, layer: ProjectLayer): void;
-    }
-}
-
 declare module csComp.Services {
     class DatabaseSource implements ILayerSource {
         service: LayerService;
@@ -5926,6 +5848,84 @@ declare module csComp.Services {
         layerMenuOptions(layer: ProjectLayer): [[string, Function]];
         addLayer(layer: ProjectLayer, callback: Function): void;
         removeLayer(layer: ProjectLayer): void;
+    }
+}
+
+declare module L {
+    interface IUserDrawSettings {
+        /** Canvas element for drawing */
+        canvas: HTMLCanvasElement;
+        /** Bounds of the map in WGS84 */
+        bounds: L.Bounds;
+        /** Size of the map in pixels in x and y direction */
+        size: {
+            x: number;
+            y: number;
+        };
+        /** Zoom scale, e.g. 0.0026 */
+        zoomScale: number;
+        /** Zoom level, e.g. 12 */
+        zoom: number;
+        options: {
+            data: number[][];
+            noDataValue: number;
+            topLeftLat: number;
+            topLeftLon: number;
+            deltaLat: number;
+            deltaLon: number;
+            /** The minimum data value: below (<) this value, the cell is not drawn */
+            min?: number;
+            /** The maximum data value: above (>) this value, the cell is not drawn */
+            max?: number;
+            /** A value between 0 (transparent) and 1 (opaque) */
+            opacity?: number;
+            /** Define the color used to draw grid cells having the minimum value. */
+            minColor: string;
+            /** Define the color used to draw grid cells having the minimum value. */
+            maxColor: string;
+            /** Defines the contour levels of the grid layer */
+            levels: number[];
+            /** When true, forces a recalculatiion */
+            areColorsUpdated: boolean;
+            legend?: {
+                val: number;
+                color: string;
+            }[];
+            [key: string]: any;
+        };
+    }
+    function canvasOverlay(userDrawFunc: (overlay: any, layer: csComp.Services.IProjectLayer, settings: IUserDrawSettings) => void, layer: csComp.Services.IProjectLayer, options: Object): any;
+}
+
+declare module csComp.Services {
+    class GeojsonRenderer {
+        static render(service: LayerService, layer: ProjectLayer, mapRenderer: IMapRenderer): void;
+        static remove(service: LayerService, layer: ProjectLayer): void;
+    }
+}
+
+declare module csComp.Services {
+    class GridLayerRenderer {
+        static render(service: LayerService, layer: ProjectLayer): void;
+        static drawFunction(overlay: any, layer: ProjectLayer, settings: L.IUserDrawSettings): void;
+    }
+}
+
+declare module csComp.Services {
+    class HeatmapRenderer {
+        static render(service: LayerService, layer: ProjectLayer, mapRenderer: LeafletRenderer): void;
+    }
+}
+
+declare module csComp.Services {
+    class TileLayerRenderer {
+        static render(service: LayerService, layer: ProjectLayer): void;
+    }
+}
+
+declare module csComp.Services {
+    class WmsRenderer {
+        static render(service: LayerService, layer: ProjectLayer): void;
     }
 }
 

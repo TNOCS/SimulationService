@@ -34,7 +34,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
     /** Base folder for the scenarios */
     private scenarioFolder = 'scenarios';
     /** If true, the flooding has started */
-    private floodingHasStarted = true;
+    private floodingHasStarted = false;
     /** A list of available flood simulations, i.e. floodSims[scenarioName] = { timeStamp, layer } */
     private floodSims: {
         [scenarioName: string]: {
@@ -62,29 +62,57 @@ export class FloodSim extends SimSvc.SimServiceManager {
     start() {
         super.start();
 
+        this.reset();
         this.initFSM();
-        this.publishFloodLayer();
         this.loadAllScenarioFiles();
-        this.waitForFloodSimCmds();
+    }
+
+    private reset() {
+        this.deleteFilesInFolder(path.join(__dirname, '../public/data/layers'));
+        this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
+
+        this.simStartTime = null;
+        this.publishFloodLayer();
+        this.fsm.currentState = SimSvc.SimState.Ready;
+        this.sendAck(this.fsm.currentState);
     }
 
     /**
-     * Initialize the FSM, basically setting the simulation start time.
+     * Initialize the FSM.
      */
     private initFSM() {
         // Specify the behaviour of the sim.
         this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
-            if (from === SimSvc.SimState.Idle || from === SimSvc.SimState.Busy)
-                this.simStartTime = this.simTime;
+            if (from === SimSvc.SimState.Idle) this.simStartTime = this.simTime;
             return true;
         });
 
         this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
-            this.publishFloodLayer();
             this.message = 'Scenario has been reset.'
+            this.reset();
             return true;
         });
 
+        this.subscribeKey('sim.floodSimCmd', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+            Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2)}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
+            if (message.hasOwnProperty('scenario')) this.startScenario(message['scenario']);
+            if (message.hasOwnProperty('next')) this.publishNextFloodLayer(Number.MAX_VALUE);
+        });
+
+        // When the simulation time is changed:
+        // 1. Check if we have to publish a new Layer
+        // 2. If there is a new layer, read the asc grid file and put it in the layer.data property
+        this.on('simTimeChanged', () => {
+            var scenario = this.pubFloodingScenario.scenario;
+            if (!scenario) return;
+            if (this.floodSims[scenario][this.floodSims[scenario].length-1].timeStamp === this.pubFloodingScenario.timeStamp) {
+                this.message = `${scenario} scenario has ended.`;
+                this.sendAck(this.fsm.currentState);
+                return;
+            }
+            var minutesSinceStart = this.simTime.diffMinutes(this.pubFloodingScenario.startTime);
+            this.publishNextFloodLayer(minutesSinceStart);
+        });
 
     }
 
@@ -115,7 +143,6 @@ export class FloodSim extends SimSvc.SimServiceManager {
             data: '',
             url: file,
             typeUrl: `${this.options.server}/api/resources/floodsimtypes`,
-            // type: 'dynamicgeojson',
             type: 'grid',
             renderType: 'gridlayer',
             dataSourceParameters: <IsoLines.IGridDataSourceParameters>{
@@ -167,32 +194,6 @@ export class FloodSim extends SimSvc.SimServiceManager {
         });
     }
 
-    /**
-     *	Listen to relevant KeyChanged events that can start the simulation.
-     */
-    private waitForFloodSimCmds() {
-        this.subscribeKey('sim.floodSimCmd', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
-            Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2)}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
-            if (message.hasOwnProperty('scenario')) this.startScenario(message['scenario']);
-            if (message.hasOwnProperty('next')) this.publishNextFloodLayer(Number.MAX_VALUE);
-        });
-
-        // When the simulation time is changed:
-        // 1. Check if we have to publish a new Layer
-        // 2. If there is a new layer, read the asc grid file and put it in the layer.data property
-        this.on('simTimeChanged', () => {
-            var scenario = this.pubFloodingScenario.scenario;
-            if (!scenario) return;
-            if (this.floodSims[scenario][this.floodSims[scenario].length-1].timeStamp === this.pubFloodingScenario.timeStamp) {
-                this.message = `${scenario} scenario has ended.`;
-                this.sendAck(this.fsm.currentState);
-                return;
-            }
-            var minutesSinceStart = this.simTime.diffMinutes(this.pubFloodingScenario.startTime);
-            this.publishNextFloodLayer(minutesSinceStart);
-        });
-    }
-
     /** Publish the next available flooding layer. */
     private publishNextFloodLayer(minutesSinceStart: number) {
         var scenario = this.pubFloodingScenario.scenario;
@@ -222,6 +223,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
             });
             return;
         }
+        this.fsm.trigger(SimSvc.SimCommand.Finish);
     }
 
     /**

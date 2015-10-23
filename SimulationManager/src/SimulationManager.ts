@@ -1,3 +1,4 @@
+import path = require('path');
 import Winston = require('winston');
 import TypeState = require('../../SimulationService/state/typestate');
 import Api = require('../../ServerComponents/api/ApiManager');
@@ -32,40 +33,50 @@ export class SimulationManager extends SimSvc.SimServiceManager {
     constructor(namespace: string, name: string, public isClient = false, options = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
 
-        // Listen to state changes and do not send any message (which is the default behaviour).
-        //this.fsm.onTransition = (fromState: SimSvc.SimState, toState: SimSvc.SimState) => { }
-
         this.simTimeKey = `${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimTime]}`;
+    }
 
-        this.on('simSpeedChanged', () => this.startTimer() );
-        // this.on('simTimeStepChanged', () => this.startTimer() );
+    private reset() {
+        this.sims = {};
+        this.simsNotReady= [];
 
+        this.deleteFilesInFolder(path.join(__dirname, '../public/data/layers'));
+        this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
+
+        this.sendAck(this.fsm.currentState);
+    }
+
+    private initFsm() {
         // When ready, start sending messages.
-        this.fsm.onEnter(SimSvc.SimState.Ready, () => {
+        this.fsm.onEnter(SimSvc.SimState.Ready, (toState) => {
+            Winston.warn('Starting...');
             this.startTimer();
+            this.sendAck(toState);
             return true;
         });
+
         // When moving to pause or idle, pause the timer.
         this.fsm.onExit(SimSvc.SimState.Ready, (toState) => {
+            Winston.warn('Pausing...');
             this.timer.pause();
             this.sendAck(toState);
             return true;
         });
-    }
 
-    /**
-     * Override the start method to specify your own startup behaviour.
-     * Although you could use the init method, at that time the connectors haven't been configured yet.
-     */
-    public start(options?: Object) {
-        super.start(options);
+        this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
+            this.message = 'Reset received.'
+            this.reset();
+            return true;
+        });
+
+        this.on('simSpeedChanged', () => this.startTimer() );
 
         // Listen to Sim.SimState keys
         this.subscribeKey(`${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimState]}`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             if (message === null) return;
             try {
                 var simState: SimSvc.ISimState = (typeof message === 'object') ? message : JSON.parse(message);
-                Winston.info("Received sim state: ", simState);
+                //Winston.info("Received sim state: ", simState);
                 if (!simState || simState.id === this.id) return;
                 var state = SimSvc.SimState[simState.state];
                 var index = this.simsNotReady.indexOf(simState.id);
@@ -82,11 +93,17 @@ export class SimulationManager extends SimSvc.SimServiceManager {
                 }
             } catch (e) {}
         });
+    }
 
-        this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
-            this.message = 'Reset received.'
-            return true;
-        });
+    /**
+     * Override the start method to specify your own startup behaviour.
+     * Although you could use the init method, at that time the connectors haven't been configured yet.
+     */
+    public start(options?: Object) {
+        super.start(options);
+
+        this.reset();
+        this.initFsm();
     }
 
     /**

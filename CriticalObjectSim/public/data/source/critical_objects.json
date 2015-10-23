@@ -1,0 +1,121 @@
+{
+    "type" : "FeatureCollection",
+    "features" : [{
+            "type" : "Feature",
+            "properties" : {
+                "Naam locatie" : "Beatrixziekenhuis",
+                "Naam concern" : "Stichting Rivas Zorggroep",
+                "Soort ziekenhuis" : "Algemeen ziekenhuis",
+                "Ook sector" : "VVT",
+                "KvK" : 11044044,
+                "Aantal locaties" : "Locatie 1 van 2",
+                "Straat" : "Banneweg",
+                "huisnummer" : "57",
+                "postcode" : "4204AA",
+                "plaatsnaam" : "GORINCHEM",
+                "Aantal bedden" : 323,
+                "Hartbewaking" : 6,
+                "IC met beademing" : 6,
+                "IC zonder beademing" : null,
+                "Spoedeisende hulp" : "ja",
+                "provincie" : "Zuid-Holland",
+                "gemeente" : "Gorinchem",
+                "featureTypeId" : "Ziekenhuis_{state}"
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    4.9576836144013,
+                    51.8386388325148
+                ]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "Naam locatie" : "Groene Hart Ziekenhuis Polikliniek Schoonhoven",
+                "Naam concern" : "Stichting Groene Hart Ziekenhuis",
+                "Soort ziekenhuis" : "",
+                "Ook sector" : "",
+                "KvK" : null,
+                "Aantal locaties" : "Locatie 4 van 4",
+                "Straat" : "Oranjeplaats",
+                "huisnummer" : "21",
+                "postcode" : "2871 TL",
+                "plaatsnaam" : "Schoonhoevn",
+                "Aantal bedden" : null,
+                "Hartbewaking" : null,
+                "IC met beademing" : null,
+                "IC zonder beademing" : null,
+                "Spoedeisende hulp" : "",
+                "provincie" : "Zuid-Holland",
+                "gemeente" : "Krimpenerwaard",
+                "featureTypeId" : "Ziekenhuis_{state}"
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    4.84675292570268,
+                    51.9458319495831
+                ]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "Naam locatie" : "Rivas Zorggroep Lingepolikliniek",
+                "Naam concern" : "Stichting Rivas Zorggroep",
+                "Soort ziekenhuis" : "",
+                "Ook sector" : "",
+                "KvK" : null,
+                "Aantal locaties" : "Locatie 2 van 2",
+                "Straat" : "Koningin Emmalaan",
+                "huisnummer" : "82",
+                "postcode" : "4141 EE",
+                "plaatsnaam" : "Leerdam",
+                "Aantal bedden" : null,
+                "Hartbewaking" : null,
+                "IC met beademing" : null,
+                "IC zonder beademing" : null,
+                "Spoedeisende hulp" : "",
+                "provincie" : "Zuid-Holland",
+                "gemeente" : "Leerdam",
+                "featureTypeId" : "Ziekenhuis_{state}"
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    5.10723035447008,
+                    51.8913822620521
+                ]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "Naam locatie" : "Albert Schweitzer Ziekenhuis Sliedrecht",
+                "Naam concern" : "Albert Schweitzer Ziekenhuis",
+                "Soort ziekenhuis" : "",
+                "Ook sector" : "",
+                "KvK" : null,
+                "Aantal locaties" : "Locatie 3 van 6",
+                "Straat" : "Wilhelminastraat",
+                "huisnummer" : "75",
+                "postcode" : "3361 XV",
+                "plaatsnaam" : "Sliedrecht",
+                "Aantal bedden" : null,
+                "Hartbewaking" : null,
+                "IC met beademing" : null,
+                "IC zonder beademing" : null,
+                "Spoedeisende hulp" : "",
+                "provincie" : "Zuid-Holland",
+                "gemeente" : "Sliedrecht",
+                "featureTypeId" : "Ziekenhuis_{state}"
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    4.77000288804638,
+                    51.8227512300653
+                ]
+            }
+        }
+    ]
+}

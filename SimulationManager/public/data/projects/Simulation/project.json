@@ -238,7 +238,20 @@
           "heatmapItems": null,
           "url": "http://localhost:3335/api/layers/powerstations",
           "typeUrl": "http://localhost:3335/api/resources/electrical_network",
-          "opacity": 75,
+          "opacity": 90,
+          "isDynamic": true,
+          "gui": {},
+          "tags": []
+        },
+        {
+          "id": "criticalobjects",
+          "title": "Kwetsbare objecten",
+          "type": "dynamicgeojson",
+          "renderType": "geojson",
+          "heatmapItems": null,
+          "url": "http://localhost:3336/api/layers/criticalobjects",
+          "typeUrl": "http://localhost:3336/api/resources/critical_objects",
+          "opacity": 90,
           "isDynamic": true,
           "gui": {},
           "tags": []

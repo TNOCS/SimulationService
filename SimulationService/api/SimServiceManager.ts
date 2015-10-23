@@ -1,3 +1,5 @@
+import fs = require('fs');
+import path = require('path');
 import Winston = require('winston');
 import TypeState = require('../state/typestate');
 import Api = require('../../ServerComponents/api/ApiManager');
@@ -36,9 +38,10 @@ export enum FailureMode {
     None = 0,
     Unknown = 1,
     Flooded = 2,
-    NoMainPower = 4,
-    NoBackupPower = 8,
-    NoComms = 16   
+    LimitedPower = 4,
+    NoMainPower = 8,
+    NoBackupPower = 16,
+    NoComms = 32
 }
 
 /** Incident that has happened */
@@ -168,6 +171,9 @@ export class SimServiceManager extends Api.ApiManager {
         this.subscribeKey(`${SimServiceManager.namespace}.${Keys[Keys.Job]}`, <Api.ApiMeta>{}, (topic: string, message: any, meta?: Api.ApiMeta) => {
             Winston.info("Received job: ", message);
         });
+
+        // Heartbeat
+        setInterval(() => this.sendAck(this.fsm.currentState), 5000);
     }
 
     /**
@@ -182,7 +188,16 @@ export class SimServiceManager extends Api.ApiManager {
             state: SimState[curState]
         };
         if (this.message) state['msg'] = this.message;
+        state['pid'] = process.pid;
+        state['mem'] = process.memoryUsage();
         this.updateKey(`${SimServiceManager.namespace}.${Keys[Keys.SimState]}.${this.name}`, state, <Api.ApiMeta>{}, () => { });
+    }
+
+    /** Delete all files in the folder */
+    deleteFilesInFolder(folder: string) {
+        fs.readdir(folder, (err: NodeJS.ErrnoException, files: string[]) => {
+            if (files) { files.forEach(f => { fs.unlink( path.join(folder, f) ) }) }
+        });
     }
 
     /**

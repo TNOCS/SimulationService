@@ -66,7 +66,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         });
 
         this.on(Api.Event[Api.Event.LayerChanged], (changed: Api.IChangeEvent) => {
-            if (changed.id !== 'floodsim') return;
+            if (changed.id !== 'floodsim' || !changed.value) return;
             var layer = <Api.ILayer> changed.value;
             if (!layer.data) return;
             Winston.info('Floodsim layer received');
@@ -77,29 +77,54 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
     }
 
     private flooding(layer: Api.ILayer) {
+        var failedPowerStations = this.checkWaterLevel(layer);
+        this.checkDependencies(failedPowerStations);
+    }
+
+    private checkWaterLevel(layer: Api.ILayer) {
         var getWaterLevel = this.convertLayerToGrid(layer);
-        var failedPowerStations: Api.Feature[] = [];
+        var failedPowerStations: string[] = [];
 
         // Check is Powerstation is flooded
-        this.powerStations.forEach(ps => {
+        for (let i = 0; i < this.powerStations.length; i++) {
+            var ps = this.powerStations[i];
             var state = this.getFeatureState(ps);
-            if (state === SimSvc.InfrastructureState.Failed) failedPowerStations.push(ps);
-            // if (state !== SimSvc.InfrastructureState.Ok) return;
+            if (state === SimSvc.InfrastructureState.Failed) {
+                failedPowerStations.push(ps.properties['name']);
+                continue;
+            }
             var waterLevel = getWaterLevel(ps.geometry.coordinates);
             if (waterLevel > 0) {
                 this.setFeatureState(ps, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, true);
-                failedPowerStations.push(ps);
+                failedPowerStations.push(ps.properties['name']);
             }
-        });
+        }
+        return failedPowerStations;
+    }
 
-        // Check if Powerstation's dependencies have failed
-        this.powerStations.forEach(ps => {
-            if (!ps.properties.hasOwnProperty('dependencies')) return;
+    private checkDependencies(failedPowerStations: string[]) {
+        if (failedPowerStations.length === 0) return;
+        var additionalFailures = false;
+        for (let i = 0; i < this.powerStations.length; i++) {
+            var ps = this.powerStations[i];
+            if (!ps.properties.hasOwnProperty('dependencies')) continue;
             var state = this.getFeatureState(ps);
-            if (state === SimSvc.InfrastructureState.Failed) return;
-            var dependencies = ps.properties['dependencies'];
-
-        });
+            if (state === SimSvc.InfrastructureState.Failed) continue;
+            var dependencies: string[] = ps.properties['dependencies'];
+            var failedDependencies = 0;
+            dependencies.forEach(dp => {
+                if (failedPowerStations.indexOf(dp) >= 0) failedDependencies++;
+            });
+            if (failedDependencies === 0) continue;
+            if (failedDependencies < dependencies.length) {
+                this.setFeatureState(ps, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.LimitedPower, true);
+            } else {
+                this.setFeatureState(ps, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoMainPower, true);
+                failedPowerStations.push(ps.properties["name"]);
+                additionalFailures = true;
+            }
+        }
+        if (additionalFailures) this.checkDependencies(failedPowerStations);
     }
 
     private convertLayerToGrid(layer: Api.ILayer) {
@@ -119,6 +144,9 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
 
     /** Reset the state to the original state. */
     private reset() {
+        this.deleteFilesInFolder(path.join(__dirname, '../public/data/layers'));
+        this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
+
         this.powerStations = [];
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);
@@ -140,6 +168,8 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
 
             this.publishLayer(this.powerLayer);
         });
+        this.fsm.currentState = SimSvc.SimState.Ready;
+        this.sendAck(this.fsm.currentState);
     }
 
     /** Set the state and failure mode of a feature, optionally publishing it too. */
@@ -152,6 +182,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         // Publish PowerSupplyArea layer
         if (state === SimSvc.InfrastructureState.Failed && feature.properties.hasOwnProperty('powerSupplyArea')) {
             var psa = new Api.Feature();
+            psa.id = Utils.newGuid();
             psa.properties = {
                 name: 'Blackout area',
                 featureTypeId: 'AffectedArea'

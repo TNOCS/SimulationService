@@ -83,13 +83,13 @@ server.use(express.static(path.join(__dirname, 'public')));
 
 var api = new CriticalObjectSim.CriticalObjectSim('cs', 'CriticalObjectSim', false, <Api.IApiManagerOptions>{
     server: `${Utils.getIPAddress()}:${port}`,
-    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim/#', 'cs/layers/powerstations/#']
+    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});
-    api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
+    // api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
     api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
-    api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/")), {});
+    api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/"), true), {});
     api.start();
 });
 

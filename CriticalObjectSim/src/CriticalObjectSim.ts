@@ -57,30 +57,30 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             if (changed.id !== 'floodsim' || !changed.value) return;
             var layer = <Api.ILayer> changed.value;
             if (!layer.data) return;
-            Winston.info('Floodsim layer received');
+            Winston.info('COSim: Floodsim layer received');
             Winston.info(`ID  : ${changed.id}`);
             Winston.info(`Type: ${changed.type}`);
             this.flooding(layer);
         });
 
-        this.on(Api.Event[Api.Event.LayerChanged], (changed: Api.IChangeEvent) => {
+        this.on(Api.Event[Api.Event.FeatureChanged], (changed: Api.IChangeEvent) => {
             if (changed.id !== 'powerstations' || !changed.value) return;
-            var layer = <Api.ILayer> changed.value;
-            if (!layer.features) return;
-            Winston.info('Powerstations layer received');
+            var f = <Api.Feature> changed.value;
+            Winston.info('COSim: Powerstations feature received');
             Winston.info(`ID  : ${changed.id}`);
             Winston.info(`Type: ${changed.type}`);
-            this.blackout(layer);
+            this.blackout(f);
         });
     }
 
-    private blackout(layer: Api.ILayer) {
-        var failedObjects = this.checkBlackoutAreas(layer);
+    private blackout(f: Api.Feature) {
+        var failedObjects = this.checkBlackoutAreas(f);
         this.checkDependencies(failedObjects);
     }
 
-    private checkBlackoutAreas(layer: Api.ILayer) {
-        var totalBlackoutArea = this.concatenateBlackoutAreas(layer);
+    private checkBlackoutAreas(f: Api.Feature) {
+        // var totalBlackoutArea = this.concatenateBlackoutAreas(f);
+        var totalBlackoutArea = f.geometry;
         var failedObjects: string[] = [];
 
         // Check if CO is in blackout area
@@ -91,7 +91,8 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
                 failedObjects.push(co.properties['name']);
                 continue;
             }
-            var inBlackout = this.pointInsideMultiPolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+            // var inBlackout = this.pointInsideMultiPolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+            var inBlackout = this.pointInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
             if (inBlackout) {
                 //TODO: Check if Auxilary Power Supply is available
                 this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.LimitedPower, true);
@@ -103,6 +104,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
 
     private concatenateBlackoutAreas(layer: Api.ILayer): Api.Geometry {
         var totalArea: Api.Geometry = {type: "MultiPolygon", coordinates: [] };
+        if (!layer || ! layer.features) return totalArea;
         var count = 0;
         layer.features.forEach((f) => {
             if (f.properties && f.properties.hasOwnProperty('featureTypeId') && f.properties['featureTypeId'] === 'AffectedArea') {
@@ -220,16 +222,16 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         // Publish feature update
         this.updateFeature(this.criticalObjectsLayer.id, feature, <Api.ApiMeta>{}, () => { });
         // Publish PowerSupplyArea layer
-        if (state === SimSvc.InfrastructureState.Failed && feature.properties.hasOwnProperty('contour')) {
-            var contour = new Api.Feature();
-            contour.id = Utils.newGuid();
-            contour.properties = {
-                name: 'Contour area',
-                featureTypeId: 'AffectedArea'
-            };
-            contour.geometry = JSON.parse(feature.properties['contour']);
-            this.addFeature(this.criticalObjectsLayer.id, contour, <Api.ApiMeta>{}, () => { });
-        }
+        // if (state === SimSvc.InfrastructureState.Failed && feature.properties.hasOwnProperty('contour')) {
+        //     var contour = new Api.Feature();
+        //     contour.id = Utils.newGuid();
+        //     contour.properties = {
+        //         name: 'Contour area',
+        //         featureTypeId: 'AffectedArea'
+        //     };
+        //     contour.geometry = JSON.parse(feature.properties['contour']);
+        //     this.addFeature(this.criticalObjectsLayer.id, contour, <Api.ApiMeta>{}, () => { });
+        // }
     }
 
     private getFeatureState(feature: Api.Feature) {

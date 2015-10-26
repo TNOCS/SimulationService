@@ -21,8 +21,6 @@ import _ = require('underscore');
 export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
     /** Relative folder for the original source files */
     private relativeSourceFolder = 'source';
-    /** Simulation start time */
-    private simStartTime: Date;
     private powerLayer: Api.ILayer;
     private powerStations: Api.Feature[];
 
@@ -41,11 +39,6 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
      * Initialize the FSM, basically setting the simulation start time.
      */
     private initFSM() {
-        // Specify the behaviour of the sim.
-        this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
-            if (from === SimSvc.SimState.Idle) this.simStartTime = this.simTime;
-            return true;
-        });
 
         this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
             this.reset();

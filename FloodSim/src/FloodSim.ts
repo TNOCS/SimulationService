@@ -52,8 +52,6 @@ export class FloodSim extends SimSvc.SimServiceManager {
         startTime: Date,
         layer: Api.ILayer
     };
-    /** Simulation start time */
-    private simStartTime: Date;
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
@@ -71,7 +69,6 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/layers'));
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
 
-        this.simStartTime = null;
         this.publishFloodLayer();
         this.fsm.currentState = SimSvc.SimState.Ready;
         this.sendAck(this.fsm.currentState);
@@ -81,12 +78,6 @@ export class FloodSim extends SimSvc.SimServiceManager {
      * Initialize the FSM.
      */
     private initFSM() {
-        // Specify the behaviour of the sim.
-        this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
-            if (from === SimSvc.SimState.Idle) this.simStartTime = this.simTime;
-            return true;
-        });
-
         this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
             this.message = 'Scenario has been reset.'
             this.reset();

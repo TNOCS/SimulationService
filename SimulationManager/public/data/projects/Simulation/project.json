@@ -117,7 +117,155 @@
           "width": "312px",
           "height": "436px",
           "data": {}
-        }
+        },
+        {
+                    "id" : "1b116807-a474-47e7-c7f2-38c6c0169d13",
+                    "directive" : "charts",
+                    "elementId" : "widget-1b116807-a474-47e7-c7f2-38c6c0169d13",
+                    "enabled" : true,
+                    "customStyle" : {
+                        "borderWidth" : 1,
+                        "background" : "white",
+                        "opacity" : "0.9"
+                    },
+                    "style" : "custom",
+                    "left" : "",
+                    "right" : "60px",
+                    "top" : "470px",
+                    "width" : "312px",
+                    "height" : "170px",
+                    "data" : {
+                        "spec" : {
+                            "width" : 260,
+                            "height" : 110,
+                            "padding" : {
+                                "top" : 10,
+                                "left" : 30,
+                                "bottom" : 30,
+                                "right" : 10
+                            },
+                            "data" : [{
+                                    "name" : "stressed",
+                                    "values" : [{
+                                            "x" : 0,
+                                            "y" : 0
+                                        }
+                                    ]
+                                },{
+                                    "name" : "failed",
+                                    "values" : [{
+                                            "x" : 0,
+                                            "y" : 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "scales" : [{
+                                    "name" : "x",
+                                    "type" : "linear",
+                                    "range" : "width",
+                                    "zero" : false,
+                                    "domain" : {
+                                        "data" : "failed",
+                                        "field" : "x"
+                                    }
+                                }, {
+                                    "name" : "y",
+                                    "type" : "linear",
+                                    "range" : "height",
+                                    "nice" : true,
+                                    "domain" : {
+                                        "data" : "failed",
+                                        "field" : "y"
+                                    }
+                                }
+                            ],
+                            "axes" : [{
+                                    "type" : "x",
+                                    "scale" : "x",
+                                    "ticks" : 10
+                                }, {
+                                    "type" : "y",
+                                    "scale" : "y"
+                                }
+                            ],
+                            "marks" : [{
+                                    "type" : "line",
+                                    "from" : {
+                                        "data" : "stressed"
+                                    },
+                                    "properties" : {
+                                        "enter" : {
+                                            "interpolate" : {
+                                                "value" : "monotone"
+                                            },
+                                            "x" : {
+                                                "scale" : "x",
+                                                "field" : "x"
+                                            },
+                                            "y" : {
+                                                "scale" : "y",
+                                                "field" : "y"
+                                            },
+                                            "y2" : {
+                                                "scale" : "y",
+                                                "value" : 0
+                                            },
+                                            "fill" : {
+                                                "value" : "steelblue"
+                                            },
+                                            "stroke" : {
+                                                "value" : "orange"
+                                            }
+                                        },
+                                        "update" : {
+                                            "fillOpacity" : {
+                                                "value" : 0
+                                            }
+                                        }
+                                    }
+                                },{
+                                    "type" : "line",
+                                    "from" : {
+                                        "data" : "failed"
+                                    },
+                                    "properties" : {
+                                        "enter" : {
+                                            "interpolate" : {
+                                                "value" : "monotone"
+                                            },
+                                            "x" : {
+                                                "scale" : "x",
+                                                "field" : "x"
+                                            },
+                                            "y" : {
+                                                "scale" : "y",
+                                                "field" : "y"
+                                            },
+                                            "y2" : {
+                                                "scale" : "y",
+                                                "value" : 0
+                                            },
+                                            "fill" : {
+                                                "value" : "steelblue"
+                                            },
+                                            "stroke" : {
+                                                "value" : "red"
+                                            }
+                                        },
+                                        "update" : {
+                                            "fillOpacity" : {
+                                                "value" : 0
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "key" : "chart",
+                        "title" : "Geëvacueerde ziekenhuisbedden"
+                    }
+                }
       ],
       "visibleLeftMenuItems": [
         "!lm-layers"

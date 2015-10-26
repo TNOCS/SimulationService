@@ -10,6 +10,11 @@ import SimSvc = require('../../SimulationService/api/SimServiceManager');
 import Grid = require('../../ServerComponents/import/IsoLines');
 import _ = require('underscore');
 
+export interface ChartData {
+    name: string;
+    values: { x: number, y: number }[];
+}
+
 /**
  * Electrical Network Simulator.
  *
@@ -21,10 +26,9 @@ import _ = require('underscore');
 export class CriticalObjectSim extends SimSvc.SimServiceManager {
     /** Relative folder for the original source files */
     private relativeSourceFolder = 'source';
-    /** Simulation start time */
-    private simStartTime: Date;
     private criticalObjectsLayer: Api.ILayer;
     private criticalObjects: Api.Feature[];
+    private bedsChartData: ChartData[];
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
@@ -43,7 +47,10 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private initFSM() {
         // Specify the behaviour of the sim.
         this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
-            if (from === SimSvc.SimState.Idle) this.simStartTime = this.simTime;
+            //Why is this never reached?
+            if (from === SimSvc.SimState.Idle) {
+                this.bedsChartData = [{ name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
+            }
             return true;
         });
 
@@ -76,6 +83,42 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private blackout(f: Api.Feature) {
         var failedObjects = this.checkBlackoutAreas(f);
         this.checkDependencies(failedObjects);
+        this.sendChartValues(failedObjects); // e.g., nr. of evacuated hospital beds.
+    }
+
+    private sendChartValues(failedObjects: string[]) {
+        if (failedObjects.length === 0) return;
+        var stressedBeds = 0;
+        var failedBeds = 0;
+        for (let i = 0; i < this.criticalObjects.length; i++) {
+            var co = this.criticalObjects[i];
+            if (!co.properties.hasOwnProperty('Aantal bedden')) continue;
+            var beds = co.properties['Aantal bedden'];
+            var state = this.getFeatureState(co);
+            if (state === SimSvc.InfrastructureState.Ok) continue;
+            if (state === SimSvc.InfrastructureState.Stressed) {
+                stressedBeds += beds;
+            } else if (state === SimSvc.InfrastructureState.Failed) {
+                failedBeds += beds;
+            }
+        }
+        this.bedsChartData.forEach((c) => {
+            if (!this.simStartTime) {
+                Winston.error('CriticalObjectsSim: SimStartTime not found!');
+                this.simStartTime = new Date(this.simTime.getTime());
+            }
+            var last = c.values[c.values.length - 1];
+            if (last && last.x === this.simTime.getTime()) {
+                c.values.pop(); //Remove the last element if it has the simtime has not changed yet
+            }
+            var h = ((this.simTime.getTime() - this.simStartTime.getTime()) / 3600000); // hours
+            if (c.name === 'failed') {
+                c.values.push({ x: h, y: failedBeds });
+            } else if (c.name === 'stressed') {
+                c.values.push({ x: h, y: stressedBeds });
+            }
+        })
+        this.updateKey("chart", this.bedsChartData, <Api.ApiMeta>{}, () => { });
     }
 
     private checkBlackoutAreas(f: Api.Feature) {
@@ -103,8 +146,8 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     }
 
     private concatenateBlackoutAreas(layer: Api.ILayer): Api.Geometry {
-        var totalArea: Api.Geometry = {type: "MultiPolygon", coordinates: [] };
-        if (!layer || ! layer.features) return totalArea;
+        var totalArea: Api.Geometry = { type: "MultiPolygon", coordinates: [] };
+        if (!layer || !layer.features) return totalArea;
         var count = 0;
         layer.features.forEach((f) => {
             if (f.properties && f.properties.hasOwnProperty('featureTypeId') && f.properties['featureTypeId'] === 'AffectedArea') {
@@ -121,6 +164,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private flooding(layer: Api.ILayer) {
         var failedObjects = this.checkWaterLevel(layer);
         this.checkDependencies(failedObjects);
+        this.sendChartValues(failedObjects); // e.g., nr. of evacuated hospital beds.
     }
 
     private checkWaterLevel(layer: Api.ILayer) {
@@ -190,6 +234,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
 
         this.criticalObjects = [];
+        this.bedsChartData = [{ name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);
 

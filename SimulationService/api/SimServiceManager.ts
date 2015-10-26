@@ -107,10 +107,12 @@ export class SimServiceManager extends Api.ApiManager {
     public simSpeed: number = 1;
     public simTimeStep = 1000;
     public simCmd: SimCommand;
+    public simStartTime: Date;
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
         this.simTime = new Date();
+        this.simStartTime = new Date();
 
         Winston.info(`${this.name}: Init layer manager (isClient=${this.isClient})`);
 
@@ -128,6 +130,14 @@ export class SimServiceManager extends Api.ApiManager {
         this.fsm.onTransition = (fromState: SimState, toState: SimState) => {
             this.publishStateChanged(fromState, toState)
         }
+
+        this.fsm.onEnter(SimState.Ready, (from) => {
+            if (from === SimState.Idle) {
+                this.simStartTime = new Date();
+                Winston.info("Set sim start time: " + this.simStartTime.toLocaleString());
+            }
+            return true;
+        });
 
         this.on(Api.Event[Api.Event.KeyChanged], (key: Api.IChangeEvent) => {
             if (!key.value.hasOwnProperty('type')) return;

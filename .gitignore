@@ -76,3 +76,4 @@ SimulationManager/public/data/layers/
 SimulationManager/public/images/gauge.png
 SimulationManager/public/data/resourceTypes/
 ElectricalNetworkSim/src/ElectricalNetworkSim.js
+CriticalObjectSim/src/CriticalObjectSim.js

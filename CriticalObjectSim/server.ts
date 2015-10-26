@@ -24,7 +24,7 @@ import Winston = require('winston');
 
 require('./../ServerComponents/helpers/DateUtils');
 
-import ElectricalNetworkSim = require('./src/ElectricalNetworkSim');
+import CriticalObjectSim = require('./src/CriticalObjectSim');
 
 Winston.remove(Winston.transports.Console);
 Winston.add(Winston.transports.Console, {
@@ -45,7 +45,7 @@ var config = new ConfigurationService('./configuration.json');
 //require('http').setMaxHeaderLength(26214400);
 
 // all environments
-var port = 3335;
+var port = 3336;
 server.set('port', port);
 server.use(favicon(__dirname + '/public/favicon.ico'));
 //increased limit size, see: http://stackoverflow.com/questions/19917401/node-js-express-request-entity-too-large
@@ -81,13 +81,13 @@ apiServiceMgr.addService(resourceTypeStore);
 
 server.use(express.static(path.join(__dirname, 'public')));
 
-var api = new ElectricalNetworkSim.ElectricalNetworkSim('cs', 'ElectricitySim', false, <Api.IApiManagerOptions>{
+var api = new CriticalObjectSim.CriticalObjectSim('cs', 'CriticalObjectSim', false, <Api.IApiManagerOptions>{
     server: `${Utils.getIPAddress()}:${port}`,
-    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/keys/Sim/PowerStationCmd', 'cs/layers/floodsim']
+    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});
-    api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
+    // api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
     api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/"), true), {});
     api.start();

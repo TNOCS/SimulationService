@@ -69,7 +69,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
             if (changed.id !== 'floodsim' || !changed.value) return;
             var layer = <Api.ILayer> changed.value;
             if (!layer.data) return;
-            Winston.info('Floodsim layer received');
+            Winston.info('ElecSim: Floodsim layer received');
             Winston.info(`ID  : ${changed.id}`);
             Winston.info(`Type: ${changed.type}`);
             this.flooding(layer);

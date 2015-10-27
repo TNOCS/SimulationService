@@ -16,12 +16,11 @@ export interface ChartData {
 }
 
 /**
- * Electrical Network Simulator.
+ * CriticalObjectSim
  *
- * It listens to floodings: when a flooding occurs, all power substations are checked, and, if flooded,
+ * It listens to floodings: when a flooding occurs, all critical objects are checked, and, if flooded,
  * fail to perform their function.
- * Also, in case their dependencies are no longer satisfied, e.g. when (all of) their power supplying
- * substation fails, it will fail too.
+ * Also, in case they experience a blackout, they will fail too.
  */
 export class CriticalObjectSim extends SimSvc.SimServiceManager {
     /** Relative folder for the original source files */

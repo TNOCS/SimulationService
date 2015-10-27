@@ -27,7 +27,7 @@ require('./../ServerComponents/helpers/DateUtils');
 import CriticalObjectSim = require('./src/CriticalObjectSim');
 
 Winston.remove(Winston.transports.Console);
-Winston.add(Winston.transports.Console, {
+Winston.add(Winston.transports.Console, <Winston.ConsoleTransportOptions>{
     colorize: true,
     prettyPrint: true
 });

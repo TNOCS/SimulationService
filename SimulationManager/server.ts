@@ -26,7 +26,7 @@ import Utils = require('./../ServerComponents/helpers/Utils');
 
 
 Winston.remove(Winston.transports.Console);
-Winston.add(Winston.transports.Console, {
+Winston.add(Winston.transports.Console, <Winston.ConsoleTransportOptions>{
     colorize: true,
     prettyPrint: true
 });

@@ -20,6 +20,8 @@
                 "Spoedeisende hulp" : "ja",
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Gorinchem",
+                "UPS" : "24 uur",
+                "dependencies" : ["UPS#1440"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -49,6 +51,8 @@
                 "Spoedeisende hulp" : "",
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Krimpenerwaard",
+                "UPS" : "24 uur",
+                "dependencies" : ["UPS#1440"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -78,6 +82,8 @@
                 "Spoedeisende hulp" : "",
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Leerdam",
+                "UPS" : "24 uur",
+                "dependencies" : ["UPS#1440"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -107,6 +113,8 @@
                 "Spoedeisende hulp" : "",
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Sliedrecht",
+                "UPS" : "24 uur",
+                "dependencies" : ["UPS#1440"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {

@@ -28,6 +28,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private criticalObjectsLayer: Api.ILayer;
     private criticalObjects: Api.Feature[];
     private bedsChartData: ChartData[];
+    private upcomingEventTime: number; // milliseconds
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
@@ -77,6 +78,31 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             Winston.info(`Type: ${changed.type}`);
             this.blackout(f);
         });
+
+        this.on('simTimeChanged', () => {
+            if (!this.upcomingEventTime || this.upcomingEventTime > this.simTime.getTime()) return;
+            this.checkUps(); // Check power supplies
+        });
+    }
+
+    private checkUps() {
+        var eventTimes = [];
+        for (let i = 0; i < this.criticalObjects.length; i++) {
+            var co = this.criticalObjects[i];
+            if (!co.properties.hasOwnProperty('willFailAt')) continue;
+            if (co.properties['willFailAt'] > this.simTime.getTime()) {
+                eventTimes.push(co.properties['willFailAt']);
+                continue;
+            } else {
+                delete co.properties['willFailAt'];
+                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+            }
+        }
+        if (eventTimes.length > 0) {
+            this.upcomingEventTime = _.min(eventTimes);
+        } else {
+            this.upcomingEventTime = null;
+        }
     }
 
     private blackout(f: Api.Feature) {
@@ -136,9 +162,28 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             // var inBlackout = this.pointInsideMultiPolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
             var inBlackout = this.pointInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
             if (inBlackout) {
-                //TODO: Check if Auxilary Power Supply is available
-                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.LimitedPower, true);
-                failedObjects.push(co.properties['name']);
+                // Check for UPS
+                var upsFound = false;
+                if (co.properties.hasOwnProperty('dependencies')) {
+                    co.properties['dependencies'].forEach((dep) => {
+                        var splittedDep = dep.split('#');
+                        if (splittedDep.length === 2) {
+                            if (splittedDep[0] === 'UPS' && co.properties['state'] === SimSvc.InfrastructureState.Ok) {
+                                let minutes = +splittedDep[1];
+                                let failTime = this.simTime.addMinutes(minutes);
+                                upsFound = true;
+                                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.NoMainPower, failTime, true);
+                            }
+                        }
+                    });
+                }
+                if (!upsFound && !co.properties.hasOwnProperty('willFailAt')) {
+                    this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+                    failedObjects.push(co.properties['name']);
+                }
+                if (upsFound) {
+                    this.checkUps();
+                }
             }
         }
         return failedObjects;
@@ -180,7 +225,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             }
             var waterLevel = getWaterLevel(co.geometry.coordinates);
             if (waterLevel > 0) {
-                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, true);
+                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, null, true);
                 failedObjects.push(co.properties['name']);
             }
         }
@@ -202,9 +247,9 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             });
             if (failedDependencies === 0) continue;
             if (failedDependencies < dependencies.length) {
-                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.LimitedPower, true);
+                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.LimitedPower, null, true);
             } else {
-                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoMainPower, true);
+                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoMainPower, null, true);
                 failedObjects.push(co.properties["name"]);
                 additionalFailures = true;
             }
@@ -234,6 +279,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
 
         this.criticalObjects = [];
         this.bedsChartData = [{ name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
+        this.upcomingEventTime = null;
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);
 
@@ -259,9 +305,10 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     }
 
     /** Set the state and failure mode of a feature, optionally publishing it too. */
-    private setFeatureState(feature: Api.Feature, state: SimSvc.InfrastructureState, failureMode: SimSvc.FailureMode = SimSvc.FailureMode.None, publish: boolean = false) {
+    private setFeatureState(feature: Api.Feature, state: SimSvc.InfrastructureState, failureMode: SimSvc.FailureMode = SimSvc.FailureMode.None, failureTime: Date = null, publish: boolean = false) {
         feature.properties['state'] = state;
         feature.properties['failureMode'] = failureMode;
+        if (failureTime) feature.properties['willFailAt'] = failureTime.getTime();
         if (!publish) return;
         // Publish feature update
         this.updateFeature(this.criticalObjectsLayer.id, feature, <Api.ApiMeta>{}, () => { });

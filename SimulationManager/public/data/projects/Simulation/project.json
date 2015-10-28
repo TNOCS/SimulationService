@@ -6,12 +6,12 @@
   "url": "https://github.com/TNOCS/csMap",
   "connected": true,
   "timeLine": {
-    "start": 1447661392962,
-    "end": 1448266192962,
+    "start": 1445288169205,
+    "end": 1445892969205,
     "range": 604800000,
     "zoomLevelName": "hours",
     "isLive": false,
-    "focus": 1448183032962,
+    "focus": 1445809809205,
     "zoomLevel": 3600000
   },
   "datasources": [
@@ -140,11 +140,18 @@
                             "height" : 110,
                             "padding" : {
                                 "top" : 10,
-                                "left" : 30,
+                                "left" : 35,
                                 "bottom" : 30,
                                 "right" : 10
                             },
                             "data" : [{
+                                    "name" : "available",
+                                    "values" : [{
+                                            "x" : 0,
+                                            "y" : 0
+                                        }
+                                    ]
+                                },{
                                     "name" : "stressed",
                                     "values" : [{
                                             "x" : 0,
@@ -164,7 +171,8 @@
                                     "name" : "x",
                                     "type" : "linear",
                                     "range" : "width",
-                                    "zero" : false,
+                                    "nice" : true,
+                                    "zero" : true,
                                     "domain" : {
                                         "data" : "failed",
                                         "field" : "x"
@@ -175,15 +183,18 @@
                                     "range" : "height",
                                     "nice" : true,
                                     "domain" : {
-                                        "data" : "failed",
-                                        "field" : "y"
+                                        "fields" : [
+                                            {"data":"failed", "field":"y"},
+                                            {"data":"stressed", "field":"y"},
+                                            {"data":"available", "field":"y"}
+                                        ]
                                     }
                                 }
                             ],
                             "axes" : [{
                                     "type" : "x",
                                     "scale" : "x",
-                                    "ticks" : 10
+                                    "ticks" : 8
                                 }, {
                                     "type" : "y",
                                     "scale" : "y"
@@ -196,9 +207,6 @@
                                     },
                                     "properties" : {
                                         "enter" : {
-                                            "interpolate" : {
-                                                "value" : "monotone"
-                                            },
                                             "x" : {
                                                 "scale" : "x",
                                                 "field" : "x"
@@ -231,9 +239,6 @@
                                     },
                                     "properties" : {
                                         "enter" : {
-                                            "interpolate" : {
-                                                "value" : "monotone"
-                                            },
                                             "x" : {
                                                 "scale" : "x",
                                                 "field" : "x"
@@ -251,6 +256,38 @@
                                             },
                                             "stroke" : {
                                                 "value" : "red"
+                                            }
+                                        },
+                                        "update" : {
+                                            "fillOpacity" : {
+                                                "value" : 0
+                                            }
+                                        }
+                                    }
+                                },{
+                                    "type" : "line",
+                                    "from" : {
+                                        "data" : "available"
+                                    },
+                                    "properties" : {
+                                        "enter" : {
+                                            "x" : {
+                                                "scale" : "x",
+                                                "field" : "x"
+                                            },
+                                            "y" : {
+                                                "scale" : "y",
+                                                "field" : "y"
+                                            },
+                                            "y2" : {
+                                                "scale" : "y",
+                                                "value" : 0
+                                            },
+                                            "fill" : {
+                                                "value" : "steelblue"
+                                            },
+                                            "stroke" : {
+                                                "value" : "green"
                                             }
                                         },
                                         "update" : {
@@ -399,6 +436,19 @@
           "heatmapItems": null,
           "url": "http://localhost:3336/api/layers/criticalobjects",
           "typeUrl": "http://localhost:3336/api/resources/critical_objects",
+          "opacity": 90,
+          "isDynamic": true,
+          "gui": {},
+          "tags": []
+        },
+        {
+          "id": "roadobjects",
+          "title": "Wegen",
+          "type": "dynamicgeojson",
+          "renderType": "geojson",
+          "heatmapItems": null,
+          "url": "http://localhost:3337/api/layers/roadobjects",
+          "typeUrl": "http://localhost:3337/api/resources/road",
           "opacity": 90,
           "isDynamic": true,
           "gui": {},

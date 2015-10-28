@@ -16,17 +16,17 @@ export interface ChartData {
 }
 
 /**
- * CriticalObjectSim
+ * RoadSim
  *
- * It listens to floodings: when a flooding occurs, all critical objects are checked, and, if flooded,
+ * It listens to floodings: when a flooding occurs, all roads are checked, and, if flooded,
  * fail to perform their function.
  * Also, in case they experience a blackout, they will fail too.
  */
-export class CriticalObjectSim extends SimSvc.SimServiceManager {
+export class RoadSim extends SimSvc.SimServiceManager {
     /** Relative folder for the original source files */
     private relativeSourceFolder = 'source';
-    private criticalObjectsLayer: Api.ILayer;
-    private criticalObjects: Api.Feature[];
+    private roadObjectsLayer: Api.ILayer;
+    private roadObjects: Api.Feature[];
     private bedsChartData: ChartData[];
     private upcomingEventTime: number; // milliseconds
 
@@ -49,14 +49,13 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
             //Why is this never reached?
             if (from === SimSvc.SimState.Idle) {
-                this.bedsChartData = [{ name: "available", values: [{ x: 0, y: 0 }] }, { name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
             }
             return true;
         });
 
         this.fsm.onEnter(SimSvc.SimState.Idle, (from) => {
             this.reset();
-            this.message = 'Critical objects have been reset.'
+            this.message = 'Roads have been reset.'
             return true;
         });
 
@@ -64,7 +63,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             if (changed.id !== 'floodsim' || !changed.value) return;
             var layer = <Api.ILayer> changed.value;
             if (!layer.data) return;
-            Winston.info('COSim: Floodsim layer received');
+            Winston.info('Roadsim: Floodsim layer received');
             Winston.info(`ID  : ${changed.id}`);
             Winston.info(`Type: ${changed.type}`);
             this.flooding(layer);
@@ -73,121 +72,35 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.on(Api.Event[Api.Event.FeatureChanged], (changed: Api.IChangeEvent) => {
             if (changed.id !== 'powerstations' || !changed.value) return;
             var f = <Api.Feature> changed.value;
-            Winston.info('COSim: Powerstations feature received');
+            Winston.info('RoadSim: Powerstations feature received');
             Winston.info(`ID  : ${changed.id}`);
             Winston.info(`Type: ${changed.type}`);
             this.blackout(f);
         });
-
-        this.on('simTimeChanged', () => {
-            if (!this.upcomingEventTime || this.upcomingEventTime > this.simTime.getTime()) return;
-            this.checkUps(); // Check power supplies
-        });
-    }
-
-    private checkUps() {
-        var eventTimes = [];
-        for (let i = 0; i < this.criticalObjects.length; i++) {
-            var co = this.criticalObjects[i];
-            if (!co.properties.hasOwnProperty('willFailAt')) continue;
-            if (co.properties['willFailAt'] > this.simTime.getTime()) {
-                eventTimes.push(co.properties['willFailAt']);
-                continue;
-            } else {
-                delete co.properties['willFailAt'];
-                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
-            }
-        }
-        if (eventTimes.length > 0) {
-            this.upcomingEventTime = _.min(eventTimes);
-        } else {
-            this.upcomingEventTime = null;
-        }
     }
 
     private blackout(f: Api.Feature) {
         var failedObjects = this.checkBlackoutAreas(f);
         this.checkDependencies(failedObjects);
-        this.sendChartValues(); // e.g., nr. of evacuated hospital beds.
-    }
-
-    private sendChartValues() {
-        var stressedBeds = 0;
-        var failedBeds = 0;
-        var availableBeds = 0;
-        for (let i = 0; i < this.criticalObjects.length; i++) {
-            var co = this.criticalObjects[i];
-            if (!co.properties.hasOwnProperty('Aantal bedden')) continue;
-            var beds = co.properties['Aantal bedden'];
-            var state = this.getFeatureState(co);
-            if (state === SimSvc.InfrastructureState.Stressed) {
-                stressedBeds += beds;
-            } else if (state === SimSvc.InfrastructureState.Failed) {
-                failedBeds += beds;
-            } else if (state === SimSvc.InfrastructureState.Ok) {
-                availableBeds += beds;
-            }
-        }
-        this.bedsChartData.forEach((c) => {
-            if (!this.simStartTime) {
-                Winston.error('CriticalObjectsSim: SimStartTime not found!');
-                this.simStartTime = new Date(this.simTime.getTime());
-            }
-            var last = c.values[c.values.length - 1];
-            if (last && last.x === this.simTime.getTime()) {
-                c.values.pop(); //Remove the last element if it has the simtime has not changed yet
-            }
-            var h = Math.round((this.simTime.getTime() - this.simStartTime.getTime()) / 3600000); // hours
-            if (c.name === 'failed') {
-                c.values.push({ x: h, y: failedBeds });
-            } else if (c.name === 'stressed') {
-                c.values.push({ x: h, y: stressedBeds });
-            } else if (c.name === 'available') {
-                c.values.push({ x: h, y: availableBeds });
-                Winston.info(`Available beds: ${availableBeds}`);
-            }
-        })
-        this.updateKey("chart", this.bedsChartData, <Api.ApiMeta>{}, () => { });
     }
 
     private checkBlackoutAreas(f: Api.Feature) {
-        // var totalBlackoutArea = this.concatenateBlackoutAreas(f);
         var totalBlackoutArea = f.geometry;
         var failedObjects: string[] = [];
 
-        // Check if CO is in blackout area
-        for (let i = 0; i < this.criticalObjects.length; i++) {
-            var co = this.criticalObjects[i];
-            var state = this.getFeatureState(co);
+        // Check if ro is in blackout area
+        for (let i = 0; i < this.roadObjects.length; i++) {
+            var ro = this.roadObjects[i];
+            var state = this.getFeatureState(ro);
             if (state === SimSvc.InfrastructureState.Failed) {
-                failedObjects.push(co.properties['name']);
+                failedObjects.push(ro.properties['name']);
                 continue;
             }
-            // var inBlackout = this.pointInsideMultiPolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
-            var inBlackout = this.pointInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+
+            var inBlackout = this.lineInsidePolygon(ro.geometry.coordinates, totalBlackoutArea.coordinates);
             if (inBlackout) {
-                // Check for UPS
-                var upsFound = false;
-                if (co.properties.hasOwnProperty('dependencies')) {
-                    co.properties['dependencies'].forEach((dep) => {
-                        var splittedDep = dep.split('#');
-                        if (splittedDep.length === 2) {
-                            if (splittedDep[0] === 'UPS' && co.properties['state'] === SimSvc.InfrastructureState.Ok) {
-                                let minutes = +splittedDep[1];
-                                let failTime = this.simTime.addMinutes(minutes);
-                                upsFound = true;
-                                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.NoMainPower, failTime, true);
-                            }
-                        }
-                    });
-                }
-                if (!upsFound && !co.properties.hasOwnProperty('willFailAt')) {
-                    this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
-                    failedObjects.push(co.properties['name']);
-                }
-                if (upsFound) {
-                    this.checkUps();
-                }
+                this.setFeatureState(ro, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+                failedObjects.push(ro.properties['name']);
             }
         }
         return failedObjects;
@@ -212,7 +125,6 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private flooding(layer: Api.ILayer) {
         var failedObjects = this.checkWaterLevel(layer);
         this.checkDependencies(failedObjects);
-        this.sendChartValues(); // e.g., nr. of evacuated hospital beds.
     }
 
     private checkWaterLevel(layer: Api.ILayer) {
@@ -220,17 +132,38 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         var failedObjects: string[] = [];
 
         // Check is CO is flooded
-        for (let i = 0; i < this.criticalObjects.length; i++) {
-            var co = this.criticalObjects[i];
+        for (let i = 0; i < this.roadObjects.length; i++) {
+            var co = this.roadObjects[i];
             var state = this.getFeatureState(co);
             if (state === SimSvc.InfrastructureState.Failed) {
                 failedObjects.push(co.properties['name']);
                 continue;
             }
-            var waterLevel = getWaterLevel(co.geometry.coordinates);
-            if (waterLevel > 0) {
+            // Check maximum water level along the raod segment
+            var maxWaterLevel = 0;
+            if (co.geometry.type.toLowerCase() !== "linestring") continue;
+            co.geometry.coordinates.forEach((segm) => {
+                let level = getWaterLevel(segm);
+                maxWaterLevel = Math.max(maxWaterLevel, level);
+            });
+            // Check the max water level the road is able to resist
+            var waterResistanceLevel = 0;
+            if (co.properties.hasOwnProperty('dependencies')){
+                co.properties['dependencies'].forEach((dep) => {
+                    var splittedDep = dep.split('#');
+                    if (splittedDep.length === 2) {
+                        if (splittedDep[0] === 'water' && co.properties['state'] === SimSvc.InfrastructureState.Ok) {
+                            waterResistanceLevel = +splittedDep[1];
+                        }
+                    }
+                });
+            }
+            // Set the state of the road segment
+            if (maxWaterLevel > waterResistanceLevel) {
                 this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, null, true);
                 failedObjects.push(co.properties['name']);
+            } else if (maxWaterLevel > 0) {
+                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.Flooded, null, true);
             }
         }
         return failedObjects;
@@ -239,8 +172,8 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private checkDependencies(failedObjects: string[]) {
         if (failedObjects.length === 0) return;
         var additionalFailures = false;
-        for (let i = 0; i < this.criticalObjects.length; i++) {
-            var co = this.criticalObjects[i];
+        for (let i = 0; i < this.roadObjects.length; i++) {
+            var co = this.roadObjects[i];
             if (!co.properties.hasOwnProperty('dependencies')) continue;
             var state = this.getFeatureState(co);
             if (state === SimSvc.InfrastructureState.Failed) continue;
@@ -281,29 +214,26 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/layers'));
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
 
-        this.criticalObjects = [];
-        this.bedsChartData = [{ name: "available", values: [{ x: 0, y: 0 }] }, { name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
-        this.upcomingEventTime = null;
+        this.roadObjects = [];
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);
 
-        var objectsFile = path.join(sourceFolder, 'critical_objects.json');
+        var objectsFile = path.join(sourceFolder, 'road_objects.json');
         fs.readFile(objectsFile, (err, data) => {
             if (err) {
                 Winston.error(`Error reading ${objectsFile}: ${err}`);
                 return;
             }
-            let co = JSON.parse(data.toString());
-            this.criticalObjectsLayer = this.createNewLayer('criticalobjects', 'Kwetsbare objecten', co.features);
-            this.criticalObjectsLayer.features.forEach(f => {
+            let ro = JSON.parse(data.toString());
+            this.roadObjectsLayer = this.createNewLayer('roadobjects', 'Wegen', ro.features);
+            this.roadObjectsLayer.features.forEach(f => {
                 if (!f.id) f.id = Utils.newGuid();
-                if (f.geometry.type !== 'Point') return;
+                if (f.geometry.type !== 'LineString') return;
                 this.setFeatureState(f, SimSvc.InfrastructureState.Ok);
-                this.criticalObjects.push(f);
+                this.roadObjects.push(f);
             });
 
-            this.publishLayer(this.criticalObjectsLayer);
-            this.sendChartValues();
+            this.publishLayer(this.roadObjectsLayer);
         });
         this.fsm.currentState = SimSvc.SimState.Ready;
         this.sendAck(this.fsm.currentState);
@@ -316,7 +246,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         if (failureTime) feature.properties['willFailAt'] = failureTime.getTime();
         if (!publish) return;
         // Publish feature update
-        this.updateFeature(this.criticalObjectsLayer.id, feature, <Api.ApiMeta>{}, () => { });
+        this.updateFeature(this.roadObjectsLayer.id, feature, <Api.ApiMeta>{}, () => { });
         // Publish PowerSupplyArea layer
         // if (state === SimSvc.InfrastructureState.Failed && feature.properties.hasOwnProperty('contour')) {
         //     var contour = new Api.Feature();
@@ -326,7 +256,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         //         featureTypeId: 'AffectedArea'
         //     };
         //     contour.geometry = JSON.parse(feature.properties['contour']);
-        //     this.addFeature(this.criticalObjectsLayer.id, contour, <Api.ApiMeta>{}, () => { });
+        //     this.addFeature(this.roadObjectsLayer.id, contour, <Api.ApiMeta>{}, () => { });
         // }
     }
 
@@ -344,7 +274,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             storage: 'file',
             enabled: true,
             isDynamic: true,
-            typeUrl: `${this.options.server}/api/resources/critical_objects`,
+            typeUrl: `${this.options.server}/api/resources/road`,
             type: 'dynamicgeojson',
         }
         return layer;
@@ -384,22 +314,18 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         return inside;
     }
 
+
     /**
-     * pointInsideMultiPolygon returns true if a 2D point lies within a multipolygon
-     * @param  {number[]}   point   [lat, lng]
+     * lineInsideMultiPolygon returns true if a point of a 2D line lies within a multipolygon
+     * @param  {number[][]}   line   [][lat, lng], ...]
      * @param  {number[][][]} polygon [[[lat, lng], [lat,lng]],...]]
      * @return {boolean}            Inside == true
      */
-    private pointInsideMultiPolygon(point: number[], multipoly: number[][][][]): boolean {
+    private lineInsidePolygon(line: number[][], polygon: number[][][]): boolean {
         // https://github.com/substack/point-in-polygon
         // ray-casting algorithm based on
         // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-        var inside = false;
-        for (var i = 0; i < multipoly.length; i++) {
-            var polygon = multipoly[i];
-            if (this.pointInsidePolygon(point, polygon)) inside = !inside;
-        }
+        var inside = line.some((l) => {return (this.pointInsidePolygon(l, polygon))});
         return inside;
     }
-
 }

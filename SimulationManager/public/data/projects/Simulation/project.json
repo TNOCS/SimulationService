@@ -453,6 +453,19 @@
           "isDynamic": true,
           "gui": {},
           "tags": []
+        },
+        {
+          "id": "communicationobjects",
+          "title": "Zendmasten",
+          "type": "dynamicgeojson",
+          "renderType": "geojson",
+          "heatmapItems": null,
+          "url": "http://localhost:3338/api/layers/communicationobjects",
+          "typeUrl": "http://localhost:3338/api/resources/comm_objects",
+          "opacity": 90,
+          "isDynamic": true,
+          "gui": {},
+          "tags": []
         }
       ]
     }

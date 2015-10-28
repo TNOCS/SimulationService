@@ -78,3 +78,4 @@ SimulationManager/public/data/resourceTypes/
 ElectricalNetworkSim/src/ElectricalNetworkSim.js
 CriticalObjectSim/src/CriticalObjectSim.js
 RoadSim/src/RoadSim.js
+CommunicationSim/src/CommunicationSim.js

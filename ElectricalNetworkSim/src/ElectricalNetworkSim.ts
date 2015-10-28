@@ -47,7 +47,7 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
         });
 
         this.subscribeKey('sim.PowerStationCmd', <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
-            Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2)}, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
+            Winston.info(`Topic: ${topic}, Msg: ${JSON.stringify(message, null, 2) }, Params: ${params ? JSON.stringify(params, null, 2) : '-'}.`)
             if (message.hasOwnProperty('powerStation') && message.hasOwnProperty('state')) {
                 var name = message['powerStation'];
                 this.powerStations.some(ps => {
@@ -87,9 +87,23 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
                 continue;
             }
             var waterLevel = getWaterLevel(ps.geometry.coordinates);
-            if (waterLevel > 0) {
+
+            // Check the max water level the station is able to resist
+            var waterResistanceLevel = 0;
+            if (ps.properties.hasOwnProperty('dependencies')) {
+                ps.properties['dependencies'].forEach((dep) => {
+                    var splittedDep = dep.split('#');
+                    if (splittedDep.length === 2) {
+                        if (splittedDep[0] !== 'water') return;
+                        waterResistanceLevel = +splittedDep[1];
+                    }
+                });
+            }
+            if (waterLevel > waterResistanceLevel) {
                 this.setFeatureState(ps, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, true);
                 failedPowerStations.push(ps.properties['name']);
+            } else if (waterLevel > 0) {
+                this.setFeatureState(ps, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.Flooded, true);
             }
         }
         return failedPowerStations;
@@ -105,11 +119,21 @@ export class ElectricalNetworkSim extends SimSvc.SimServiceManager {
             if (state === SimSvc.InfrastructureState.Failed) continue;
             var dependencies: string[] = ps.properties['dependencies'];
             var failedDependencies = 0;
+            var okDependencies = 0;
             dependencies.forEach(dp => {
-                if (failedPowerStations.indexOf(dp) >= 0) failedDependencies++;
+                var splittedDp = dp.split('#');
+                if (splittedDp.length === 2) {
+                    if (splittedDp[0] !== 'powerstation') return;
+                    let dpName = splittedDp[1];
+                    if (failedPowerStations.indexOf(dpName) >= 0) {
+                        failedDependencies++;
+                    } else {
+                        okDependencies++;
+                    }
+                }
             });
             if (failedDependencies === 0) continue;
-            if (failedDependencies < dependencies.length) {
+            if (failedDependencies < (okDependencies + failedDependencies)) {
                 this.setFeatureState(ps, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.LimitedPower, true);
             } else {
                 this.setFeatureState(ps, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoMainPower, true);

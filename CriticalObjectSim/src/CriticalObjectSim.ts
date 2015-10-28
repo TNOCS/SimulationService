@@ -228,9 +228,22 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
                 continue;
             }
             var waterLevel = getWaterLevel(co.geometry.coordinates);
-            if (waterLevel > 0) {
+            // Check the max water level the object is able to resist
+            var waterResistanceLevel = 0;
+            if (co.properties.hasOwnProperty('dependencies')) {
+                co.properties['dependencies'].forEach((dep) => {
+                    var splittedDep = dep.split('#');
+                    if (splittedDep.length === 2) {
+                        if (splittedDep[0] !== 'water') return;
+                        waterResistanceLevel = +splittedDep[1];
+                    }
+                });
+            }
+            if (waterLevel > waterResistanceLevel) {
                 this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, null, true);
                 failedObjects.push(co.properties['name']);
+            } else if (waterLevel > 0) {
+                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.Flooded, null, true);
             }
         }
         return failedObjects;

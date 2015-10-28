@@ -21,7 +21,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Gorinchem",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440"],
+                "dependencies" : ["UPS#1440","water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -52,7 +52,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Krimpenerwaard",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440"],
+                "dependencies" : ["UPS#1440","water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -83,7 +83,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Leerdam",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440"],
+                "dependencies" : ["UPS#1440","water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -114,7 +114,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Sliedrecht",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440"],
+                "dependencies" : ["UPS#1440","water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {

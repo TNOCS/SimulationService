@@ -3,6 +3,446 @@
     "features" : [{
             "type" : "Feature",
             "properties" : {
+                "LocatieID" : 4165285,
+                "Name" : "Borchleen",
+                "Rechtspers" : "Vierstroomzorgring B.V.",
+                "Straat" : "Lopikerplein",
+                "Postcode" : "2871AN",
+                "Huisnummer" : "3",
+                "Plaats" : "SCHOONHOVEN",
+                "Aantal_app" : 12,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1990",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.857942, 51.947193]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4622668,
+                "Name" : "Centrum Slothoven",
+                "Rechtspers" : "Stichting Zorgpartners Midden-Holland",
+                "Straat" : "Poorthuisstraat",
+                "Postcode" : "2861DV",
+                "Huisnummer" : "23",
+                "Plaats" : "BERGAMBACHT",
+                "Aantal_app" : 15,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "2006",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.784402, 51.92871]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4172191,
+                "Name" : "De Waard",
+                "Rechtspers" : "Stichting Waardeburgh",
+                "Straat" : "De Alblashof",
+                "Postcode" : "2951XR",
+                "Huisnummer" : "1",
+                "Plaats" : "ALBLASSERDAM",
+                "Aantal_app" : 85,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1995",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.66528, 51.866377]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4620260,
+                "Name" : "Nic Beetsstraat",
+                "Rechtspers" : "Stichting Zorgpartners Midden-Holland",
+                "Straat" : "Nic Beetsstraat",
+                "Postcode" : "2941TN",
+                "Huisnummer" : "1",
+                "Plaats" : "LEKKERKERK",
+                "Aantal_app" : 92,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : null,
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.679976, 51.896731]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4620278,
+                "Name" : "Rotterdamseweg",
+                "Rechtspers" : "Stichting Zorgpartners Midden-Holland",
+                "Straat" : "Rotterdamseweg",
+                "Postcode" : "2871GA",
+                "Huisnummer" : "1",
+                "Plaats" : "SCHOONHOVEN",
+                "Aantal_app" : 68,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : null,
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.843886, 51.94835]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4623104,
+                "Name" : "Hof van Ammers",
+                "Rechtspers" : "AV Zorggroep",
+                "Straat" : "Bernhardstraat",
+                "Postcode" : "2964BC",
+                "Huisnummer" : "13",
+                "Plaats" : "GROOT AMMERS",
+                "Aantal_app" : 13,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "2010",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.821559, 51.923069]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4140472,
+                "Name" : "Hoofdlocatie",
+                "Rechtspers" : "Bestuur Huis Ter Leede",
+                "Straat" : "Eiland",
+                "Postcode" : "4143EN",
+                "Huisnummer" : "1",
+                "Plaats" : "LEERDAM",
+                "Aantal_app" : 120,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1973",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [5.090105, 51.897476]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4140760,
+                "Name" : "Hoofdlocatie",
+                "Rechtspers" : "Burgemeester De Boer-Stichting",
+                "Straat" : "Rembrandthof",
+                "Postcode" : "3372XV",
+                "Huisnummer" : "85",
+                "Plaats" : "HARDINXVELD GIESSENDAM",
+                "Aantal_app" : 65,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "2003",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.884532, 51.823965]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4172085,
+                "Name" : "Huize Overslijdrecht",
+                "Rechtspers" : "Stichting Waardeburgh",
+                "Straat" : "Scheldelaan",
+                "Postcode" : "3363CK",
+                "Huisnummer" : "3",
+                "Plaats" : "SLIEDRECHT",
+                "Aantal_app" : 71,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1991",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.771141, 51.823057]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4172142,
+                "Name" : "Huize Parkzicht",
+                "Rechtspers" : "Stichting Waardeburgh",
+                "Straat" : "Lijsterweg",
+                "Postcode" : "3362BB",
+                "Huisnummer" : "1",
+                "Plaats" : "SLIEDRECHT",
+                "Aantal_app" : 83,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1969",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.784653, 51.820089]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4092628,
+                "Name" : "WZC Sint Clara",
+                "Rechtspers" : "Zorggroep Rivas",
+                "Straat" : "Wijnkoperstraat",
+                "Postcode" : "4204HK",
+                "Huisnummer" : "6",
+                "Plaats" : "GORINCHEM",
+                "Aantal_app" : 60,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1966",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.957097, 51.83767]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4092738,
+                "Name" : "Huize Steijndeld",
+                "Rechtspers" : "Zorggroep Rivas",
+                "Straat" : "Kortendijk",
+                "Postcode" : "4201KW",
+                "Huisnummer" : "72",
+                "Plaats" : "GORINCHEM",
+                "Aantal_app" : 64,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1985",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.97702, 51.831889]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4092689,
+                "Name" : "WZC De Schutse",
+                "Rechtspers" : "Zorggroep Rivas",
+                "Straat" : "Mollenburgseweg",
+                "Postcode" : "4205HA",
+                "Huisnummer" : "14",
+                "Plaats" : "GORINCHEM",
+                "Aantal_app" : 54,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "2012",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.963763, 51.840643]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4622677,
+                "Name" : "Tijdelijke huisvesting (in voormalige Emmahuis)",
+                "Rechtspers" : "AV Zorggroep",
+                "Straat" : "Oranjehof",
+                "Postcode" : "4141GC",
+                "Huisnummer" : "27",
+                "Plaats" : "LEERDAM",
+                "Aantal_app" : 82,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : null,
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [5.104316, 51.891497]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4092571,
+                "Name" : "Verzorgingshuis De Bannehof",
+                "Rechtspers" : "Zorggroep Rivas",
+                "Straat" : "Voermanstraat",
+                "Postcode" : "4204RH",
+                "Huisnummer" : "141",
+                "Plaats" : "GORINCHEM",
+                "Aantal_app" : 60,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1972",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.960545, 51.833886]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4183255,
+                "Name" : "Verzorgingshuis De Schutse",
+                "Rechtspers" : "Stichting AxionContinU",
+                "Straat" : "Anna van Burenstraat",
+                "Postcode" : "3411AK",
+                "Huisnummer" : "40",
+                "Plaats" : "LOPIK",
+                "Aantal_app" : 36,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1998",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.946054, 51.974011]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4110006,
+                "Name" : "Verzorgingshuis Vreeswijk",
+                "Rechtspers" : "Stichting Zorgspectrum",
+                "Straat" : "Lekboulevard",
+                "Postcode" : "3434GL",
+                "Huisnummer" : "10",
+                "Plaats" : "NIEUWEGEIN",
+                "Aantal_app" : 144,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1984",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [5.086779, 52.003719]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4181457,
+                "Name" : "WZC De Markt",
+                "Rechtspers" : "Zorggroep Rivas",
+                "Straat" : "Markt",
+                "Postcode" : "3351PB",
+                "Huisnummer" : "24",
+                "Plaats" : "PAPENDRECHT",
+                "Aantal_app" : 79,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1989",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.682066, 51.826704]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4133373,
+                "Name" : "Zorgcentrum de Lemmenskamp",
+                "Rechtspers" : "Stichting De Riethorst Stromenland",
+                "Straat" : "Wethouder de Joodestraat",
+                "Postcode" : "4285CD",
+                "Huisnummer" : "2",
+                "Plaats" : "WOUDRICHEM",
+                "Aantal_app" : 42,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "2004",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.99964, 51.81121]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4140538,
+                "Name" : "Zorgcentrum Graafzicht",
+                "Rechtspers" : "AV Zorggroep",
+                "Straat" : "Burg Dekkingstraat",
+                "Postcode" : "2971AC",
+                "Huisnummer" : "1",
+                "Plaats" : "BLESKENSGRAAF CA",
+                "Aantal_app" : 60,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1970",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.783255, 51.872394]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4110112,
+                "Name" : "Zorgcentrum Hof van Batenstein",
+                "Rechtspers" : "Stichting Zorgspectrum",
+                "Straat" : "Hof van Batenstein",
+                "Postcode" : "4131HA",
+                "Huisnummer" : "1",
+                "Plaats" : "VIANEN UT",
+                "Aantal_app" : 104,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : "1972",
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [5.098925, 51.995062]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "LocatieID" : 4619358,
+                "Name" : "Zorgcentrum Pedaja",
+                "Rechtspers" : "Stichting Waardeburgh",
+                "Straat" : "Claversweer",
+                "Postcode" : "3371PR",
+                "Huisnummer" : "1",
+                "Plaats" : "HARDINXVELD GIESSENDAM",
+                "Aantal_app" : 28,
+                "featureTypeId" : "Verzorgingshuis_{state}",
+                "dependencies" : ["water#0.15"],
+                "Bouwjaar" : null,
+                "GeoAddress" : null
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [4.837297, 51.824726]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
                 "Naam locatie" : "Beatrixziekenhuis",
                 "Naam concern" : "Stichting Rivas Zorggroep",
                 "Soort ziekenhuis" : "Algemeen ziekenhuis",
@@ -21,7 +461,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Gorinchem",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440","water#0.15"],
+                "dependencies" : ["UPS#1440", "water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -52,7 +492,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Krimpenerwaard",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440","water#0.15"],
+                "dependencies" : ["UPS#1440", "water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -83,7 +523,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Leerdam",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440","water#0.15"],
+                "dependencies" : ["UPS#1440", "water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {
@@ -114,7 +554,7 @@
                 "provincie" : "Zuid-Holland",
                 "gemeente" : "Sliedrecht",
                 "UPS" : "24 uur",
-                "dependencies" : ["UPS#1440","water#0.15"],
+                "dependencies" : ["UPS#1440", "water#0.15"],
                 "featureTypeId" : "Ziekenhuis_{state}"
             },
             "geometry" : {

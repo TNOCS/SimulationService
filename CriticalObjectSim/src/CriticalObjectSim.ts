@@ -86,6 +86,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     }
 
     private checkUps() {
+        var updateChart = false;
         var eventTimes = [];
         for (let i = 0; i < this.criticalObjects.length; i++) {
             var co = this.criticalObjects[i];
@@ -96,6 +97,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             } else {
                 delete co.properties['willFailAt'];
                 this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+                updateChart = true;
             }
         }
         if (eventTimes.length > 0) {
@@ -103,6 +105,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         } else {
             this.upcomingEventTime = null;
         }
+        if (updateChart) this.sendChartValues();
     }
 
     private blackout(f: Api.Feature) {

@@ -1,124 +1,114 @@
 {
-  "id": "Simulation",
-  "title": "Simulation",
-  "description": "Example of the Simulation Manager in action.",
-  "logo": "images/CommonSenseRound.png",
-  "url": "https://github.com/TNOCS/csMap",
-  "connected": true,
-  "timeLine": {
-    "start": 1445288169205,
-    "end": 1445892969205,
-    "range": 604800000,
-    "zoomLevelName": "hours",
-    "isLive": false,
-    "focus": 1445809809205,
-    "zoomLevel": 3600000
-  },
-  "datasources": [
-    {
-      "id": "keys",
-      "type": "dynamic",
-      "sensors": {}
-    }
-  ],
-  "dashboards": [
-    {
-      "id": "home",
-      "name": "Home",
-      "editMode": false,
-      "showMap": true,
-      "showTimeline": true,
-      "showLeftmenu": true,
-      "showLegend": true,
-      "showRightmenu": false,
-      "showBackgroundImage": false,
-      "visiblelayers": [],
-      "widgets": [
-        {
-          "id": "f38c1b7d-40b7-4e03-1349-7d0c0876091b",
-          "directive": "simtimecontroller",
-          "elementId": "widget-f38c1b7d-40b7-4e03-1349-7d0c0876091b",
-          "enabled": true,
-          "style": "default",
-          "left": "20px",
-          "right": "",
-          "top": "25px",
-          "width": "340px",
-          "height": "140px",
-          "data": {
-            "httpMethod": {
-              "name": "POST"
-            },
-            "url": "api/keys/Sim.SimTime",
-            "message": "{ hello: \"world\" }"
-          }
-        },
-        {
-          "id": "9371825f-2762-4dbf-ec41-867231fb40d7",
-          "directive": "postman",
-          "elementId": "widget-9371825f-2762-4dbf-ec41-867231fb40d7",
-          "enabled": true,
-          "style": "default",
-          "left": "20px",
-          "right": "",
-          "top": "190px",
-          "width": "340px",
-          "height": "430px",
-          "data": {
-            "messages": [
-              {
-                "name": "Start flooding Gorinchem",
-                "httpMethod": {
-                  "name": "POST"
-                },
-                "url": "/api/keys/sim.floodSimCmd",
-                "message": "{ \"scenario\": \"Gorinchem\"}",
-                "description": "Start the Gorinchem flooding scenario provided by HKV."
-              },
-              {
-                "name": "Start 'breach'",
-                "httpMethod": {
-                  "name": "POST"
-                },
-                "url": "/api/keys/sim.floodSimCmd",
-                "message": "{ \"scenario\": \"breach\"}",
-                "description": "Scenario provided by Deltares."
-              },
-              {
-                "name": "Fail power station Bergambacht",
-                "httpMethod": {
-                  "name": "POST"
-                },
-                "description": "Let power station Bergambacht fail.",
-                "url": "/api/keys/sim.PowerStationCmd",
-                "message": "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
-              },
-              {
-                "name": "Gorinchem next",
-                "httpMethod": {
-                  "name": "POST"
-                },
-                "description": "Show the next available flooding layer.",
-                "message": "{ \"scenario\": \"Gorinchem\", \"next\": true }",
-                "url": "/api/keys/sim.floodSimCmd"
-              }
-            ]
-          }
-        },
-        {
-          "id": "ac5f271b-5f06-4835-0d18-54727896ebaf",
-          "directive": "simstate",
-          "elementId": "widget-ac5f271b-5f06-4835-0d18-54727896ebaf",
-          "enabled": true,
-          "style": "default",
-          "left": "",
-          "right": "60px",
-          "top": "26px",
-          "width": "312px",
-          "height": "436px",
-          "data": {}
-        },
-        {
+    "id" : "Simulation",
+    "title" : "Simulation",
+    "description" : "Example of the Simulation Manager in action.",
+    "logo" : "images/CommonSenseRound.png",
+    "url" : "https://github.com/TNOCS/csMap",
+    "connected" : true,
+    "timeLine" : {
+        "start" : 1445288169205,
+        "end" : 1445892969205,
+        "range" : 604800000,
+        "zoomLevelName" : "hours",
+        "isLive" : false,
+        "focus" : 1445809809205,
+        "zoomLevel" : 3600000
+    },
+    "datasources" : [{
+            "id" : "keys",
+            "type" : "dynamic",
+            "sensors" : {}
+        }
+    ],
+    "dashboards" : [{
+            "id" : "home",
+            "name" : "Home",
+            "editMode" : false,
+            "showMap" : true,
+            "showTimeline" : true,
+            "showLeftmenu" : true,
+            "showLegend" : true,
+            "showRightmenu" : false,
+            "showBackgroundImage" : false,
+            "visiblelayers" : [],
+            "widgets" : [{
+                    "id" : "f38c1b7d-40b7-4e03-1349-7d0c0876091b",
+                    "directive" : "simtimecontroller",
+                    "elementId" : "widget-f38c1b7d-40b7-4e03-1349-7d0c0876091b",
+                    "enabled" : true,
+                    "style" : "default",
+                    "left" : "20px",
+                    "right" : "",
+                    "top" : "25px",
+                    "width" : "340px",
+                    "height" : "140px",
+                    "data" : {
+                        "httpMethod" : {
+                            "name" : "POST"
+                        },
+                        "url" : "api/keys/Sim.SimTime",
+                        "message" : "{ hello: \"world\" }"
+                    }
+                }, {
+                    "id" : "9371825f-2762-4dbf-ec41-867231fb40d7",
+                    "directive" : "postman",
+                    "elementId" : "widget-9371825f-2762-4dbf-ec41-867231fb40d7",
+                    "enabled" : true,
+                    "style" : "default",
+                    "left" : "20px",
+                    "right" : "",
+                    "top" : "190px",
+                    "width" : "340px",
+                    "height" : "430px",
+                    "data" : {
+                        "messages" : [{
+                                "name" : "Start flooding Gorinchem",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "url" : "/api/keys/sim.floodSimCmd",
+                                "message" : "{ \"scenario\": \"Gorinchem\"}",
+                                "description" : "Start the Gorinchem flooding scenario provided by HKV."
+                            }, {
+                                "name" : "Start 'breach'",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "url" : "/api/keys/sim.floodSimCmd",
+                                "message" : "{ \"scenario\": \"breach\"}",
+                                "description" : "Scenario provided by Deltares."
+                            }, {
+                                "name" : "Fail power station Bergambacht",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "description" : "Let power station Bergambacht fail.",
+                                "url" : "/api/keys/sim.PowerStationCmd",
+                                "message" : "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
+                            }, {
+                                "name" : "Gorinchem next",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "description" : "Show the next available flooding layer.",
+                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
+                                "url" : "/api/keys/sim.floodSimCmd"
+                            }
+                        ]
+                    }
+                }, {
+                    "id" : "ac5f271b-5f06-4835-0d18-54727896ebaf",
+                    "directive" : "simstate",
+                    "elementId" : "widget-ac5f271b-5f06-4835-0d18-54727896ebaf",
+                    "enabled" : true,
+                    "style" : "default",
+                    "left" : "",
+                    "right" : "60px",
+                    "top" : "26px",
+                    "width" : "280px",
+                    "height" : "436px",
+                    "data" : {}
+                }, {
                     "id" : "1b116807-a474-47e7-c7f2-38c6c0169d13",
                     "directive" : "charts",
                     "elementId" : "widget-1b116807-a474-47e7-c7f2-38c6c0169d13",
@@ -129,10 +119,10 @@
                         "opacity" : "0.9"
                     },
                     "style" : "custom",
-                    "left" : "",
-                    "right" : "60px",
-                    "top" : "470px",
-                    "width" : "312px",
+                    "left" : "20px",
+                    "right" : "",
+                    "top" : "645px",
+                    "width" : "340px",
                     "height" : "170px",
                     "data" : {
                         "spec" : {
@@ -151,14 +141,14 @@
                                             "y" : 0
                                         }
                                     ]
-                                },{
+                                }, {
                                     "name" : "stressed",
                                     "values" : [{
                                             "x" : 0,
                                             "y" : 0
                                         }
                                     ]
-                                },{
+                                }, {
                                     "name" : "failed",
                                     "values" : [{
                                             "x" : 0,
@@ -183,10 +173,16 @@
                                     "range" : "height",
                                     "nice" : true,
                                     "domain" : {
-                                        "fields" : [
-                                            {"data":"failed", "field":"y"},
-                                            {"data":"stressed", "field":"y"},
-                                            {"data":"available", "field":"y"}
+                                        "fields" : [{
+                                                "data" : "failed",
+                                                "field" : "y"
+                                            }, {
+                                                "data" : "stressed",
+                                                "field" : "y"
+                                            }, {
+                                                "data" : "available",
+                                                "field" : "y"
+                                            }
                                         ]
                                     }
                                 }
@@ -232,7 +228,7 @@
                                             }
                                         }
                                     }
-                                },{
+                                }, {
                                     "type" : "line",
                                     "from" : {
                                         "data" : "failed"
@@ -264,7 +260,7 @@
                                             }
                                         }
                                     }
-                                },{
+                                }, {
                                     "type" : "line",
                                     "from" : {
                                         "data" : "available"
@@ -303,172 +299,162 @@
                         "title" : "Geëvacueerde ziekenhuisbedden"
                     }
                 }
-      ],
-      "visibleLeftMenuItems": [
-        "!lm-layers"
-      ]
-    },
-    {
-      "id": "datatable",
-      "name": "Table",
-      "editMode": false,
-      "showMap": false,
-      "showTimeline": false,
-      "showLeftmenu": false,
-      "showLegend": false,
-      "showRightmenu": false,
-      "showBackgroundImage": false,
-      "widgets": [
-        {
-          "id": "a098ba13-5258-4a50-4315-be6b266ecba7",
-          "directive": "datatable",
-          "elementId": "widget-a098ba13-5258-4a50-4315-be6b266ecba7",
-          "enabled": true,
-          "width": "100%",
-          "height": "100%"
-        }
-      ],
-      "visibleLeftMenuItems": []
-    },
-    {
-      "id": "nomap",
-      "name": "No Map",
-      "editMode": false,
-      "showMap": false,
-      "showTimeline": false,
-      "showLeftmenu": true,
-      "showLegend": false,
-      "showRightmenu": false,
-      "showBackgroundImage": false,
-      "widgets": [
-        {
-          "id": "3654881f-0644-46ea-5133-f45c3dde8c9e",
-          "directive": "markdownwidget",
-          "title": "Test",
-          "elementId": "widget-3654881f-0644-46ea-5133-f45c3dde8c9e",
-          "enabled": true,
-          "left": "10px",
-          "top": "10px",
-          "width": "650px",
-          "height": "350px",
-          "data": {
-            "content": "# Hello World #\n | a | b | c | d | \n |---|---|---|---| \n | 1 | 2 | 3 | 4 |"
-          }
-        }
-      ]
-    }
-  ],
-  "userPrivileges": {
-    "mca": {
-      "expertMode": true
-    },
-    "heatmap": {
-      "expertMode": true
-    }
-  },
-  "expertMode": 3,
-  "baselayers": {},
-  "propertyTypeData": {},
-  "groups": [
-    {
-      "id": "76947763-7f29-4fa7-05af-901a08bc506d",
-      "title": "Incidents",
-      "layers": [
-        {
-          "id": "floodsim",
-          "title": "Flooding",
-          "description": "Initial flooding status.",
-          "type": "grid",
-          "renderType": "gridlayer",
-          "heatmapItems": null,
-          "url": "http://localhost:3334/api/layers/floodsim",
-          "typeUrl": "http://localhost:3334/api/resources/floodsimtypes",
-          "opacity": 75,
-          "dataSourceParameters": {
-            "propertyName": "h",
-            "gridType": "esri",
-            "projection": "WGS84",
-            "contourLevels": [
-              0.1,
-              0.5,
-              1,
-              3,
-              4,
-              5,
-              6
             ],
-            "skipLines": 6,
-            "columns": 380,
-            "rows": 206,
-            "deltaLon": 0.0014584288488676631,
-            "deltaLat": -0.0008877224387042511,
-            "noDataValue": -9999,
-            "startLon": 4.624165116053319,
-            "startLat": 51.99900160775284,
-            "maxThreshold": 5.25,
-            "minThreshold": -9999
-          },
-          "defaultFeatureType": "flooding",
-          "defaultLegendProperty": "h",
-          "isDynamic": true,
-          "gui": {},
-          "tags": []
-        },
-        {
-          "id": "powerstations",
-          "title": "Stroomstations",
-          "description": "Elektrische stroomstations",
-          "type": "dynamicgeojson",
-          "renderType": "geojson",
-          "showFeatureNotifications": true,
-          "url": "http://localhost:3335/api/layers/powerstations",
-          "typeUrl": "http://localhost:3335/api/resources/electrical_network",
-          "opacity": 90,
-          "isDynamic": true,
-          "gui": {},
-          "tags": []
-        },
-        {
-          "id": "criticalobjects",
-          "title": "Kwetsbare objecten",
-          "type": "dynamicgeojson",
-          "renderType": "geojson",
-          "showFeatureNotifications": true,
-          "url": "http://localhost:3336/api/layers/criticalobjects",
-          "typeUrl": "http://localhost:3336/api/resources/critical_objects",
-          "opacity": 90,
-          "isDynamic": true,
-          "gui": {},
-          "tags": []
-        },
-        {
-          "id": "roadobjects",
-          "title": "Wegen",
-          "type": "dynamicgeojson",
-          "renderType": "geojson",
-          "showFeatureNotifications": true,
-          "url": "http://localhost:3337/api/layers/roadobjects",
-          "typeUrl": "http://localhost:3337/api/resources/road",
-          "opacity": 90,
-          "isDynamic": true,
-          "gui": {},
-          "tags": []
-        },
-        {
-          "id": "communicationobjects",
-          "title": "Zendmasten",
-          "type": "dynamicgeojson",
-          "renderType": "geojson",
-          "showFeatureNotifications": true,
-          "url": "http://localhost:3338/api/layers/communicationobjects",
-          "typeUrl": "http://localhost:3338/api/resources/comm_objects",
-          "opacity": 90,
-          "isDynamic": true,
-          "gui": {},
-          "tags": []
+            "visibleLeftMenuItems" : [
+                "!lm-layers"
+            ]
+        }, {
+            "id" : "datatable",
+            "name" : "Table",
+            "editMode" : false,
+            "showMap" : false,
+            "showTimeline" : false,
+            "showLeftmenu" : false,
+            "showLegend" : false,
+            "showRightmenu" : false,
+            "showBackgroundImage" : false,
+            "widgets" : [{
+                    "id" : "a098ba13-5258-4a50-4315-be6b266ecba7",
+                    "directive" : "datatable",
+                    "elementId" : "widget-a098ba13-5258-4a50-4315-be6b266ecba7",
+                    "enabled" : true,
+                    "width" : "100%",
+                    "height" : "100%"
+                }
+            ],
+            "visibleLeftMenuItems" : []
+        }, {
+            "id" : "nomap",
+            "name" : "No Map",
+            "editMode" : false,
+            "showMap" : false,
+            "showTimeline" : false,
+            "showLeftmenu" : true,
+            "showLegend" : false,
+            "showRightmenu" : false,
+            "showBackgroundImage" : false,
+            "widgets" : [{
+                    "id" : "3654881f-0644-46ea-5133-f45c3dde8c9e",
+                    "directive" : "markdownwidget",
+                    "title" : "Test",
+                    "elementId" : "widget-3654881f-0644-46ea-5133-f45c3dde8c9e",
+                    "enabled" : true,
+                    "left" : "10px",
+                    "top" : "10px",
+                    "width" : "650px",
+                    "height" : "350px",
+                    "data" : {
+                        "content" : "# Hello World #\n | a | b | c | d | \n |---|---|---|---| \n | 1 | 2 | 3 | 4 |"
+                    }
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "layerDirectory": "/api/layers"
+    ],
+    "userPrivileges" : {
+        "mca" : {
+            "expertMode" : true
+        },
+        "heatmap" : {
+            "expertMode" : true
+        }
+    },
+    "expertMode" : 3,
+    "baselayers" : {},
+    "propertyTypeData" : {},
+    "groups" : [{
+            "id" : "76947763-7f29-4fa7-05af-901a08bc506d",
+            "title" : "Incidents",
+            "layers" : [{
+                    "id" : "floodsim",
+                    "title" : "Flooding",
+                    "description" : "Initial flooding status.",
+                    "type" : "grid",
+                    "renderType" : "gridlayer",
+                    "heatmapItems" : null,
+                    "url" : "http://localhost:3334/api/layers/floodsim",
+                    "typeUrl" : "http://localhost:3334/api/resources/floodsimtypes",
+                    "opacity" : 75,
+                    "dataSourceParameters" : {
+                        "propertyName" : "h",
+                        "gridType" : "esri",
+                        "projection" : "WGS84",
+                        "contourLevels" : [
+                            0.1,
+                            0.5,
+                            1,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "skipLines" : 6,
+                        "columns" : 380,
+                        "rows" : 206,
+                        "deltaLon" : 0.0014584288488676631,
+                        "deltaLat" : -0.0008877224387042511,
+                        "noDataValue" : -9999,
+                        "startLon" : 4.624165116053319,
+                        "startLat" : 51.99900160775284,
+                        "maxThreshold" : 5.25,
+                        "minThreshold" : -9999
+                    },
+                    "defaultFeatureType" : "flooding",
+                    "defaultLegendProperty" : "h",
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }, {
+                    "id" : "powerstations",
+                    "title" : "Stroomstations",
+                    "description" : "Elektrische stroomstations",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:3335/api/layers/powerstations",
+                    "typeUrl" : "http://localhost:3335/api/resources/electrical_network",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }, {
+                    "id" : "criticalobjects",
+                    "title" : "Kwetsbare objecten",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:3336/api/layers/criticalobjects",
+                    "typeUrl" : "http://localhost:3336/api/resources/critical_objects",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }, {
+                    "id" : "roadobjects",
+                    "title" : "Wegen",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:3337/api/layers/roadobjects",
+                    "typeUrl" : "http://localhost:3337/api/resources/road",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }, {
+                    "id" : "communicationobjects",
+                    "title" : "Zendmasten",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:3338/api/layers/communicationobjects",
+                    "typeUrl" : "http://localhost:3338/api/resources/comm_objects",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }
+            ]
+        }
+    ],
+    "layerDirectory" : "/api/layers"
 }

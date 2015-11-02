@@ -363,11 +363,11 @@
     "propertyTypeData" : {},
     "groups" : [{
             "id" : "76947763-7f29-4fa7-05af-901a08bc506d",
-            "title" : "Incidents",
+            "title" : "Incidenten",
             "layers" : [{
                     "id" : "floodsim",
-                    "title" : "Flooding",
-                    "description" : "Initial flooding status.",
+                    "title" : "Overstroming",
+                    "description" : "Dijkdoorbraak bij Gorinchem.",
                     "type" : "grid",
                     "renderType" : "gridlayer",
                     "heatmapItems" : null,
@@ -448,6 +448,25 @@
                     "showFeatureNotifications" : true,
                     "url" : "http://localhost:3338/api/layers/communicationobjects",
                     "typeUrl" : "http://localhost:3338/api/resources/comm_objects",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }
+            ]
+        },{
+            "id" : "76947763-7f29-4fa7-05af-901a08bc4444",
+            "title" : "Incidents",
+            "clustering" : true,
+            "clusterLevel" : 13,
+            "layers" : [{
+                    "id" : "hazardousobjects",
+                    "title" : "Gevaarlijke objecten",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:3339/api/layers/hazardousobjects",
+                    "typeUrl" : "http://localhost:3339/api/resources/hazardous_objects",
                     "opacity" : 90,
                     "isDynamic" : true,
                     "gui" : {},

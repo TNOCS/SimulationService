@@ -79,3 +79,4 @@ ElectricalNetworkSim/src/ElectricalNetworkSim.js
 CriticalObjectSim/src/CriticalObjectSim.js
 RoadSim/src/RoadSim.js
 CommunicationSim/src/CommunicationSim.js
+HazardousObjectSim/src/HazardousObjectSim.js

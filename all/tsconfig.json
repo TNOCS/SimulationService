@@ -17,6 +17,8 @@
         "!./public/bower_components/**/*.ts"
     ],
     "files": [
+        "./public/app/app.ts",
+        "./public/app/m.ts",
         "./server.ts",
         "../Scripts/typings/angular-translate/angular-translate.d.ts",
         "../Scripts/typings/angularjs/angular-cookies.d.ts",

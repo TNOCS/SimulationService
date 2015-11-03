@@ -2,6 +2,8 @@
 // Output application name
 var appName = 'csComp';
 var path2csWeb = '../../csWeb/';
+// var destinationPath = './SimulationManager/';
+var destinationPath = './all/';
 
 var gulp = require('gulp'),
     del = require('del'),
@@ -35,7 +37,7 @@ gulp.task('built_csComp', function() {
         // ]))
         // .pipe(debug({title: 'after ordering:'}))
         .pipe(concat('csComp.js'))
-        .pipe(gulp.dest('./SimulationManager/public/cs/js'));
+        .pipe(gulp.dest(destinationPath + 'public/cs/js'));
 });
 
 gulp.task('built_csComp.d.ts', function() {
@@ -65,7 +67,7 @@ gulp.task('create_templateCache', function() {
         //     title: 'create_templateCache:'
         // }))
         .pipe(templateCache(options))
-        .pipe(gulp.dest('./SimulationManager/public/cs/js'))
+        .pipe(gulp.dest(destinationPath + 'public/cs/js'))
 })
 
 gulp.task('include_js', function() {
@@ -74,22 +76,22 @@ gulp.task('include_js', function() {
         //     title: 'include_js:'
         // }))
         .pipe(plumber())
-        .pipe(changed('./SimulationManager/public/cs/js/'))
-        .pipe(gulp.dest('./SimulationManager/public/cs/js'));
+        .pipe(changed(destinationPath + 'public/cs/js/'))
+        .pipe(gulp.dest(destinationPath + 'public/cs/js'));
 });
 
 gulp.task('include_css', function() {
     gulp.src(path2csWeb + 'csComp/includes/css/*.*')
         .pipe(plumber())
-        .pipe(changed('./SimulationManager/public/cs/css/'))
-        .pipe(gulp.dest('./SimulationManager/public/cs/css'));
+        .pipe(changed(destinationPath + 'public/cs/css/'))
+        .pipe(gulp.dest(destinationPath + 'public/cs/css'));
 });
 
 gulp.task('include_images', function() {
     gulp.src(path2csWeb + 'csComp/includes/images/**/*.*')
         .pipe(plumber())
-        .pipe(changed('./SimulationManager/public/cs/images/'))
-        .pipe(gulp.dest('./SimulationManager/public/cs/images/'));
+        .pipe(changed(destinationPath + 'public/cs/images/'))
+        .pipe(gulp.dest(destinationPath + 'public/cs/images/'));
 });
 
 gulp.task('copy_csServerComp', function() {

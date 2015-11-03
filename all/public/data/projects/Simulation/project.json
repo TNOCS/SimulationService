@@ -59,9 +59,26 @@
                     "right" : "",
                     "top" : "190px",
                     "width" : "340px",
-                    "height" : "430px",
+                    "height" : "85px",
                     "data" : {
+                        "smallSize" : true,
                         "messages" : [{
+                                "name" : "Gorinchem next",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "description" : "Show the next available flooding layer.",
+                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
+                                "url" : "/api/keys/sim.floodSimCmd"
+                            }, {
+                                "name" : "Next event",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "description" : "Forward time to the next event.",
+                                "message" : "{ \"next\": true }",
+                                "url" : "/api/keys/Sim.NextEvent"
+                            }, {
                                 "name" : "Start flooding Gorinchem",
                                 "httpMethod" : {
                                     "name" : "POST"
@@ -85,14 +102,6 @@
                                 "description" : "Let power station Bergambacht fail.",
                                 "url" : "/api/keys/sim.PowerStationCmd",
                                 "message" : "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
-                            }, {
-                                "name" : "Gorinchem next",
-                                "httpMethod" : {
-                                    "name" : "POST"
-                                },
-                                "description" : "Show the next available flooding layer.",
-                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
-                                "url" : "/api/keys/sim.floodSimCmd"
                             }
                         ]
                     }
@@ -121,7 +130,7 @@
                     "style" : "custom",
                     "left" : "20px",
                     "right" : "",
-                    "top" : "645px",
+                    "top" : "300px",
                     "width" : "340px",
                     "height" : "170px",
                     "data" : {
@@ -363,16 +372,16 @@
     "propertyTypeData" : {},
     "groups" : [{
             "id" : "76947763-7f29-4fa7-05af-901a08bc506d",
-            "title" : "Incidents",
+            "title" : "Incidenten",
             "layers" : [{
                     "id" : "floodsim",
-                    "title" : "Flooding",
-                    "description" : "Initial flooding status.",
+                    "title" : "Overstroming",
+                    "description" : "Dijkdoorbraak bij Gorinchem.",
                     "type" : "grid",
                     "renderType" : "gridlayer",
                     "heatmapItems" : null,
-                    "url" : "http://localhost:3334/api/layers/floodsim",
-                    "typeUrl" : "http://localhost:3334/api/resources/floodsimtypes",
+                    "url" : "http://localhost:2015/api/layers/floodsim",
+                    "typeUrl" : "http://localhost:2015/api/resources/floodsimtypes",
                     "opacity" : 75,
                     "dataSourceParameters" : {
                         "propertyName" : "h",
@@ -410,8 +419,8 @@
                     "type" : "dynamicgeojson",
                     "renderType" : "geojson",
                     "showFeatureNotifications" : true,
-                    "url" : "http://localhost:3335/api/layers/powerstations",
-                    "typeUrl" : "http://localhost:3335/api/resources/electrical_network",
+                    "url" : "http://localhost:2015/api/layers/powerstations",
+                    "typeUrl" : "http://localhost:2015/api/resources/electrical_network",
                     "opacity" : 90,
                     "isDynamic" : true,
                     "gui" : {},
@@ -422,8 +431,8 @@
                     "type" : "dynamicgeojson",
                     "renderType" : "geojson",
                     "showFeatureNotifications" : true,
-                    "url" : "http://localhost:3336/api/layers/criticalobjects",
-                    "typeUrl" : "http://localhost:3336/api/resources/critical_objects",
+                    "url" : "http://localhost:2015/api/layers/criticalobjects",
+                    "typeUrl" : "http://localhost:2015/api/resources/critical_objects",
                     "opacity" : 90,
                     "isDynamic" : true,
                     "gui" : {},
@@ -434,8 +443,8 @@
                     "type" : "dynamicgeojson",
                     "renderType" : "geojson",
                     "showFeatureNotifications" : true,
-                    "url" : "http://localhost:3337/api/layers/roadobjects",
-                    "typeUrl" : "http://localhost:3337/api/resources/road",
+                    "url" : "http://localhost:2015/api/layers/roadobjects",
+                    "typeUrl" : "http://localhost:2015/api/resources/road",
                     "opacity" : 90,
                     "isDynamic" : true,
                     "gui" : {},
@@ -446,10 +455,43 @@
                     "type" : "dynamicgeojson",
                     "renderType" : "geojson",
                     "showFeatureNotifications" : true,
-                    "url" : "http://localhost:3338/api/layers/communicationobjects",
-                    "typeUrl" : "http://localhost:3338/api/resources/comm_objects",
+                    "url" : "http://localhost:2015/api/layers/communicationobjects",
+                    "typeUrl" : "http://localhost:2015/api/resources/comm_objects",
                     "opacity" : 90,
                     "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }
+            ]
+        },{
+            "id" : "76947763-7f29-4fa7-05af-901a08bc4444",
+            "title" : "Incidents",
+            "clustering" : true,
+            "clusterLevel" : 13,
+            "layers" : [{
+                    "id" : "hazardousobjects",
+                    "title" : "Gevaarlijke objecten",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:2015/api/layers/hazardousobjects",
+                    "typeUrl" : "http://localhost:2015/api/resources/hazardous_objects",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                },
+                {
+                    "id" : "betuwelijn",
+                    "title" : "Betuwelijn",
+                    "type" : "geojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "data/src/betuwelijn.json",
+                    "typeUrl" : "data/resourceTypes/betuwelijn.json",
+                    "defaultFeatureType" : "betuwelijn",
+                    "opacity" : 95,
+                    "isDynamic" : false,
                     "gui" : {},
                     "tags" : []
                 }

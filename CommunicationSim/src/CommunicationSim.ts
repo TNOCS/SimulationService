@@ -191,7 +191,7 @@ export class CommunicationSim extends SimSvc.SimServiceManager {
                 return;
             }
             let co = JSON.parse(data.toString());
-            this.communicationObjectsLayer = this.createNewLayer('communicationObjects', 'Telecommunicatie', co.features);
+            this.communicationObjectsLayer = this.createNewLayer('communicationobjects', 'Telecommunicatie', co.features);
             this.communicationObjectsLayer.features.forEach(f => {
                 if (!f.id) f.id = Utils.newGuid();
                 if (f.geometry.type !== 'Point') return;

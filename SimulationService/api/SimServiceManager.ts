@@ -81,7 +81,9 @@ export enum Keys {
     SimState,
     /** For transmitting the simulation time */
     SimTime,
-    Job
+    Job,
+    /** Forward to the next event time */
+    NextEvent
 }
 
 export interface ISimState {
@@ -89,7 +91,8 @@ export interface ISimState {
     name: string;
     state: string,
     time: Date,
-    msg?: string
+    msg?: string,
+    nextEvent: number
 }
 
 /**
@@ -102,6 +105,8 @@ export class SimServiceManager extends Api.ApiManager {
     id: string = Utils.newGuid();
     /** Optional message to transmit with the state object */
     public message: string;
+    /** Date in ms of when the next event will occur */
+    public nextEvent: number;
     public fsm: TypeState.FiniteStateMachine<SimState>;
     public simTime: Date;
     public simSpeed: number = 1;
@@ -195,11 +200,13 @@ export class SimServiceManager extends Api.ApiManager {
             id: this.id,
             name: this.name,
             time: this.simTime,
-            state: SimState[curState]
+            state: SimState[curState],
+            nextEvent: this.nextEvent
         };
         if (this.message) state['msg'] = this.message;
         state['pid'] = process.pid;
         state['mem'] = process.memoryUsage();
+        Winston.debug(`Next event: ${state.nextEvent}`);
         this.updateKey(`${SimServiceManager.namespace}.${Keys[Keys.SimState]}.${this.name}`, state, <Api.ApiMeta>{}, () => { });
     }
 

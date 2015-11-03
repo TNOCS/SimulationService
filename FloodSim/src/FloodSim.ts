@@ -98,6 +98,7 @@ export class FloodSim extends SimSvc.SimServiceManager {
             if (!scenario) return;
             if (this.floodSims[scenario][this.floodSims[scenario].length-1].timeStamp === this.pubFloodingScenario.timeStamp) {
                 this.message = `${scenario} scenario has ended.`;
+                this.nextEvent = null;
                 this.sendAck(this.fsm.currentState);
                 return;
             }
@@ -190,9 +191,9 @@ export class FloodSim extends SimSvc.SimServiceManager {
         var scenario = this.pubFloodingScenario.scenario;
         var publishedTimeStamp = this.pubFloodingScenario.timeStamp;
         this.fsm.trigger(SimSvc.SimCommand.Run);
-        Winston.warn(`Start time: ${this.pubFloodingScenario.startTime.toLocaleTimeString()}.`);
-        Winston.warn(`Current time: ${this.simTime.toLocaleTimeString()}.`);
-        Winston.warn(`Minutes since start: ${minutesSinceStart}.`);
+        Winston.info(`Start time: ${this.pubFloodingScenario.startTime.toLocaleTimeString()}.`);
+        Winston.info(`Current time: ${this.simTime.toLocaleTimeString()}.`);
+        Winston.info(`Minutes since start: ${minutesSinceStart}.`);
         for (let i in this.floodSims[scenario]) {
             var s = this.floodSims[scenario][i];
             if (s.timeStamp <= publishedTimeStamp) continue;
@@ -201,6 +202,11 @@ export class FloodSim extends SimSvc.SimServiceManager {
                 return;
             }
             this.pubFloodingScenario.timeStamp = s.timeStamp;
+            let keys = Object.keys(this.floodSims[scenario]);
+            let index = keys.indexOf(i);
+            let nextFlood = this.floodSims[scenario][keys[index+1]];
+            Winston.warn(`nextFlood: ${nextFlood.timeStamp}`);
+            this.nextEvent = (nextFlood) ? (this.pubFloodingScenario.startTime.addMinutes(nextFlood.timeStamp)).getTime() : null;
             fs.readFile(s.layer.url, 'utf8', (err: NodeJS.ErrnoException, data: string) => {
                 if (err) {
                     Winston.error(`Error reading file: ${err}.`);
@@ -224,11 +230,15 @@ export class FloodSim extends SimSvc.SimServiceManager {
         this.floodingHasStarted = this.floodSims.hasOwnProperty(scenario);
         if (!this.floodingHasStarted) return;
 
-        this.message = `${scenario} is loaded...`;
-        Winston.info(`${this.message}.`);
-
         this.pubFloodingScenario.scenario = scenario;
         this.pubFloodingScenario.startTime = this.simTime;
+
+        let s = this.floodSims[scenario][0];
+        let d = this.pubFloodingScenario.startTime.addMinutes(s.timeStamp);
+        this.nextEvent = d.getTime();
+
+        this.message = `${scenario} loaded. Next event at ${d.toLocaleString()}`;
+        Winston.info(`${this.message}.`);
     }
 
     /**

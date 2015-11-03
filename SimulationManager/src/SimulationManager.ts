@@ -38,7 +38,7 @@ export class SimulationManager extends SimSvc.SimServiceManager {
 
     private reset() {
         this.sims = {};
-        this.simsNotReady= [];
+        this.simsNotReady = [];
 
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/layers'));
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
@@ -69,14 +69,14 @@ export class SimulationManager extends SimSvc.SimServiceManager {
             return true;
         });
 
-        this.on('simSpeedChanged', () => this.startTimer() );
+        this.on('simSpeedChanged', () => this.startTimer());
 
         // Listen to Sim.SimState keys
         this.subscribeKey(`${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.SimState]}`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
             if (message === null) return;
             try {
                 var simState: SimSvc.ISimState = (typeof message === 'object') ? message : JSON.parse(message);
-                //Winston.info("Received sim state: ", simState);
+                // Winston.info("Received sim state: ", simState);
                 if (!simState || simState.id === this.id) return;
                 var state = SimSvc.SimState[simState.state];
                 var index = this.simsNotReady.indexOf(simState.id);
@@ -86,12 +86,36 @@ export class SimulationManager extends SimSvc.SimServiceManager {
                     if (index >= 0) this.simsNotReady.splice(index, 1);
                 }
                 this.sims[simState.id] = simState;
+                // Read the upcoming event time of the sim, and check whether it is the first upcoming event of all sims
+                if (simState.hasOwnProperty('nextEvent') && simState.nextEvent && state === SimSvc.SimState.Ready) {
+                    if (!this.nextEvent || simState.nextEvent < this.nextEvent) {
+                        this.nextEvent = simState.nextEvent;
+                        Winston.info(`SimManager: Next event is ${(new Date(this.nextEvent)).toLocaleString() }.`);
+                    }
+                }
                 // Listen to sims that move to Exit (when they have exited, we always try to emit a final Exit message).
                 if (state === SimSvc.SimState.Exit) {
                     delete this.sims[simState.id];
                     if (index >= 0) this.simsNotReady.splice(index, 1);
                 }
-            } catch (e) {}
+            } catch (e) { }
+        });
+
+        // Listen to NextEvent
+        this.subscribeKey(`${SimSvc.SimServiceManager.namespace}.${SimSvc.Keys[SimSvc.Keys.NextEvent]}`, <Api.ApiMeta>{}, (topic: string, message: string, params: Object) => {
+            if (message === null) return;
+            try {
+                var msgObject = (typeof message === 'object') ? message : JSON.parse(message);
+                if (!msgObject || !msgObject.next || !this.nextEvent) return;
+                if (this.continue()) {
+                    this.timer.config({ time: (new Date(this.nextEvent)).toISOString() });
+                    this.nextEvent = null;
+                    this.publishTime();
+                    Winston.info(`Forwarded to time: ${this.timer.getTime().toLocaleString() }`);
+                } else {
+                    Winston.warn(`Simulation is not ready to continue yet`);
+                }
+            } catch (e) { }
         });
     }
 

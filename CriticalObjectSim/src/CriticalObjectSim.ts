@@ -28,7 +28,6 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
     private criticalObjectsLayer: Api.ILayer;
     private criticalObjects: Api.Feature[];
     private bedsChartData: ChartData[];
-    private upcomingEventTime: number; // milliseconds
 
     constructor(namespace: string, name: string, public isClient = false, public options: Api.IApiManagerOptions = <Api.IApiManagerOptions>{}) {
         super(namespace, name, isClient, options);
@@ -80,7 +79,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         });
 
         this.on('simTimeChanged', () => {
-            if (!this.upcomingEventTime || this.upcomingEventTime > this.simTime.getTime()) return;
+            if (!this.nextEvent || this.nextEvent > this.simTime.getTime()) return;
             this.checkUps(); // Check power supplies
         });
     }
@@ -101,9 +100,9 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             }
         }
         if (eventTimes.length > 0) {
-            this.upcomingEventTime = _.min(eventTimes);
+            this.nextEvent = _.min(eventTimes);
         } else {
-            this.upcomingEventTime = null;
+            this.nextEvent = null;
         }
         if (updateChart) this.sendChartValues();
     }
@@ -299,7 +298,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
 
         this.criticalObjects = [];
         this.bedsChartData = [{ name: "available", values: [{ x: 0, y: 0 }] }, { name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
-        this.upcomingEventTime = null;
+        this.nextEvent = null;
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);
 

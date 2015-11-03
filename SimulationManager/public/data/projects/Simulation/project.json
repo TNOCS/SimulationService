@@ -63,6 +63,22 @@
                     "data" : {
                         "smallSize" : true,
                         "messages" : [{
+                                "name" : "Gorinchem next",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "description" : "Show the next available flooding layer.",
+                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
+                                "url" : "/api/keys/sim.floodSimCmd"
+                            }, {
+                                "name" : "Next event",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "description" : "Forward time to the next event.",
+                                "message" : "{ \"next\": true }",
+                                "url" : "/api/keys/Sim.NextEvent"
+                            }, {
                                 "name" : "Start flooding Gorinchem",
                                 "httpMethod" : {
                                     "name" : "POST"
@@ -86,14 +102,6 @@
                                 "description" : "Let power station Bergambacht fail.",
                                 "url" : "/api/keys/sim.PowerStationCmd",
                                 "message" : "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
-                            }, {
-                                "name" : "Gorinchem next",
-                                "httpMethod" : {
-                                    "name" : "POST"
-                                },
-                                "description" : "Show the next available flooding layer.",
-                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
-                                "url" : "/api/keys/sim.floodSimCmd"
                             }
                         ]
                     }
@@ -470,6 +478,20 @@
                     "typeUrl" : "http://localhost:3339/api/resources/hazardous_objects",
                     "opacity" : 90,
                     "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                },
+                {
+                    "id" : "betuwelijn",
+                    "title" : "Betuwelijn",
+                    "type" : "geojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "data/src/betuwelijn.json",
+                    "typeUrl" : "data/resourceTypes/betuwelijn.json",
+                    "defaultFeatureType" : "betuwelijn",
+                    "opacity" : 95,
+                    "isDynamic" : false,
                     "gui" : {},
                     "tags" : []
                 }

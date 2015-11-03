@@ -16,8 +16,8 @@
         "!./node_modules/**/*.ts"
     ],
     "files": [
-        "server.ts",
-        "src/CommunicationSim.ts",
+        "./server.ts",
+        "./src/CommunicationSim.ts",
         "../Scripts/typings/angular-translate/angular-translate.d.ts",
         "../Scripts/typings/angularjs/angular-cookies.d.ts",
         "../Scripts/typings/angularjs/angular-mocks.d.ts",
@@ -48,7 +48,6 @@
         "../Scripts/typings/proj4/proj4.d.ts",
         "../Scripts/typings/request/request.d.ts",
         "../Scripts/typings/rimraf/rimraf.d.ts",
-        "../Scripts/typings/socket.io/socket.io.d.ts",
         "../Scripts/typings/socketio/socket.io.d.ts",
         "../Scripts/typings/sqlite3/sqlite3.d.ts",
         "../Scripts/typings/underscore/underscore.d.ts",
@@ -76,7 +75,6 @@
         "../ServerComponents/creator/IGeoJsonFeature.d.ts",
         "../ServerComponents/creator/IProjectRepositoryService.d.ts",
         "../ServerComponents/creator/MapLayerFactory.d.ts",
-        "../ServerComponents/creator/MarvelConverterService.d.ts",
         "../ServerComponents/creator/ProjectRepositoryService.d.ts",
         "../ServerComponents/creator/ProxyService.d.ts",
         "../ServerComponents/creator/RssService.d.ts",

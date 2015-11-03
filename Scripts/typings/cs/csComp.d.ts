@@ -782,6 +782,8 @@ declare module csComp.Services {
         tags: string;
         /** last updated time */
         updated: number;
+        /** show notification on new feature*/
+        showFeatureNotifications: boolean;
         /**
          * Returns an object which contains all the data that must be serialized.
          */
@@ -1981,25 +1983,63 @@ declare module ExpertMode {
     }
 }
 
-declare module FeatureList {
+declare module FeatureRelations {
     /**
       * Module
       */
     var myModule: any;
 }
 
-declare module FeatureList {
-    interface IFeatureListScope extends ng.IScope {
-        vm: FeatureListCtrl;
-        numberOfItems: number;
+declare module FeatureRelations {
+    import IFeature = csComp.Services.IFeature;
+    interface IFeatureRelationsScope extends ng.IScope {
+        vm: FeatureRelationsCtrl;
+        showMenu: boolean;
+        poi: IFeature;
+        title: string;
+        icon: string;
     }
-    class FeatureListCtrl {
+    interface IHierarchySettings {
+        referenceList: string[];
+    }
+    class RelationGroup {
+        title: string;
+        id: string;
+        property: csComp.Services.IPropertyType;
+        relations: Relation[];
+    }
+    class Relation {
+        title: string;
+        icon: string;
+        subject: csComp.Services.IFeature;
+        target: csComp.Services.IFeature;
+    }
+    class FeatureRelationsCtrl {
         private $scope;
-        private $layerService;
+        private $location;
+        private $sce;
         private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $translate;
         private scope;
+        relations: RelationGroup[];
+        showRelations: boolean;
+        title: string;
         static $inject: string[];
-        constructor($scope: IFeatureListScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService);
+        selectRelation(relation: Relation): void;
+        private createNearbyRelation(f);
+        initRelations(): void;
+        getRelations(): RelationGroup[];
+        constructor($scope: IFeatureRelationsScope, $location: ng.ILocationService, $sce: ng.ISCEService, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $translate: ng.translate.ITranslateService);
+        /**
+                 * Callback function
+                 * @see {http://stackoverflow.com/questions/12756423/is-there-an-alias-for-this-in-typescript}
+                 * @see {http://stackoverflow.com/questions/20627138/typescript-this-scoping-issue-when-called-in-jquery-callback}
+                 * @todo {notice the strange syntax using a fat arrow =>, which is to preserve the this reference in a callback!}
+                 */
+        private sidebarMessageReceived;
+        private featureMessageReceived;
     }
 }
 
@@ -2172,63 +2212,25 @@ declare module FeatureProps {
     }
 }
 
-declare module FeatureRelations {
+declare module FeatureList {
     /**
       * Module
       */
     var myModule: any;
 }
 
-declare module FeatureRelations {
-    import IFeature = csComp.Services.IFeature;
-    interface IFeatureRelationsScope extends ng.IScope {
-        vm: FeatureRelationsCtrl;
-        showMenu: boolean;
-        poi: IFeature;
-        title: string;
-        icon: string;
+declare module FeatureList {
+    interface IFeatureListScope extends ng.IScope {
+        vm: FeatureListCtrl;
+        numberOfItems: number;
     }
-    interface IHierarchySettings {
-        referenceList: string[];
-    }
-    class RelationGroup {
-        title: string;
-        id: string;
-        property: csComp.Services.IPropertyType;
-        relations: Relation[];
-    }
-    class Relation {
-        title: string;
-        icon: string;
-        subject: csComp.Services.IFeature;
-        target: csComp.Services.IFeature;
-    }
-    class FeatureRelationsCtrl {
+    class FeatureListCtrl {
         private $scope;
-        private $location;
-        private $sce;
-        private $mapService;
         private $layerService;
-        private $messageBusService;
-        private $translate;
+        private $mapService;
         private scope;
-        relations: RelationGroup[];
-        showRelations: boolean;
-        title: string;
         static $inject: string[];
-        selectRelation(relation: Relation): void;
-        private createNearbyRelation(f);
-        initRelations(): void;
-        getRelations(): RelationGroup[];
-        constructor($scope: IFeatureRelationsScope, $location: ng.ILocationService, $sce: ng.ISCEService, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $translate: ng.translate.ITranslateService);
-        /**
-                 * Callback function
-                 * @see {http://stackoverflow.com/questions/12756423/is-there-an-alias-for-this-in-typescript}
-                 * @see {http://stackoverflow.com/questions/20627138/typescript-this-scoping-issue-when-called-in-jquery-callback}
-                 * @todo {notice the strange syntax using a fat arrow =>, which is to preserve the this reference in a callback!}
-                 */
-        private sidebarMessageReceived;
-        private featureMessageReceived;
+        constructor($scope: IFeatureListScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService);
     }
 }
 
@@ -2627,6 +2629,7 @@ declare module KanbanColumn {
     class KanbanConfig {
         featureTypesToAdd: string[];
         columns: Column[];
+        canAdd: boolean;
     }
     class KanbanBoardCtrl {
         private $scope;
@@ -2676,6 +2679,7 @@ declare module KanbanColumn {
         fields: any;
         orderBy: string;
         actions: string[];
+        canShare: boolean;
     }
     class KanbanColumnCtrl {
         private $scope;
@@ -3186,41 +3190,6 @@ declare module Mca {
     }
 }
 
-declare module Navigate {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module Navigate {
-    interface INavigateScope extends ng.IScope {
-        vm: NavigateCtrl;
-    }
-    class RecentFeature {
-        id: string;
-        name: string;
-        layerId: string;
-        feature: csComp.Services.IFeature;
-    }
-    class NavigateCtrl {
-        private $scope;
-        private $layerService;
-        private $messageBus;
-        private localStorageService;
-        private scope;
-        RecentLayers: csComp.Services.ProjectLayer[];
-        RecentFeatures: RecentFeature[];
-        static $inject: string[];
-        constructor($scope: INavigateScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, localStorageService: ng.localStorage.ILocalStorageService);
-        private updateRecentFeaturesList();
-        private selectFeature(feature);
-        private initRecentFeatures();
-        toggleLayer(layer: csComp.Services.ProjectLayer): void;
-        private initRecentLayers();
-    }
-}
-
 declare module OfflineSearch {
     /**
       * Module
@@ -3369,6 +3338,53 @@ declare module OfflineSearch {
     }
 }
 
+declare module Navigate {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module Navigate {
+    interface INavigateScope extends ng.IScope {
+        vm: NavigateCtrl;
+    }
+    class RecentFeature {
+        id: string;
+        name: string;
+        layerId: string;
+        feature: csComp.Services.IFeature;
+    }
+    class NavigateCtrl {
+        private $scope;
+        private $layerService;
+        private $messageBus;
+        private localStorageService;
+        private scope;
+        RecentLayers: csComp.Services.ProjectLayer[];
+        RecentFeatures: RecentFeature[];
+        static $inject: string[];
+        constructor($scope: INavigateScope, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, localStorageService: ng.localStorage.ILocalStorageService);
+        private updateRecentFeaturesList();
+        private selectFeature(feature);
+        private initRecentFeatures();
+        toggleLayer(layer: csComp.Services.ProjectLayer): void;
+        private initRecentLayers();
+    }
+}
+
+declare module Search {
+    class NavigateSteps {
+    }
+    class NavigateState {
+        state: any;
+    }
+    interface INavigateProvider {
+        title: string;
+        url: string;
+    }
+}
+
 declare module ProjectHeaderSelection {
     /**
       * Module
@@ -3393,6 +3409,13 @@ declare module ProjectHeaderSelection {
     }
 }
 
+declare module Helpers.Resize {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
 declare module ProjectSettings {
     /**
       * Module
@@ -3415,13 +3438,6 @@ declare module ProjectSettings {
         updateProject(): void;
         private updateProjectReady(data);
     }
-}
-
-declare module Helpers.Resize {
-    /**
-      * Module
-      */
-    var myModule: any;
 }
 
 declare module ShowModal {
@@ -3505,6 +3521,7 @@ declare module Timeline {
         private ids;
         constructor($scope: ITimelineScope, $layerService: csComp.Services.LayerService, $mapService: csComp.Services.MapService, $messageBusService: csComp.Services.MessageBusService, TimelineService: Timeline.ITimelineService);
         private update(s, data);
+        private setFocusContainerDebounce;
         private updateFeatures();
         private initTimeline();
         updateDragging(): void;
@@ -3520,6 +3537,7 @@ declare module Timeline {
         unPin(): void;
         pinToNow(): void;
         stop(): void;
+        updateFocusTimeContainer(time: Date): void;
         updateFocusTime(): void;
         /**
         * Load the locales: instead of loading them from the original timeline-locales.js distribution,
@@ -3589,6 +3607,15 @@ declare module Voting {
 }
 
 declare module Authentication {
+}
+
+declare module csComp.Services {
+    class ConnectionService {
+        private $messageBusService;
+        private $layerService;
+        static $inject: string[];
+        constructor($messageBusService: Services.MessageBusService, $layerService: Services.LayerService);
+    }
 }
 
 declare module csComp.Services {
@@ -3672,6 +3699,7 @@ declare module csComp.Services {
         private static cache;
         static $inject: string[];
         private connections;
+        private notifications;
         constructor($translate: ng.translate.ITranslateService);
         getConnection(id: string): Connection;
         initConnection(id: string, url: string, callback: Function): void;
@@ -3738,15 +3766,6 @@ declare module csComp.Services {
       * Module
       */
     var myModule: any;
-}
-
-declare module csComp.Services {
-    class ConnectionService {
-        private $messageBusService;
-        private $layerService;
-        static $inject: string[];
-        constructor($messageBusService: Services.MessageBusService, $layerService: Services.LayerService);
-    }
 }
 
 declare module csComp.Services {
@@ -4483,35 +4502,6 @@ declare module WidgetEdit {
     }
 }
 
-declare module GroupEdit {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module GroupEdit {
-    interface IGroupEditScope extends ng.IScope {
-        vm: GroupEditCtrl;
-        group: csComp.Services.ProjectGroup;
-    }
-    class GroupEditCtrl {
-        private $scope;
-        private $mapService;
-        private $layerService;
-        private $messageBusService;
-        private $dashboardService;
-        private scope;
-        noLayerSelected: boolean;
-        static $inject: string[];
-        constructor($scope: IGroupEditScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
-        updateLayers(): void;
-        removeGroup(): void;
-        toggleClustering(): void;
-        updateOws(): void;
-    }
-}
-
 declare module FeatureTypeEditor {
     /**
       * Module
@@ -4599,6 +4589,35 @@ declare module LayerEdit {
     }
 }
 
+declare module GroupEdit {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module GroupEdit {
+    interface IGroupEditScope extends ng.IScope {
+        vm: GroupEditCtrl;
+        group: csComp.Services.ProjectGroup;
+    }
+    class GroupEditCtrl {
+        private $scope;
+        private $mapService;
+        private $layerService;
+        private $messageBusService;
+        private $dashboardService;
+        private scope;
+        noLayerSelected: boolean;
+        static $inject: string[];
+        constructor($scope: IGroupEditScope, $mapService: csComp.Services.MapService, $layerService: csComp.Services.LayerService, $messageBusService: csComp.Services.MessageBusService, $dashboardService: csComp.Services.DashboardService);
+        updateLayers(): void;
+        removeGroup(): void;
+        toggleClustering(): void;
+        updateOws(): void;
+    }
+}
+
 declare module PropertyTypes {
     /**
       * Module
@@ -4635,6 +4654,129 @@ declare module PropertyTypes {
          * @todo {notice the strange syntax using a fat arrow =>, which is to preserve the this reference in a callback!}
          */
         private sidebarMessageReceived;
+    }
+}
+
+declare module IFrameWidget {
+    /**
+      * Module
+      */
+    var myModule: any;
+    interface IIFrameEditCtrl extends ng.IScope {
+        vm: IFrameEditCtrl;
+        data: any;
+    }
+    class IFrameEditCtrl {
+        private $scope;
+        private $sce;
+        private scope;
+        widget: csComp.Services.IWidget;
+        static $inject: string[];
+        constructor($scope: IIFrameEditCtrl, $sce: any);
+        update(): void;
+    }
+}
+
+declare module IFrameWidget {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module IFrameWidget {
+    class IFrameWidgetData {
+        title: string;
+        url: string;
+        width: number;
+        height: number;
+        _safeurl: string;
+    }
+    interface IIFrameWidgetScope extends ng.IScope {
+        vm: IFrameWidgetCtrl;
+        data: IFrameWidgetData;
+    }
+    class IFrameWidgetCtrl {
+        private $scope;
+        private $sce;
+        private scope;
+        private widget;
+        private parentWidget;
+        static $inject: string[];
+        constructor($scope: IIFrameWidgetScope, $sce: any);
+        update(): void;
+    }
+}
+
+declare module ChartsWidget {
+    /**
+      * Module
+      */
+    var myModule: any;
+    interface IChartsEditCtrl extends ng.IScope {
+        vm: ChartsEditCtrl;
+        data: any;
+        spec: string;
+    }
+    class ChartsEditCtrl {
+        private $scope;
+        private $timeout;
+        private $compile;
+        private $layerService;
+        private $templateCache;
+        private $messageBus;
+        private $mapService;
+        private $dashboardService;
+        private scope;
+        widget: csComp.Services.IWidget;
+        editor: any;
+        static $inject: string[];
+        constructor($scope: IChartsEditCtrl, $timeout: ng.ITimeoutService, $compile: ng.ICompileService, $layerService: csComp.Services.LayerService, $templateCache: ng.ITemplateCacheService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
+        setupEditor(): void;
+        loadChart(): void;
+        updateChart(): void;
+        refreshChart(): void;
+    }
+}
+
+declare module ChartsWidget {
+    /**
+      * Module
+      */
+    var myModule: any;
+}
+
+declare module ChartsWidget {
+    class ChartData {
+        title: string;
+        /**
+         * Content to display: you can either provide it directly, or specify a URL, in which case it will replace the content.
+         */
+        content: string;
+        key: string;
+        spec: any;
+        _id: string;
+        _view: any;
+    }
+    interface IChartScope extends ng.IScope {
+        vm: ChartCtrl;
+        data: ChartData;
+        spec: string;
+    }
+    class ChartCtrl {
+        private $scope;
+        private $timeout;
+        private $layerService;
+        private $messageBus;
+        private $mapService;
+        private scope;
+        widget: csComp.Services.IWidget;
+        private parentWidget;
+        private defaultSpec;
+        static $inject: string[];
+        constructor($scope: IChartScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService);
+        private keyHandle;
+        startChart(): void;
     }
 }
 
@@ -4862,129 +5004,6 @@ declare module Filters {
         initTextFilter(): void;
         updateTextFilter(): void;
         remove(): void;
-    }
-}
-
-declare module ChartsWidget {
-    /**
-      * Module
-      */
-    var myModule: any;
-    interface IChartsEditCtrl extends ng.IScope {
-        vm: ChartsEditCtrl;
-        data: any;
-        spec: string;
-    }
-    class ChartsEditCtrl {
-        private $scope;
-        private $timeout;
-        private $compile;
-        private $layerService;
-        private $templateCache;
-        private $messageBus;
-        private $mapService;
-        private $dashboardService;
-        private scope;
-        widget: csComp.Services.IWidget;
-        editor: any;
-        static $inject: string[];
-        constructor($scope: IChartsEditCtrl, $timeout: ng.ITimeoutService, $compile: ng.ICompileService, $layerService: csComp.Services.LayerService, $templateCache: ng.ITemplateCacheService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService, $dashboardService: csComp.Services.DashboardService);
-        setupEditor(): void;
-        loadChart(): void;
-        updateChart(): void;
-        refreshChart(): void;
-    }
-}
-
-declare module ChartsWidget {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module ChartsWidget {
-    class ChartData {
-        title: string;
-        /**
-         * Content to display: you can either provide it directly, or specify a URL, in which case it will replace the content.
-         */
-        content: string;
-        key: string;
-        spec: any;
-        _id: string;
-        _view: any;
-    }
-    interface IChartScope extends ng.IScope {
-        vm: ChartCtrl;
-        data: ChartData;
-        spec: string;
-    }
-    class ChartCtrl {
-        private $scope;
-        private $timeout;
-        private $layerService;
-        private $messageBus;
-        private $mapService;
-        private scope;
-        widget: csComp.Services.IWidget;
-        private parentWidget;
-        private defaultSpec;
-        static $inject: string[];
-        constructor($scope: IChartScope, $timeout: ng.ITimeoutService, $layerService: csComp.Services.LayerService, $messageBus: csComp.Services.MessageBusService, $mapService: csComp.Services.MapService);
-        private keyHandle;
-        startChart(): void;
-    }
-}
-
-declare module IFrameWidget {
-    /**
-      * Module
-      */
-    var myModule: any;
-    interface IIFrameEditCtrl extends ng.IScope {
-        vm: IFrameEditCtrl;
-        data: any;
-    }
-    class IFrameEditCtrl {
-        private $scope;
-        private $sce;
-        private scope;
-        widget: csComp.Services.IWidget;
-        static $inject: string[];
-        constructor($scope: IIFrameEditCtrl, $sce: any);
-        update(): void;
-    }
-}
-
-declare module IFrameWidget {
-    /**
-      * Module
-      */
-    var myModule: any;
-}
-
-declare module IFrameWidget {
-    class IFrameWidgetData {
-        title: string;
-        url: string;
-        width: number;
-        height: number;
-        _safeurl: string;
-    }
-    interface IIFrameWidgetScope extends ng.IScope {
-        vm: IFrameWidgetCtrl;
-        data: IFrameWidgetData;
-    }
-    class IFrameWidgetCtrl {
-        private $scope;
-        private $sce;
-        private scope;
-        private widget;
-        private parentWidget;
-        static $inject: string[];
-        constructor($scope: IIFrameWidgetScope, $sce: any);
-        update(): void;
     }
 }
 
@@ -5459,8 +5478,10 @@ declare module SimTimeController {
         isPlaying: boolean;
         isPaused: boolean;
         isStopped: boolean;
+        private messageBusHandle;
         static $inject: string[];
         constructor($scope: ISimTimeControllerScope, $http: ng.IHttpService, messageBusService: csComp.Services.MessageBusService, $timeout: ng.ITimeoutService);
+        private subscribeToSimTime();
         play(): void;
         pause(): void;
         stop(): void;
@@ -5543,7 +5564,7 @@ declare module csComp.Services {
         title: string;
         connection: Connection;
         constructor(service: LayerService, $http: ng.IHttpService);
-        private updateFeatureByProperty(key, id, value);
+        private updateFeatureByProperty(key, id, value, layer?);
         private deleteFeatureByProperty(key, id, value);
         initSubscriptions(layer: ProjectLayer): void;
         addLayer(layer: ProjectLayer, callback: (layer: ProjectLayer) => void): void;

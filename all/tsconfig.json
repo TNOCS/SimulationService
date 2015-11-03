@@ -13,11 +13,11 @@
         "./**/*.ts",
         "../Scripts/**/*.ts",
         "../ServerComponents/**/*.ts",
-        "!./node_modules/**/*.ts"
+        "!./node_modules/**/*.ts",
+        "!./public/bower_components/**/*.ts"
     ],
     "files": [
         "./server.ts",
-        "./src/RoadSim.ts",
         "../Scripts/typings/angular-translate/angular-translate.d.ts",
         "../Scripts/typings/angularjs/angular-cookies.d.ts",
         "../Scripts/typings/angularjs/angular-mocks.d.ts",

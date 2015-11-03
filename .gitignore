@@ -57,10 +57,10 @@ FloodSim/server.js
 FloodSim/src/**/*.js
 FloodSim/public/data/layers.json
 FloodSim/public/data/layers/
+FloodSim/**/*.js
 server.js
 SimulationManager/**/*.js
 SimulationManager/public/**/*.js
-FloodSim/**/*.js
 SimulationManager/public/bower_components/
 SimulationManager/public/cs/
 FloodSim/public/data/scenarios/
@@ -80,3 +80,8 @@ CriticalObjectSim/src/CriticalObjectSim.js
 RoadSim/src/RoadSim.js
 CommunicationSim/src/CommunicationSim.js
 HazardousObjectSim/src/HazardousObjectSim.js
+all/public/bower_components/
+all/public/**/*.js
+all/public/bower_components/
+all/public/cs/
+all/public/swagger/

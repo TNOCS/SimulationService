@@ -1,6 +1,10 @@
+require('./../ServerComponents/helpers/DateUtils');
+
 import express = require('express');
 import http = require('http');
 import path = require('path');
+import Winston = require('winston');
+
 import cc = require("./../ServerComponents/dynamic/ClientConnection");
 import creator = require('./../ServerComponents/creator/MapLayerFactory');
 import ProjectRepositoryService = require('./../ServerComponents/creator/ProjectRepositoryService');
@@ -16,19 +20,17 @@ import Api = require('./../ServerComponents/api/ApiManager');
 import RestAPI = require('./../ServerComponents/api/RestAPI');
 import MqttAPI = require('./../ServerComponents/api/MqttAPI');
 import SocketIOAPI = require('./../ServerComponents/api/SocketIOAPI');
-import MongoDB = require('./../ServerComponents/api/MongoDB');
 import FileStorage = require('./../ServerComponents/api/FileStorage');
-// import ImbAPI = require('./../ServerComponents/api/ImbAPI');
 import Utils = require('./../ServerComponents/helpers/Utils');
-import Winston = require('winston');
 
-require('./../ServerComponents/helpers/DateUtils');
+import FloodSim = require('../FLoodSim/src/FloodSim');
+import SimSvc = require('../SimulationService/api/SimServiceManager');
+import SimMngr = require('./../SimulationManager/src/SimulationManager');
 
-import FloodSim = require('./src/FloodSim');
 
 Winston.remove(Winston.transports.Console);
 Winston.add(Winston.transports.Console, <Winston.ConsoleTransportOptions>{
-    label: 'FloodSim',
+    label: 'all',
     colorize: true,
     prettyPrint: true
 });
@@ -46,20 +48,13 @@ var config = new ConfigurationService('./configuration.json');
 //require('http').setMaxHeaderLength(26214400);
 
 // all environments
-var port = 3334;
+var port = "2015";
 server.set('port', port);
 server.use(favicon(__dirname + '/public/favicon.ico'));
 //increased limit size, see: http://stackoverflow.com/questions/19917401/node-js-express-request-entity-too-large
 server.use(bodyParser.json({ limit: '25mb' })); // support json encoded bodies
 server.use(bodyParser.urlencoded({ limit: '25mb', extended: true })); // support encoded bodies
 
-// CORRS: see http://stackoverflow.com/a/25148861/319711
-server.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
-  next();
-});
 config.add("server", "http://localhost:" + port);
 
 var ld = new LayerDirectory.LayerDirectory(server, cm);
@@ -82,27 +77,31 @@ apiServiceMgr.addService(resourceTypeStore);
 
 server.use(express.static(path.join(__dirname, 'public')));
 
-var api = new FloodSim.FloodSim('cs', 'FloodSim', false, <Api.IApiManagerOptions>{
+var prefix = SimSvc.SimServiceManager.namespace;
+
+var api = new SimMngr.SimulationManager('cs', 'SimulationManager', false, {
     server: `${Utils.getIPAddress()}:${port}`,
-    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/keys/sim/floodSimCmd']
+    mqttSubscriptions: [ 'cs/layers/floodsim', 'cs/layers/roadobjects/feature/#', 'cs/layers/powerstations/feature/#', 'cs/layers/criticalobjects/feature/#', 'cs/layers/communicationobjects/feature/#', 'cs/keys/#' ]
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});
-    //api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
+    api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
     api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/")), {});
-    // api.addConnector("imb", new ImbAPI.ImbAPI("localhost", 4000), {});
-    // api.addConnector("mongo", new MongoDB.MongoDBStorage("127.0.0.1", 27017), {});
     api.start();
 });
 
-// api.initResources(path.join(path.resolve(__dirname), "public/data/resourceTypes/"));
-// api.addConnector("rest", new RestAPI.RestAPI(server, config['basePath']), {});
-// api.addConnector("socketio", new SocketIOAPI.SocketIOAPI(cm), {});
-// api.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
-// api.addConnector("imb", new ImbAPI.ImbAPI("localhost", 4000), {});
-// api.addConnector("mongo", new MongoDB.MongoDBStorage("127.0.0.1", 27017), {});
-// api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/layers/")), {});
+/** Start FloodSim server */
+var floodSim = new FloodSim.FloodSim('cs', 'FloodSim', false, <Api.IApiManagerOptions>{
+    server: `${Utils.getIPAddress()}:${port}`,
+    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/keys/sim/floodSimCmd']
+});
+floodSim.init(path.join(path.resolve(__dirname), "../FloodSim/public/data"), () => {
+    floodSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    floodSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
+    floodSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../FloodSim/public/data/")), {});
+    floodSim.start();
+});
 
 
 httpServer.listen(server.get('port'), () => {

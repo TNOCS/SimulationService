@@ -16,8 +16,8 @@
         "!./node_modules/**/*.ts"
     ],
     "files": [
-        "server.ts",
-        "src/CriticalObjectSim.ts",
+        "./server.ts",
+        "./src/CriticalObjectSim.ts",
         "../Scripts/typings/angular-translate/angular-translate.d.ts",
         "../Scripts/typings/angularjs/angular-cookies.d.ts",
         "../Scripts/typings/angularjs/angular-mocks.d.ts",

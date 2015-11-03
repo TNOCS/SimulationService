@@ -59,8 +59,9 @@
                     "right" : "",
                     "top" : "190px",
                     "width" : "340px",
-                    "height" : "430px",
+                    "height" : "85px",
                     "data" : {
+                        "smallSize" : true,
                         "messages" : [{
                                 "name" : "Start flooding Gorinchem",
                                 "httpMethod" : {
@@ -121,7 +122,7 @@
                     "style" : "custom",
                     "left" : "20px",
                     "right" : "",
-                    "top" : "645px",
+                    "top" : "300px",
                     "width" : "340px",
                     "height" : "170px",
                     "data" : {

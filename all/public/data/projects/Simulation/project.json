@@ -63,13 +63,13 @@
                     "data" : {
                         "smallSize" : true,
                         "messages" : [{
-                                "name" : "Gorinchem next",
+                                "name" : "Start flooding Gorinchem",
                                 "httpMethod" : {
                                     "name" : "POST"
                                 },
-                                "description" : "Show the next available flooding layer.",
-                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
-                                "url" : "/api/keys/sim.floodSimCmd"
+                                "url" : "/api/keys/sim.floodSimCmd",
+                                "message" : "{ \"scenario\": \"Gorinchem\"}",
+                                "description" : "Start the Gorinchem flooding scenario provided by HKV."
                             }, {
                                 "name" : "Next event",
                                 "httpMethod" : {
@@ -79,13 +79,13 @@
                                 "message" : "{ \"next\": true }",
                                 "url" : "/api/keys/Sim.NextEvent"
                             }, {
-                                "name" : "Start flooding Gorinchem",
+                                "name" : "Gorinchem next",
                                 "httpMethod" : {
                                     "name" : "POST"
                                 },
-                                "url" : "/api/keys/sim.floodSimCmd",
-                                "message" : "{ \"scenario\": \"Gorinchem\"}",
-                                "description" : "Start the Gorinchem flooding scenario provided by HKV."
+                                "description" : "Show the next available flooding layer.",
+                                "message" : "{ \"scenario\": \"Gorinchem\", \"next\": true }",
+                                "url" : "/api/keys/sim.floodSimCmd"
                             }, {
                                 "name" : "Start 'breach'",
                                 "httpMethod" : {
@@ -145,25 +145,13 @@
                             },
                             "data" : [{
                                     "name" : "available",
-                                    "values" : [{
-                                            "x" : 0,
-                                            "y" : 0
-                                        }
-                                    ]
+                                    "values" : []
                                 }, {
                                     "name" : "stressed",
-                                    "values" : [{
-                                            "x" : 0,
-                                            "y" : 0
-                                        }
-                                    ]
+                                    "values" : []
                                 }, {
                                     "name" : "failed",
-                                    "values" : [{
-                                            "x" : 0,
-                                            "y" : 0
-                                        }
-                                    ]
+                                    "values" : []
                                 }
                             ],
                             "scales" : [{

@@ -111,7 +111,7 @@ var floodSim = new FloodSim.FloodSim('cs', 'FloodSim', false, <Api.IApiManagerOp
     mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/keys/sim/floodSimCmd']
 });
 floodSim.init(path.join(path.resolve(__dirname), "../FloodSim/public/data"), () => {
-    floodSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    // floodSim.addConnector("rest", new RestAPI.RestAPI(server), {});
     floodSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     floodSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../FloodSim/public/data/")), {});
     floodSim.start();
@@ -123,7 +123,7 @@ var communicationSim = new CommunicationSim.CommunicationSim('cs', 'Communicatio
     mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
 });
 communicationSim.init(path.join(path.resolve(__dirname), "../CommunicationSim/public/data"), () => {
-    communicationSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    // communicationSim.addConnector("rest", new RestAPI.RestAPI(server), {});
     communicationSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     communicationSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../CommunicationSim/public/data/")), {});
     communicationSim.start();
@@ -135,7 +135,7 @@ var electricalNetworkSim = new ElectricalNetworkSim.ElectricalNetworkSim('cs', '
     mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim']
 });
 electricalNetworkSim.init(path.join(path.resolve(__dirname), "../ElectricalNetworkSim/public/data"), () => {
-    electricalNetworkSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    // electricalNetworkSim.addConnector("rest", new RestAPI.RestAPI(server), {});
     electricalNetworkSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     electricalNetworkSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../ElectricalNetworkSim/public/data/")), {});
     electricalNetworkSim.start();
@@ -147,7 +147,7 @@ var criticalObjectSim = new CriticalObjectSim.CriticalObjectSim('cs', 'CriticalO
     mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
 });
 criticalObjectSim.init(path.join(path.resolve(__dirname), "../CriticalObjectSim/public/data"), () => {
-    criticalObjectSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    // criticalObjectSim.addConnector("rest", new RestAPI.RestAPI(server), {});
     criticalObjectSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     criticalObjectSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../CriticalObjectSim/public/data/")), {});
     criticalObjectSim.start();
@@ -159,7 +159,7 @@ var roadSim = new RoadSim.RoadSim('cs', 'RoadSim', false, <Api.IApiManagerOption
     mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
 });
 roadSim.init(path.join(path.resolve(__dirname), "../RoadSim/public/data"), () => {
-    roadSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    // roadSim.addConnector("rest", new RestAPI.RestAPI(server), {});
     roadSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     roadSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../RoadSim/public/data/")), {});
     roadSim.start();
@@ -171,7 +171,7 @@ var hazardousObjectSim = new HazardousObjectSim.HazardousObjectSim('cs', 'Hazard
     mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
 });
 hazardousObjectSim.init(path.join(path.resolve(__dirname), "../HazardousObjectSim/public/data"), () => {
-    hazardousObjectSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    // hazardousObjectSim.addConnector("rest", new RestAPI.RestAPI(server), {});
     hazardousObjectSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     hazardousObjectSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../HazardousObjectSim/public/data/")), {});
     hazardousObjectSim.start();

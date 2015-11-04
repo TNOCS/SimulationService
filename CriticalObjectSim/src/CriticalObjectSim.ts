@@ -48,7 +48,8 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
             //Why is this never reached?
             if (from === SimSvc.SimState.Idle) {
-                this.bedsChartData = [{ name: "available", values: [{ x: 0, y: 0 }] }, { name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
+                this.bedsChartData = [{ name: "available", values: [] }, { name: "failed", values: [] }, { name: "stressed", values: [] }];
+                this.sendChartValues();
             }
             return true;
         });
@@ -297,7 +298,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.deleteFilesInFolder(path.join(__dirname, '../public/data/keys'));
 
         this.criticalObjects = [];
-        this.bedsChartData = [{ name: "available", values: [{ x: 0, y: 0 }] }, { name: "failed", values: [{ x: 0, y: 0 }] }, { name: "stressed", values: [{ x: 0, y: 0 }] }];
+        this.bedsChartData = [{ name: "available", values: [] }, { name: "failed", values: [] }, { name: "stressed", values: [] }];
         this.nextEvent = null;
         // Copy original GeoJSON layers to dynamic layers
         var sourceFolder = path.join(this.rootPath, this.relativeSourceFolder);

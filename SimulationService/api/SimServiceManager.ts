@@ -138,7 +138,7 @@ export class SimServiceManager extends Api.ApiManager {
 
         this.fsm.onEnter(SimState.Ready, (from) => {
             if (from === SimState.Idle) {
-                this.simStartTime = new Date();
+                this.simStartTime = new Date(this.simTime.getTime());
                 Winston.info("Set sim start time: " + this.simStartTime.toLocaleString());
             }
             return true;

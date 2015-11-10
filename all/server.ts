@@ -104,7 +104,6 @@ api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "public/data/")), {});
     api.start();
 });
-
 /** Start FloodSim server */
 var floodSim = new FloodSim.FloodSim('cs', 'FloodSim', false, <Api.IApiManagerOptions>{
     server: `${Utils.getIPAddress()}:${port}`,

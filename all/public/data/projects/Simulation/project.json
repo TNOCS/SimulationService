@@ -102,6 +102,14 @@
                                 "description" : "Let power station Bergambacht fail.",
                                 "url" : "/api/keys/sim.PowerStationCmd",
                                 "message" : "{ \"powerStation\": \"Bergambacht\", \"state\": 2 }"
+                            }, {
+                                "name" : "Release gas cloud",
+                                "httpMethod" : {
+                                    "name" : "POST"
+                                },
+                                "url" : "/api/keys/sim.cloudSimCmd",
+                                "message" : "{ \"scenario\": \"1_XLS_Air concentration - time grid\"}",
+                                "description" : "Release a gas cloud."
                             }
                         ]
                     }
@@ -397,6 +405,34 @@
                     },
                     "defaultFeatureType" : "flooding",
                     "defaultLegendProperty" : "h",
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
+                }, {
+                    "id" : "cloudsim",
+                    "title" : "Gaswolk",
+                    "description" : "Gaswolk bij Ijsselmond.",
+                    "type" : "grid",
+                    "renderType" : "gridlayer",
+                    "heatmapItems" : null,
+                    "url" : "http://localhost:2015/api/layers/cloudsim",
+                    "typeUrl" : "http://localhost:2015/api/resources/cloudsimtypes",
+                    "opacity" : 75,
+                    "dataSourceParameters" : {
+                        "propertyName" : "c",
+                        "gridType" : "esri",
+                        "projection" : "WGS84",
+                        "contourLevels" : [
+                            0,                            
+                            0.00001,
+                            0.0001,
+                            0.001,
+                            0.01
+                        ],
+                        "skipLines" : 6
+                    },
+                    "defaultFeatureType" : "Cloud",
+                    "defaultLegendProperty" : "c",
                     "isDynamic" : true,
                     "gui" : {},
                     "tags" : []

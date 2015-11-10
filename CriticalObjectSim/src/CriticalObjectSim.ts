@@ -48,7 +48,17 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         this.fsm.onEnter(SimSvc.SimState.Ready, (from) => {
             //Why is this never reached?
             if (from === SimSvc.SimState.Idle) {
-                this.bedsChartData = [{ name: "available", values: [] }, { name: "failed", values: [] }, { name: "stressed", values: [] }];
+                this.bedsChartData = [
+                    {
+                        name: "available",
+                        values: []
+                    }, {
+                        name: "failed",
+                        values: []
+                    }, {
+                        name: "stressed",
+                        values: []
+                    }];
                 this.sendChartValues();
             }
             return true;
@@ -123,30 +133,34 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             if (!co.properties.hasOwnProperty('Aantal bedden')) continue;
             var beds = co.properties['Aantal bedden'];
             var state = this.getFeatureState(co);
-            if (state === SimSvc.InfrastructureState.Stressed) {
-                stressedBeds += beds;
-            } else if (state === SimSvc.InfrastructureState.Failed) {
-                failedBeds += beds;
-            } else if (state === SimSvc.InfrastructureState.Ok) {
-                availableBeds += beds;
+            switch (state) {
+                case SimSvc.InfrastructureState.Ok:
+                    availableBeds += beds;
+                    break;
+                case SimSvc.InfrastructureState.Stressed:
+                    stressedBeds += beds;
+                    break;
+                case SimSvc.InfrastructureState.Failed:
+                    failedBeds += beds;
+                    break;
             }
         }
+        if (!this.simStartTime) {
+            Winston.error('CriticalObjectsSim: SimStartTime not found!');
+            this.simStartTime = new Date(this.simTime.getTime());
+        }
+        var hours = Math.round((this.simTime.getTime() - this.simStartTime.getTime()) / 3600000); 
         this.bedsChartData.forEach((c) => {
-            if (!this.simStartTime) {
-                Winston.error('CriticalObjectsSim: SimStartTime not found!');
-                this.simStartTime = new Date(this.simTime.getTime());
-            }
             var last = c.values[c.values.length - 1];
             if (last && last.x === this.simTime.getTime()) {
                 c.values.pop(); //Remove the last element if it has the simtime has not changed yet
             }
-            var h = Math.round((this.simTime.getTime() - this.simStartTime.getTime()) / 3600000); // hours
             if (c.name === 'failed') {
-                c.values.push({ x: h, y: failedBeds });
+                c.values.push({ x: hours, y: failedBeds });
             } else if (c.name === 'stressed') {
-                c.values.push({ x: h, y: stressedBeds });
+                c.values.push({ x: hours, y: stressedBeds });
             } else if (c.name === 'available') {
-                c.values.push({ x: h, y: availableBeds });
+                c.values.push({ x: hours, y: availableBeds });
                 Winston.info(`Available beds: ${availableBeds}`);
             }
         })
@@ -168,29 +182,28 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             }
             // var inBlackout = this.pointInsideMultiPolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
             var inBlackout = this.pointInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
-            if (inBlackout) {
-                // Check for UPS
-                var upsFound = false;
-                if (co.properties.hasOwnProperty('dependencies')) {
-                    co.properties['dependencies'].forEach((dep) => {
-                        var splittedDep = dep.split('#');
-                        if (splittedDep.length === 2) {
-                            if (splittedDep[0] === 'UPS' && co.properties['state'] === SimSvc.InfrastructureState.Ok) {
-                                let minutes = +splittedDep[1];
-                                let failTime = this.simTime.addMinutes(minutes);
-                                upsFound = true;
-                                this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.NoMainPower, failTime, true);
-                            }
+            if (!inBlackout) continue;
+            // Check for UPS
+            var upsFound = false;
+            if (co.properties['state'] === SimSvc.InfrastructureState.Ok && co.properties.hasOwnProperty('dependencies')) {
+                co.properties['dependencies'].forEach((dep) => {
+                    var splittedDep = dep.split('#');
+                    if (splittedDep.length === 2) {
+                        if (splittedDep[0] === 'UPS') {
+                            let minutes = +splittedDep[1];
+                            let failTime = this.simTime.addMinutes(minutes);
+                            upsFound = true;
+                            this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.NoMainPower, failTime, true);
                         }
-                    });
-                }
-                if (!upsFound && !co.properties.hasOwnProperty('willFailAt')) {
-                    this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
-                    failedObjects.push(co.properties['name']);
-                }
-                if (upsFound) {
-                    this.checkUps();
-                }
+                    }
+                });
+            }
+            if (!upsFound && !co.properties.hasOwnProperty('willFailAt')) {
+                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+                failedObjects.push(co.properties['name']);
+            }
+            if (upsFound) {
+                this.checkUps();
             }
         }
         return failedObjects;
@@ -333,17 +346,6 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
         if (!publish) return;
         // Publish feature update
         this.updateFeature(this.criticalObjectsLayer.id, feature, <Api.ApiMeta>{}, () => { });
-        // Publish PowerSupplyArea layer
-        // if (state === SimSvc.InfrastructureState.Failed && feature.properties.hasOwnProperty('contour')) {
-        //     var contour = new Api.Feature();
-        //     contour.id = Utils.newGuid();
-        //     contour.properties = {
-        //         name: 'Contour area',
-        //         featureTypeId: 'AffectedArea'
-        //     };
-        //     contour.geometry = JSON.parse(feature.properties['contour']);
-        //     this.addFeature(this.criticalObjectsLayer.id, contour, <Api.ApiMeta>{}, () => { });
-        // }
     }
 
     private getFeatureState(feature: Api.Feature) {

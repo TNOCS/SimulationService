@@ -149,7 +149,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
             Winston.error('CriticalObjectsSim: SimStartTime not found!');
             this.simStartTime = new Date(this.simTime.getTime());
         }
-        var hours = Math.round((this.simTime.getTime() - this.simStartTime.getTime()) / 3600000); 
+        var hours = Math.round((this.simTime.getTime() - this.simStartTime.getTime()) / 3600000);
         this.bedsChartData.forEach((c) => {
             var last = c.values[c.values.length - 1];
             if (last && last.x === this.simTime.getTime()) {
@@ -164,7 +164,7 @@ export class CriticalObjectSim extends SimSvc.SimServiceManager {
                 Winston.info(`Available beds: ${availableBeds}`);
             }
         })
-        this.updateKey("chart", this.bedsChartData, <Api.ApiMeta>{}, () => { });
+        this.updateKey("chart", { values: this.bedsChartData}, <Api.ApiMeta>{}, () => { });
     }
 
     private checkBlackoutAreas(f: Api.Feature) {

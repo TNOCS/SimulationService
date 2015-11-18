@@ -564,6 +564,34 @@
                     51.8227512300653
                 ]
             }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "Name" : "Zuiveringsstation De Steeg",
+                "dependencies" : ["water#0.1"],
+                "featureTypeId" : "Drinkwater_{state}"
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    4.935495,
+                    51.93496
+                ]
+            }
+        }, {
+            "type" : "Feature",
+            "properties" : {
+                "Name" : "Afvalwaterzuivering",
+                "dependencies" : ["water#0.1"],
+                "featureTypeId" : "Afvalwater_{state}"
+            },
+            "geometry" : {
+                "type" : "Point",
+                "coordinates" : [
+                    4.83897,
+                    51.822685
+                ]
+            }
         }
     ]
 }

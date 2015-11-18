@@ -28,6 +28,7 @@ import ElectricalNetworkSim = require('../ElectricalNetworkSim/src/ElectricalNet
 import CommunicationSim = require('../CommunicationSim/src/CommunicationSim');
 import CriticalObjectSim = require('../CriticalObjectSim/src/CriticalObjectSim');
 import RoadSim = require('../RoadSim/src/RoadSim');
+import PipeSim = require('../PipeSim/src/PipeSim');
 import HazardousObjectSim = require('../HazardousObjectSim/src/HazardousObjectSim');
 import SimSvc = require('../SimulationService/api/SimServiceManager');
 import SimMngr = require('./../SimulationManager/src/SimulationManager');
@@ -94,8 +95,8 @@ var prefix = SimSvc.SimServiceManager.namespace;
 
 var api = new SimMngr.SimulationManager('cs', 'SimulationManager', false, {
     server: `${Utils.getIPAddress()}:${port}`,
-    mqttSubscriptions: [ 'cs/layers/communicationobjects', 'cs/layers/roadobjects', 'cs/layers/floodsim', 'cs/layers/powerstations', 'cs/layers/hazardousobjects', 'cs/layers/criticalobjects',
-    'cs/layers/roadobjects/feature/#', 'cs/layers/powerstations/feature/#', 'cs/layers/criticalobjects/feature/#', 'cs/layers/hazardousobjects/feature/#', 'cs/layers/communicationobjects/feature/#', 'cs/keys/#' ]
+    mqttSubscriptions: [ 'cs/layers/communicationobjects', 'cs/layers/roadobjects', 'cs/layers/floodsim', 'cs/layers/powerstations', 'cs/layers/pipeobjects','cs/layers/hazardousobjects', 'cs/layers/criticalobjects',
+    'cs/layers/roadobjects/feature/#', 'cs/layers/powerstations/feature/#', 'cs/layers/criticalobjects/feature/#', 'cs/layers/pipeobjects/feature/#', 'cs/layers/hazardousobjects/feature/#', 'cs/layers/communicationobjects/feature/#', 'cs/keys/#' ]
 });
 api.init(path.join(path.resolve(__dirname), "public/data"), () => {
     api.addConnector("rest", new RestAPI.RestAPI(server), {});
@@ -174,6 +175,18 @@ hazardousObjectSim.init(path.join(path.resolve(__dirname), "../HazardousObjectSi
     hazardousObjectSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
     hazardousObjectSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../HazardousObjectSim/public/data/")), {});
     hazardousObjectSim.start();
+});
+
+/** Start PipeSim server */
+var pipeSim = new PipeSim.PipeSim('cs', 'PipeSim', false, <Api.IApiManagerOptions>{
+    server: `${Utils.getIPAddress()}:${port}`,
+    mqttSubscriptions: ['cs/keys/Sim/SimTime', 'cs/layers/floodsim', 'cs/layers/powerstations/feature/#']
+});
+pipeSim.init(path.join(path.resolve(__dirname), "../PipeSim/public/data"), () => {
+    // pipeSim.addConnector("rest", new RestAPI.RestAPI(server), {});
+    pipeSim.addConnector("mqtt", new MqttAPI.MqttAPI("localhost", 1883), {});
+    pipeSim.addConnector("file", new FileStorage.FileStorage(path.join(path.resolve(__dirname), "../PipeSim/public/data/")), {});
+    pipeSim.start();
 });
 
 httpServer.listen(server.get('port'), () => {

@@ -449,6 +449,18 @@
                     "isDynamic" : true,
                     "gui" : {},
                     "tags" : []
+                }, {
+                    "id" : "pipeobjects",
+                    "title" : "Gasleidingen",
+                    "type" : "dynamicgeojson",
+                    "renderType" : "geojson",
+                    "showFeatureNotifications" : true,
+                    "url" : "http://localhost:2015/api/layers/pipeobjects",
+                    "typeUrl" : "http://localhost:2015/api/resources/pipe_objects",
+                    "opacity" : 90,
+                    "isDynamic" : true,
+                    "gui" : {},
+                    "tags" : []
                 }
             ]
         },{

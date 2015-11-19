@@ -262,34 +262,4 @@ export class FloodSim extends SimSvc.SimServiceManager {
         }
         return timeStamp;
     }
-
-    // /** Read a flooding file. Currently, only ESRI ASCII GRID files in RD are supported */
-    // private readFloodingFile(entry: { scenario: string, name: string, path: string }, callback: () => void) {
-    //     fs.readFile(entry.path, 'utf8', (err: Error, data: Buffer) => {
-    //         if (err) {
-    //             Winston.error(`Error reading file ${entry.path}: ${err.message}`);
-    //         } else {
-    //             var params: IsoLines.IGridDataSourceParameters = <IsoLines.IGridDataSourceParameters>{
-    //                 propertyName: 'h',
-    //                 gridType: 'esri',
-    //                 projection: 'RD',
-    //                 noDataValue: -9999,
-    //                 useContour: false,
-    //                 minThreshold: 0,
-    //                 contourLevels: [0.1, 0.5, 1, 3, 4, 5, 6]
-    //             };
-    //             var timeStamp = this.extractTimeStamp(entry.name);
-    //             Winston.info(`Converting ${entry.path}...`);
-    //             var floodSim = IsoLines.IsoLines.convertDataToIsoLines(data.toString(), params);
-    //             Winston.info(`Done converting ${entry.path}: ${floodSim.features.length} features found.`);
-    //             var outputFile = entry.path.replace('.asc', '.geojson');
-    //             fs.writeFileSync(outputFile, JSON.stringify(floodSim, (key, value) => {
-    //                 if (isNaN(+key)) return value;
-    //                 return value.toFixed ? Number(value.toFixed(7)) : value;
-    //             }));
-    //             this.addToScenarios(entry.scenario, outputFile);
-    //             callback();
-    //         }
-    //     });
-    // }
 }

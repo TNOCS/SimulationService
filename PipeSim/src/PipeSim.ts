@@ -120,34 +120,50 @@ export class PipeSim extends SimSvc.SimServiceManager {
             var inBlackout;
             if (co.geometry.type.toLowerCase() === 'point') {
                 this.pointInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+            } else if (co.geometry.type.toLowerCase() === 'linestring') {
+                //this.lineInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+                continue;
+            } else if (co.geometry.type.toLowerCase() === 'multilinestring') {
+                // this.multilineInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+                continue;
             } else {
-                this.lineInsidePolygon(co.geometry.coordinates, totalBlackoutArea.coordinates);
+                continue;
             }
             if (!inBlackout) continue;
-            // Check for UPS
-            var upsFound = false;
-            if (co.properties['state'] === SimSvc.InfrastructureState.Ok && co.properties.hasOwnProperty('dependencies')) {
-                co.properties['dependencies'].forEach((dep) => {
-                    var splittedDep = dep.split('#');
-                    if (splittedDep.length === 2) {
-                        if (splittedDep[0] === 'UPS') {
-                            let minutes = +splittedDep[1];
-                            let failTime = this.simTime.addMinutes(minutes);
-                            upsFound = true;
-                            this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.NoMainPower, failTime, true);
-                        }
-                    }
-                });
-            }
-            if (!upsFound && !co.properties.hasOwnProperty('willFailAt')) {
-                this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
-                failedObjects.push(co.properties['name']);
-            }
-            if (upsFound) {
-                this.checkUps();
-            }
+            // If the station fails, everything will fail
+            this.failAll();
+            // // Check for UPS
+            // var upsFound = false;
+            // if (co.properties['state'] === SimSvc.InfrastructureState.Ok && co.properties.hasOwnProperty('dependencies')) {
+            //     co.properties['dependencies'].forEach((dep) => {
+            //         var splittedDep = dep.split('#');
+            //         if (splittedDep.length === 2) {
+            //             if (splittedDep[0] === 'UPS') {
+            //                 let minutes = +splittedDep[1];
+            //                 let failTime = this.simTime.addMinutes(minutes);
+            //                 upsFound = true;
+            //                 this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.NoMainPower, failTime, true);
+            //             }
+            //         }
+            //     });
+            // }
+            // if (!upsFound && !co.properties.hasOwnProperty('willFailAt')) {
+            //     this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+            //     failedObjects.push(co.properties['name']);
+            // }
+            // if (upsFound) {
+            //     this.checkUps();
+            // }
         }
         return failedObjects;
+    }
+
+    private failAll() {
+        Winston.warn("Gas stations/pipes failing");
+        for (let i = 0; i < this.pipeObjects.length; i++) {
+            var co = this.pipeObjects[i];
+            this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.NoBackupPower, null, true);
+        }
     }
 
     private concatenateBlackoutAreas(layer: Api.ILayer): Api.Geometry {
@@ -184,15 +200,30 @@ export class PipeSim extends SimSvc.SimServiceManager {
                 continue;
             }
             var waterLevel;
-            if (co.geometry.type.toLowerCase() === 'point') {
-                waterLevel = getWaterLevel(co.geometry.coordinates);
-            } else {
-                // Check maximum water level along the raod segment
-                if (co.geometry.type.toLowerCase() !== "linestring") continue;
-                co.geometry.coordinates.forEach((segm) => {
-                    let level = getWaterLevel(segm);
-                    waterLevel = Math.max(waterLevel, level);
-                });
+            switch (co.geometry.type.toLowerCase()) {
+                case 'point':
+                    waterLevel = getWaterLevel(co.geometry.coordinates);
+                    break;
+                case 'linestring':
+                    // Check maximum water level along the pipe segment
+                    continue;
+                    co.geometry.coordinates.forEach((segm) => {
+                        let level = getWaterLevel(segm);
+                        waterLevel = Math.max(waterLevel, level);
+                    });
+                    break;
+                case 'multilinestring':
+                    // Check maximum water level along each pipe segment
+                    continue;
+                    co.geometry.coordinates.forEach((segm) => {
+                        segm.forEach(subseg => {
+                            let level = getWaterLevel(subseg);
+                            waterLevel = Math.max(waterLevel, level);
+                        });
+                    });
+                    break;
+                default:
+                    Winston.warn("PipeSim: Unknown geometry type");
             }
             // Check the max water level the object is able to resist
             var waterResistanceLevel = 0;
@@ -207,6 +238,8 @@ export class PipeSim extends SimSvc.SimServiceManager {
             }
             if (waterLevel > waterResistanceLevel) {
                 this.setFeatureState(co, SimSvc.InfrastructureState.Failed, SimSvc.FailureMode.Flooded, null, true);
+                // If the station fails, everything will fail
+                this.failAll();
                 failedObjects.push(co.properties['name']);
             } else if (waterLevel > 0) {
                 this.setFeatureState(co, SimSvc.InfrastructureState.Stressed, SimSvc.FailureMode.Flooded, null, true);
@@ -275,7 +308,7 @@ export class PipeSim extends SimSvc.SimServiceManager {
             this.pipeObjectsLayer = this.createNewLayer('pipeobjects', 'Gasleidingen', co.features);
             this.pipeObjectsLayer.features.forEach(f => {
                 if (!f.id) f.id = Utils.newGuid();
-                if (f.geometry.type !== 'Point' && f.geometry.type !== 'LineString') return;
+                if (f.geometry.type.toLowerCase() !== 'point' && f.geometry.type.toLowerCase() !== 'linestring' && f.geometry.type.toLowerCase() !== 'multilinestring') return;
                 this.setFeatureState(f, SimSvc.InfrastructureState.Ok);
                 this.pipeObjects.push(f);
             });
@@ -380,6 +413,14 @@ export class PipeSim extends SimSvc.SimServiceManager {
         // ray-casting algorithm based on
         // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
         var inside = line.some((l) => { return (this.pointInsidePolygon(l, polygon)) });
+        return inside;
+    }
+    private multilineInsidePolygon(mline: number[][][], polygon: number[][][]): boolean {
+        var inside = false;
+        mline.some((line) => {
+            inside = this.lineInsidePolygon(line, polygon);
+            return inside;
+        });
         return inside;
     }
 }
